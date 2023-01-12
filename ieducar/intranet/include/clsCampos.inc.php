@@ -256,6 +256,7 @@ class clsCampos extends Core_Controller_Page_Abstract
         ];
 
         if (!$this->__adicionando_tabela) {
+
             $this->campos[$nome] = $arr_componente;
         } else {
             $this->__campos_tabela[] = $arr_componente;
