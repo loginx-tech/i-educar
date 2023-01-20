@@ -12,9 +12,6 @@ use clsFisica;
 use clsPessoaFj;
 use clsPmieducarAluno;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Schema;
 
 class SedController extends Controller
 {
@@ -58,7 +55,7 @@ class SedController extends Controller
             $obj_pessoa_pai = new clsPessoaFj($det_fisica['idpes_pai']);
             $det_pessoa_pai = $obj_pessoa_pai->detalhe();
 
-            // if ($det_pessoa_pai) {
+        // if ($det_pessoa_pai) {
             //     $nome_pai = $det_pessoa_pai['nome'];
 
             //     // CPF
@@ -68,7 +65,7 @@ class SedController extends Controller
             //     if ($det_cpf['cpf']) {
             //         $cpf_pai = $det_cpf['cpf'];
             //     }
-            // }
+        // }
         } else {
             $det_pessoa_pai['nome'] = '';
         }
@@ -77,7 +74,7 @@ class SedController extends Controller
             $obj_pessoa_mae = new clsPessoaFj($det_fisica['idpes_mae']);
             $det_pessoa_mae = $obj_pessoa_mae->detalhe();
 
-            // if ($det_pessoa_mae) {
+        // if ($det_pessoa_mae) {
             //     $nome_mae = $det_pessoa_mae['nome'];
 
             //     // CPF
@@ -87,7 +84,7 @@ class SedController extends Controller
             //     if ($det_cpf['cpf']) {
             //         $cpf_mae = $det_cpf['cpf'];
             //     }
-            // }
+        // }
         } else {
             $det_pessoa_mae['nome'] = '';
         }
@@ -106,11 +103,11 @@ class SedController extends Controller
     public function storeAluno($codAluno, SedStoreAlunoRequest $request)
     {
         //Retira acentos e caracteres especiais e ifens da cidade
-        if($request->inNomeMunNascto) {
+        if ($request->inNomeMunNascto) {
             $request->inNomeMunNascto = str_replace('-', ' ', preg_replace('/[`^~\'"]/', null, iconv('UTF-8', 'ASCII//TRANSLIT', $request->inNomeMunNascto)));
         }
 
-        if($request->inNomeCidade) {
+        if ($request->inNomeCidade) {
             $request->inNomeCidade = str_replace('-', ' ', preg_replace('/[`^~\'"]/', null, iconv('UTF-8', 'ASCII//TRANSLIT', $request->inNomeCidade)));
         }
 
@@ -158,5 +155,3 @@ class SedController extends Controller
         ], 200);
     }
 }
-
-

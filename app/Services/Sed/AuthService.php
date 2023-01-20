@@ -24,6 +24,7 @@ class AuthService
                 }
             }
         }
+
         return null;
     }
 
@@ -65,13 +66,13 @@ class AuthService
         }
 
         $response = Http::withOptions(
-                ['verify' => false]
-            )->withBasicAuth(
-                $user_sed,
-                $password_sed
-            )->get(
-                config('sed.url') . SedRouters::VALIDA_USUARIO->value
-            );
+            ['verify' => false]
+        )->withBasicAuth(
+            $user_sed,
+            $password_sed
+        )->get(
+            config('sed.url') . SedRouters::VALIDA_USUARIO->value
+        );
 
         self::storeAccessToken($response->object()->outAutenticacao, $new);
     }
