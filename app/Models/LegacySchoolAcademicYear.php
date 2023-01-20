@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * LegacySchoolAcademicYear
  *
- * @property int $ano
- *
  * @method static LegacySchoolAcademicYearBuilder query()
  */
 class LegacySchoolAcademicYear extends LegacyModel
@@ -60,8 +58,6 @@ class LegacySchoolAcademicYear extends LegacyModel
         'data_exclusao',
         'ativo',
         'turmas_por_ano',
-        'copia_dados_professor',
-        'copia_dados_demais_servidores'
     ];
 
     protected function year(): Attribute

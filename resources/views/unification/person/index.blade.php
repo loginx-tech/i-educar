@@ -58,13 +58,13 @@
         @forelse($unifications as $unification)
             <tr>
                 <td>
-                    <a href="{{ $show = route('person-log-unification.show', ['unification' => $unification->id, 'name' => request('name'), 'cpf' => request('cpf'), 'page' => request('page')]) }}">{{ $unification->getMainName()  }}</a>
+                    <a href="{{ route('person-log-unification.show', ['unification' => $unification->id]) }}">{{ $unification->getMainName()  }}</a>
                 </td>
                 <td>
-                    <a href="{{ $show }}">{{ implode(', ', $unification->getDuplicatesName()) }}</a>
+                    <a href="{{ route('person-log-unification.show', ['unification' => $unification->id]) }}">{{ implode(', ', $unification->getDuplicatesName()) }}</a>
                 </td>
                 <td>
-                    <a href="{{ $show }}">{{ $unification->created_at->format('d/m/Y')  }}</a>
+                    <a href="{{ route('person-log-unification.show', ['unification' => $unification->id]) }}">{{ $unification->created_at->format('d/m/Y')  }}</a>
                 </td>
             </tr>
         @empty

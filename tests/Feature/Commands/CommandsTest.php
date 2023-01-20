@@ -26,6 +26,11 @@ class CommandsTest extends TestCase
         $this->artisan('legacy:create:tests')->assertExitCode(0);
     }
 
+    public function test_console_command_legacy_link()
+    {
+        $this->artisan('legacy:link')->assertExitCode(0);
+    }
+
     public function test_console_command_notifications_delete()
     {
         $this->artisan('notifications:delete')->assertExitCode(0);

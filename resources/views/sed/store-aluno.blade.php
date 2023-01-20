@@ -35,8 +35,7 @@
                     <span class="form">
                         <input class="obrigatorio @error('inNomeMae') is-invalid @enderror"
                             type="text" name="inNomeMae" id="name" required
-                            {{-- value="{{ old('inNomeMae') ? old('inNomeMae') : '' }}" --}}
-                            value="{{ old('inNomeMae') ? old('inNomeMae') : $det_fisica['nome_mae'] }}"
+                            value="{{ old('inNomeMae') ? old('inNomeMae') : $det_pessoa_mae['nome'] }}"
                             size="50" maxlength="255">
                     </span>
                 </td>

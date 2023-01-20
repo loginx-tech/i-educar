@@ -25,9 +25,7 @@ function updateSelect($targetElement, options, emptyOptionHtml) {
 
   if (options.length === 1) {
       setTimeout(function () {
-        if ($targetElement.attr('data-no-autocomplete') !== 'true') {
-          $targetElement.removeAttr('selected').find('option:eq(1)').attr('selected', 'selected').change();
-        }
+        $targetElement.removeAttr('selected').find('option:eq(1)').attr('selected', 'selected').change();
       },200)
   }
 

@@ -88,7 +88,8 @@ class AlunoController extends Portabilis_Controller_Page_EditController
 
         'aluno_inep_id' => [
             'label' => 'Código INEP',
-            'help' => '',
+            'help' => 'console.log("teste");',
+            'value' => 'console.log("teste");',
         ],
 
         'aluno_estado_id' => [
