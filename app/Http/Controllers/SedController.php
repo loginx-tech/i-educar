@@ -43,7 +43,7 @@ class SedController extends Controller
         $obj_pessoa_fj = $det_pessoa_fj->detalhe();
 
         $alunoRA = LegacyStudent::where('ref_idpes', $alunoDetalhe['ref_idpes'])->first();
-        if($alunoRA->state_registration_id) {
+        if ($alunoRA->state_registration_id) {
             return redirect()->route('intranet.page', 'educar_aluno_lst.php')->with('success', 'Esse aluno já possui RA no SED.');
         }
 
