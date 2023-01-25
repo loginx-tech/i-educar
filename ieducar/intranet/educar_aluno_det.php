@@ -734,42 +734,42 @@ return new class extends clsDetalhe {
             $this->addDetalhe(['Celular', $reg['responsavel_parentesco_celular']]);
         }
 
-        $objDistribuicaoUniforme = new clsPmieducarDistribuicaoUniforme(null, $this->cod_aluno, date('Y'));
-        $reg = $objDistribuicaoUniforme->detalhePorAlunoAno();
+        // $objDistribuicaoUniforme = new clsPmieducarDistribuicaoUniforme(null, $this->cod_aluno, date('Y'));
+        // $reg = $objDistribuicaoUniforme->detalhePorAlunoAno();
 
-        if ($reg) {
-            if (dbBool($reg['kit_completo'])) {
-                $this->addDetalhe(['<span id=\'funiforme\'></span>Recebeu kit completo', 'Sim']);
-                $this->addDetalhe([
-                    '<span id=\'ffuniforme\'></span>' . 'Data da distribuição',
-                    Portabilis_Date_Utils::pgSQLToBr($reg['data'])
-                ]);
-            } else {
-                $this->addDetalhe([
-                    '<span id=\'funiforme\'></span>Recebeu kit completo',
-                    'Não'
-                ]);
-                $this->addDetalhe([
-                    'Data da distribuição',
-                    Portabilis_Date_Utils::pgSQLToBr($reg['data'])
-                ]);
-                $this->addDetalhe([
-                    'Quantidade de agasalhos (jaqueta e calça)',
-                    $reg['agasalho_qtd'] ?: '0'
-                ]);
-                $this->addDetalhe(['Quantidade de camisetas (manga curta)', $reg['camiseta_curta_qtd'] ?: '0']);
-                $this->addDetalhe(['Quantidade de camisetas (manga longa)', $reg['camiseta_longa_qtd'] ?: '0']);
-                $this->addDetalhe(['Quantidade de camisetas infantis (sem manga)', $reg['camiseta_infantil_qtd'] ?: '0']);
-                $this->addDetalhe(['Quantidade de calça jeans', $reg['calca_jeans_qtd'] ?: '0']);
-                $this->addDetalhe(['Quantidade de meias', $reg['meias_qtd'] ?: '0']);
-                $this->addDetalhe(['Bermudas tectels (masculino)', $reg['bermudas_tectels_qtd'] ?: '0']);
-                $this->addDetalhe(['Bermudas coton (feminino)', $reg['bermudas_coton_qtd'] ?: '0']);
-                $this->addDetalhe([
-                    '<span id=\'ffuniforme\'></span>' . 'Quantidade de tênis',
-                    $reg['tenis_qtd'] ?: '0'
-                ]);
-            }
-        }
+        // if ($reg) {
+        //     if (dbBool($reg['kit_completo'])) {
+        //         $this->addDetalhe(['<span id=\'funiforme\'></span>Recebeu kit completo', 'Sim']);
+        //         $this->addDetalhe([
+        //             '<span id=\'ffuniforme\'></span>' . 'Data da distribuição',
+        //             Portabilis_Date_Utils::pgSQLToBr($reg['data'])
+        //         ]);
+        //     } else {
+        //         $this->addDetalhe([
+        //             '<span id=\'funiforme\'></span>Recebeu kit completo',
+        //             'Não'
+        //         ]);
+        //         $this->addDetalhe([
+        //             'Data da distribuição',
+        //             Portabilis_Date_Utils::pgSQLToBr($reg['data'])
+        //         ]);
+        //         $this->addDetalhe([
+        //             'Quantidade de agasalhos (jaqueta e calça)',
+        //             $reg['agasalho_qtd'] ?: '0'
+        //         ]);
+        //         $this->addDetalhe(['Quantidade de camisetas (manga curta)', $reg['camiseta_curta_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Quantidade de camisetas (manga longa)', $reg['camiseta_longa_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Quantidade de camisetas infantis (sem manga)', $reg['camiseta_infantil_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Quantidade de calça jeans', $reg['calca_jeans_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Quantidade de meias', $reg['meias_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Bermudas tectels (masculino)', $reg['bermudas_tectels_qtd'] ?: '0']);
+        //         $this->addDetalhe(['Bermudas coton (feminino)', $reg['bermudas_coton_qtd'] ?: '0']);
+        //         $this->addDetalhe([
+        //             '<span id=\'ffuniforme\'></span>' . 'Quantidade de tênis',
+        //             $reg['tenis_qtd'] ?: '0'
+        //         ]);
+        //     }
+        // }
 
         $objMoradia = new clsModulesMoradiaAluno($this->cod_aluno);
         $reg = $objMoradia->detalhe();

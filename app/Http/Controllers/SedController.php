@@ -12,9 +12,6 @@ use clsFisica;
 use clsPessoaFj;
 use clsPmieducarAluno;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Schema;
 
 class SedController extends Controller
 {
@@ -45,11 +42,75 @@ class SedController extends Controller
         $det_pessoa_fj = new clsPessoaFj($alunoDetalhe['ref_idpes']);
         $obj_pessoa_fj = $det_pessoa_fj->detalhe();
 
-        return view('sed.store-aluno', ['aluno' => $aluno->detalhe(), 'user' => $user, 'codAluno' => $codAluno, 'obj_pessoa_fj' => $obj_pessoa_fj, 'det_fisica' => $det_fisica]);
+        $alunoRA = LegacyStudent::where('ref_idpes', $alunoDetalhe['ref_idpes'])->first();
+        if($alunoRA->state_registration_id) {
+            return redirect()->route('intranet.page', 'educar_aluno_lst.php')->with('success', 'Esse aluno já possui RA no SED.');
+        }
+
+        $det_pessoa_pai = [];
+        $det_pessoa_mae = [];
+
+        // Pais
+        if ($det_fisica['idpes_pai']) {
+            $obj_pessoa_pai = new clsPessoaFj($det_fisica['idpes_pai']);
+            $det_pessoa_pai = $obj_pessoa_pai->detalhe();
+
+        // if ($det_pessoa_pai) {
+            //     $nome_pai = $det_pessoa_pai['nome'];
+
+            //     // CPF
+            //     $obj_cpf = new clsFisica($idpes_pai);
+            //     $det_cpf = $obj_cpf->detalhe();
+
+            //     if ($det_cpf['cpf']) {
+            //         $cpf_pai = $det_cpf['cpf'];
+            //     }
+        // }
+        } else {
+            $det_pessoa_pai['nome'] = '';
+        }
+
+        if ($det_fisica['idpes_mae']) {
+            $obj_pessoa_mae = new clsPessoaFj($det_fisica['idpes_mae']);
+            $det_pessoa_mae = $obj_pessoa_mae->detalhe();
+
+        // if ($det_pessoa_mae) {
+            //     $nome_mae = $det_pessoa_mae['nome'];
+
+            //     // CPF
+            //     $obj_cpf = new clsFisica($idpes_mae);
+            //     $det_cpf = $obj_cpf->detalhe();
+
+            //     if ($det_cpf['cpf']) {
+            //         $cpf_mae = $det_cpf['cpf'];
+            //     }
+        // }
+        } else {
+            $det_pessoa_mae['nome'] = '';
+        }
+
+        return view('sed.store-aluno', [
+            'aluno' => $aluno->detalhe(),
+            'user' => $user,
+            'codAluno' => $codAluno,
+            'obj_pessoa_fj' => $obj_pessoa_fj,
+            'det_fisica' => $det_fisica,
+            'det_pessoa_pai' => $det_pessoa_pai,
+            'det_pessoa_mae' => $det_pessoa_mae,
+        ]);
     }
 
     public function storeAluno($codAluno, SedStoreAlunoRequest $request)
     {
+        //Retira acentos e caracteres especiais e ifens da cidade
+        if ($request->inNomeMunNascto) {
+            $request->inNomeMunNascto = str_replace('-', ' ', preg_replace('/[`^~\'"]/', null, iconv('UTF-8', 'ASCII//TRANSLIT', $request->inNomeMunNascto)));
+        }
+
+        if ($request->inNomeCidade) {
+            $request->inNomeCidade = str_replace('-', ' ', preg_replace('/[`^~\'"]/', null, iconv('UTF-8', 'ASCII//TRANSLIT', $request->inNomeCidade)));
+        }
+
         $response = ($this->storeAlunoService)($request);
         $responseObj = $response->collect();
 
@@ -92,9 +153,5 @@ class SedController extends Controller
             'message' => 'RA encontrado no SED.',
             'aluno' => $responseObj,
         ], 200);
-
-
     }
 }
-
-

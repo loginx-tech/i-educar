@@ -20,11 +20,12 @@ class AuthService
                 $cidade = $sed->value;
 
                 if ($sed->is_enabled) {
-                    return true;
+                    return $cidade;
                 }
             }
         }
-        return false;
+
+        return null;
     }
 
     /**
@@ -35,7 +36,6 @@ class AuthService
     public function getAccessToken()
     {
         $accessToken = DB::table('sed_access_token')->first();
-
         // Caso token não esteja cadastrado no banco de dados
         if (!$accessToken) {
             self::generateAccessToken(new: true);
@@ -52,13 +52,28 @@ class AuthService
      */
     public function generateAccessToken($new = false): void
     {
-        $response = Http::withBasicAuth(
-            config('sed.user'),
-            config('sed.password')
-        )
-            ->get(
-                config('sed.url') . SedRouters::VALIDA_USUARIO->value
-            );
+        $cidade = self::getConfigSystemSed();
+        if (!$cidade) {
+            abort(403, 'Sistema não configurado para utilizar o sed');
+        }
+
+        //Acessa a config de cada cidade
+        $user_sed = env('SED_USER_' . strtoupper($cidade));
+        $password_sed = env('SED_PASSWORD_' . strtoupper($cidade));
+
+        if (!$user_sed || !$password_sed) {
+            abort(403, 'Sistema não configurado para utilizar o sed em ' . $cidade . '.');
+        }
+
+        $response = Http::withOptions(
+            ['verify' => false]
+        )->withBasicAuth(
+            $user_sed,
+            $password_sed
+        )->get(
+            config('sed.url') . SedRouters::VALIDA_USUARIO->value
+        );
+
         self::storeAccessToken($response->object()->outAutenticacao, $new);
     }
 
@@ -99,7 +114,7 @@ class AuthService
      */
     public function get($route, $body = [], $headers = [])
     {
-        $response = Http::withToken($this->getAccessToken())->retry(3, 100, function ($exception, $request) {
+        $response = Http::withOptions(['verify' => false])->withToken($this->getAccessToken())->retry(3, 100, function ($exception, $request) {
             // Caso o token esteja expirado, gera um novo token e tenta novamente
             if ($exception->response->status() !== 401) {
                 return false;
@@ -131,7 +146,7 @@ class AuthService
      */
     public function post($route, $body = [], $headers = [])
     {
-        $response = Http::withToken($this->getAccessToken())->retry(3, 100, function ($exception, $request) {
+        $response = Http::withOptions(['verify' => false])->withToken($this->getAccessToken())->retry(3, 100, function ($exception, $request) {
             // Caso erros comuns, retorna false para tentar novamente
             if ($exception->response->status() !== 401) {
                 return false;

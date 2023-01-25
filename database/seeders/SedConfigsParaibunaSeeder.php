@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class SedConfigsJacareiSeeder extends Seeder
+class SedConfigsParaibunaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,23 +18,23 @@ class SedConfigsJacareiSeeder extends Seeder
             [
                 'key' => 'system',
                 'description' => 'Marca o sistema de qual cidade esta em execução',
-                'value' => 'JACAREI',
+                'value' => 'PARAIBUNA',
                 'is_enabled' => true, // Marca se o sistema esta com as funções do sed habilitadas, caso false nenhuma das funções serao executadas, apenas ieducar rodando.
             ],
             [
                 'key' => 'diretoria',
                 'description' => 'ID da diretoria no sed',
-                'value' => '',
-                'is_enabled' => true,
+                'value' => '20207',
+                'is_enabled' => true, //Nessa configuração é necessário habilitar o sed para que o sistema funcione
             ],
             [
                 'key' => 'municipio',
                 'description' => 'ID do municipio no sed',
-                'value' => '',
-                'is_enabled' => true,
+                'value' => '9267',
+                'is_enabled' => true, //Nessa configuração é necessário habilitar o sed para que o sistema funcione
             ]
         ];
-        DB::table('sed_configs')->where('key', 'system')->delete();
+        DB::table('sed_configs')->delete();
         DB::table('sed_configs')->insert($configs);
     }
 }
