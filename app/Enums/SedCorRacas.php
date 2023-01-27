@@ -15,6 +15,7 @@ enum SedCorRacas: int
     {
         switch ($cor_raca) {
             case self::BRANCA->value:        return 'Branca';
+
             
             // no break
             case self::PRETA->value:         return 'Preta';
