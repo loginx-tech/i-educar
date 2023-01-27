@@ -131,11 +131,26 @@ class SedController extends Controller
     public function consultaRa($ra)
     {
         $sedService = new \App\Services\Sed\AuthService();
+        // Verifica se as funções do sed estao ativas
         $sed = $sedService->getConfigSystemSed();
         if (!$sed) {
             return response()->json([
                 'status' => 'disabled',
             ], 200);
+        }
+
+        // Verifica se nao existe esse Ra cadastrado no ieducar
+        $alunoRA = LegacyStudent::where('aluno_estado_id', $ra)->first();
+        if ($alunoRA) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Este RA já possui cadastro no sistema, acesse-o pela listagem de alunos.',
+            ], 200);
+        }
+
+        // Retira o Digito
+        if (strlen($ra) == 13 || strlen($ra) == 10) {
+            $ra = substr($ra, 0, -1);
         }
 
         $response = ($this->getAlunoService)($ra);

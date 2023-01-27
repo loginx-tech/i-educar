@@ -6,11 +6,6 @@ function consultaRA() {
     let strRa = ra.replace(/[^0-9]/g, '')
 
     if (strRa.length > 0) {
-
-        if (strRa.length == 13 || strRa.length == 10) {
-            strRa = strRa.substr(0, strRa.length-1)
-        }
-
         fetch('/consulta-ra/' + strRa, {
             method: 'GET',
             headers: {'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]')['content']}
@@ -21,7 +16,7 @@ function consultaRA() {
         .then((data) => {
             if (data.status != 'disabled'){
                 if(data.status == 'success') {
-
+                    console.log(data.aluno);
                     $j('#id_federal').val(data.aluno.outDocumentos.outCPF);
                     $j('#aluno_inep_id').val(data.aluno.outDocumentos.outCodeINEP);
                     $j('#data_nascimento').val(data.aluno.outDadosPessoais.outDataNascimento);
@@ -54,7 +49,6 @@ function consultaRA() {
                     $j('#neighborhood').val(data.aluno.outEnderecoResidencial.outBairro);
                     $j('#city_city').val(data.aluno.outEnderecoResidencial.outNomeCidade);
                     $j('#postal_code').val(data.aluno.outEnderecoResidencial.outCep);
-                    console.log($j('#postal_code').val());
 
                     //$j('#pais_residencia').val(data.aluno.outEnderecoResidencial.);
                     if (data.aluno.outEnderecoResidencial.outAreaLogradouro == 'Rural') {
@@ -65,15 +59,14 @@ function consultaRA() {
                     $j('#localizacao_diferenciada').val(data.aluno.outEnderecoResidencial.outCodLocalizacao);
 
                     alert('RA Encontrado com sucesso. Todos os dados já cadastrados foram preenchidos automaticamente. Verifique se os dados estão corretos e clique em salvar.');
-                    console.log(data.aluno);
                 } else {
+                    $j('#aluno_estado_id').val('');
                     alert(data.message);
                 }
             }
         })
         .catch((error) => {
             alert('Erro de comunicação com o sed, tente novamente mais tarde')
-            console.log(error);
         });
     }
 
