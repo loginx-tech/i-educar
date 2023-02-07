@@ -46,6 +46,12 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+
+            // Arquivo separado para rotas do sed
+            Route::middleware('web')
+                //->prefix('sed')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/sed.php'));
         });
     }
 
