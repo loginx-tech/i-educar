@@ -1173,6 +1173,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->inputsHelper()->select('pais_residencia', $options);
 
         Portabilis_View_Helper_Application::loadJavascript($this, [
+            '/vendor/legacy/Sed/Assets/ConsultaRA.js',
             '/vendor/legacy/Cadastro/Assets/Javascripts/Endereco.js',
             '/vendor/legacy/Cadastro/Assets/Javascripts/Addresses.js',
         ]);

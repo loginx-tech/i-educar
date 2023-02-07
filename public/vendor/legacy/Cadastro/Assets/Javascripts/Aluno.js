@@ -1918,7 +1918,7 @@ function canShowParentsFields() {
                         <option id="estado-civil-pessoa-aluno_6" value="6">Companheiro(a)</option>
                         <option id="estado-civil-pessoa-aluno_3" value="3">Divorciado(a)</option>
                         <option id="estado-civil-pessoa-aluno_4" value="4">Separado(a)</option>
-                        <option id="estado-civil-pessoa-aluno_1" value="1">Solteiro(a)</option>
+                        <option id="estado-civil-pessoa-aluno_1" value="1" selected>Solteiro(a)</option>
                         <option id="estado-civil-pessoa-aluno_5" value="5">Viúvo(a)</option>
                         <option id="estado-civil-pessoa-aluno_7" value="7">Não informado</option>
                       </select>

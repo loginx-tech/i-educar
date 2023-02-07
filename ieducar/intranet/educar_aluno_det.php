@@ -9,7 +9,6 @@ use App\Models\LegacyStudent;
 use App\Models\PersonHasPlace;
 use App\Models\Religion;
 use App\Models\TransportationProvider;
-use App\Models\UniformDistribution;
 use App\Services\UrlPresigner;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -585,8 +584,9 @@ return new class extends clsDetalhe {
 
             $this->url_editar = '/module/Cadastro/aluno?id=' . $registro['cod_aluno'];
 
-            $this->array_botao = ['Nova matrícula', 'Atualizar histórico', 'Distribuição de uniforme'];
+            $this->array_botao = ['Cadastro SED','Nova matrícula', 'Atualizar histórico', 'Distribuição de uniforme'];
             $this->array_botao_url_script = [
+                sprintf('go("sed/aluno/create/%d");', $registro['cod_aluno']),
                 sprintf('go("educar_matricula_cad.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
                 sprintf('go("educar_historico_escolar_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
                 sprintf('go("educar_distribuicao_uniforme_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno'])

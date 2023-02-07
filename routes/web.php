@@ -9,26 +9,27 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes(['register' => false]);
 
-Route::redirect('/', '/web');
+Route::redirect('/', '/intranet/educar_index.php')->name('home');
 
 Route::view('/docs-api', 'docs/api/index');
 
-Route::redirect('intranet/index.php', '/web')
-    ->name('home');
+//Route::redirect('/', '/web');
+//Route::redirect('intranet/index.php', '/web')
+//   ->name('home');
 
-Route::redirect('intranet/public_pais_lst.php', '/web/enderecamento/pais');
-Route::redirect('intranet/public_uf_lst.php', '/web/enderecamento/estado');
-Route::redirect('intranet/public_municipio_lst.php', '/web/enderecamento/municipio');
-Route::redirect('intranet/public_distrito_lst.php', '/web/enderecamento/distrito');
-Route::redirect('intranet/public_pais_det.php', '/web/enderecamento/pais');
-Route::redirect('intranet/public_uf_det.php', '/web/enderecamento/estado');
-Route::redirect('intranet/public_municipio_det.php', '/web/enderecamento/municipio');
-Route::redirect('intranet/public_distrito_det.php', '/web/enderecamento/distrito');
+//Route::redirect('intranet/public_pais_lst.php', '/web/enderecamento/pais');
+//Route::redirect('intranet/public_uf_lst.php', '/web/enderecamento/estado');
+//Route::redirect('intranet/public_municipio_lst.php', '/web/enderecamento/municipio');
+//Route::redirect('intranet/public_distrito_lst.php', '/web/enderecamento/distrito');
+//Route::redirect('intranet/public_pais_det.php', '/web/enderecamento/pais');
+//Route::redirect('intranet/public_uf_det.php', '/web/enderecamento/estado');
+//Route::redirect('intranet/public_municipio_det.php', '/web/enderecamento/municipio');
+//Route::redirect('intranet/public_distrito_det.php', '/web/enderecamento/distrito');
 
-Route::redirect('intranet/public_pais_cad.php', '/web/enderecamento/pais/novo');
-Route::redirect('intranet/public_uf_cad.php', '/web/enderecamento/estado/novo');
-Route::redirect('intranet/public_municipio_cad.php', '/web/enderecamento/municipio/novo');
-Route::redirect('intranet/public_distrito_cad.php', '/web/enderecamento/distrito/novo');
+//Route::redirect('intranet/public_pais_cad.php', '/web/enderecamento/pais/novo');
+//Route::redirect('intranet/public_uf_cad.php', '/web/enderecamento/estado/novo');
+//Route::redirect('intranet/public_municipio_cad.php', '/web/enderecamento/municipio/novo');
+//Route::redirect('intranet/public_distrito_cad.php', '/web/enderecamento/distrito/novo');
 
 Route::any('module/Api/{uri}', 'LegacyController@api')->where('uri', '.*');
 
@@ -41,6 +42,8 @@ Route::any('intranet/suspenso.php', 'LegacyController@intranet')
 Route::group(['middleware' => ['auth']], function () {
     Route::get('alterar-senha', 'PasswordController@change')->name('change-password');
     Route::post('alterar-senha', 'PasswordController@change')->name('post-change-password');
+
+    require __DIR__.'/sed.php';
 });
 
 Route::group(['middleware' => ['ieducar.navigation', 'ieducar.footer', 'ieducar.xssbypass', 'ieducar.suspended', 'auth', 'ieducar.checkresetpassword']], function () {
@@ -114,7 +117,7 @@ Route::group(['middleware' => ['ieducar.navigation', 'ieducar.footer', 'ieducar.
 
     Route::any('module/{uri}', 'LegacyController@module')->where('uri', '.*');
     Route::any('modules/{uri}', 'LegacyController@modules')->where('uri', '.*');
-    Route::any('intranet/{uri}', 'LegacyController@intranet')->where('uri', '.*');
+    Route::any('intranet/{uri}', 'LegacyController@intranet')->where('uri', '.*')->name('intranet.page');
 
     Route::group(['namespace' => 'Educacenso', 'prefix' => 'educacenso'], function () {
         Route::get('validar/{validator}', 'ValidatorController@validation');

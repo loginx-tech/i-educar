@@ -61,9 +61,7 @@ class ConnectTenantDatabase
     public function getDefaultTenantResolver()
     {
         return function (Request $request) {
-            $host = str_replace('-', '', $request->getHost());
-
-            return Str::replaceFirst('.' . config('app.default_host'), '', $host);
+            return Str::replaceFirst('.' . config('app.default_host'), '', $request->getHost());
         };
     }
 
