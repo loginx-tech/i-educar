@@ -27,7 +27,7 @@
         "honeybadger-io/honeybadger-laravel": "^3.12",
         "intervention/image": "^2.6",
         "laravel/framework": "^9.3",
-        "laravel/horizon": "^v6.7.9",
+        "laravel/horizon": "^5.14",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.6",
         "laravel/ui": "^3.4",

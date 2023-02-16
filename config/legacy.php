@@ -157,7 +157,7 @@ return [
         'mailer' => [
             'smtp' => [
                 'from_name' => env('MAIL_FROM_NAME', 'Example'),
-                'from_email' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+                'from_email' => env('MAIL_FROM_ADDRESS', 'nao_responda@i-educar.com'),
                 'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
                 'port' => env('MAIL_PORT', 587),
                 'auth' => boolval(env('MAIL_ENCRYPTION', 'tls')),

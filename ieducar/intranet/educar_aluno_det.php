@@ -734,45 +734,45 @@ return new class extends clsDetalhe {
             $this->addDetalhe(detalhe: ['Celular', $reg['responsavel_parentesco_celular']]);
         }
 
-        $uniformDistribution = UniformDistribution::where('student_id', $this->cod_aluno)
-            ->where('year', now()->year)
-            ->first();
+        // $uniformDistribution = UniformDistribution::where('student_id', $this->cod_aluno)
+        //     ->where('year', now()->year)
+        //     ->first();
 
-        if ($uniformDistribution) {
-            if ($uniformDistribution->complete_kit) {
-                $this->addDetalhe(detalhe: ['<span id=\'funiforme\'></span>Recebeu kit completo', 'Sim']);
-                $this->addDetalhe(detalhe: [
-                    '<span id=\'ffuniforme\'></span>' . 'Data da distribuição',
-                    $uniformDistribution->distribution_date?->format('d/m/Y')
-                ]);
-            } else {
-                $this->addDetalhe(detalhe: [
-                    '<span id=\'funiforme\'></span>Recebeu kit completo',
-                    'Não'
-                ]);
-                $this->addDetalhe(detalhe: [
-                    'Tipo',
-                    $uniformDistribution->type
-                ]);
-                $this->addDetalhe(detalhe: [
-                    'Data da distribuição',
-                    $uniformDistribution->distribution_date?->format('d/m/Y')
-                ]);
-                $this->addDetalhe(detalhe: ['Quantidade de agasalhos (jaqueta)', $uniformDistribution->coat_jacket_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de agasalhos (calça)', $uniformDistribution->coat_pants_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de camisetas (manga curta)', $uniformDistribution->shirt_short_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de camisetas (manga longa)', $uniformDistribution->shirt_long_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de camisetas infantis (sem manga)', $uniformDistribution->kids_shirt_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de calça jeans', $uniformDistribution->pants_jeans_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Quantidade de meias', $uniformDistribution->socks_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Bermudas tectels (masculino)', $uniformDistribution->shorts_tactel_qty ?: '0']);
-                $this->addDetalhe(detalhe: ['Bermudas coton (feminino)', $uniformDistribution->shorts_coton_qty ?: '0']);
-                $this->addDetalhe(detalhe: [
-                    '<span id=\'ffuniforme\'></span>' . 'Quantidade de tênis',
-                    $uniformDistribution->sneakers_qty ?: '0'
-                ]);
-            }
-        }
+        // if ($uniformDistribution) {
+        //     if ($uniformDistribution->complete_kit) {
+        //         $this->addDetalhe(detalhe: ['<span id=\'funiforme\'></span>Recebeu kit completo', 'Sim']);
+        //         $this->addDetalhe(detalhe: [
+        //             '<span id=\'ffuniforme\'></span>' . 'Data da distribuição',
+        //             $uniformDistribution->distribution_date?->format('d/m/Y')
+        //         ]);
+        //     } else {
+        //         $this->addDetalhe(detalhe: [
+        //             '<span id=\'funiforme\'></span>Recebeu kit completo',
+        //             'Não'
+        //         ]);
+        //         $this->addDetalhe(detalhe: [
+        //             'Tipo',
+        //             $uniformDistribution->type
+        //         ]);
+        //         $this->addDetalhe(detalhe: [
+        //             'Data da distribuição',
+        //             $uniformDistribution->distribution_date?->format('d/m/Y')
+        //         ]);
+        //         $this->addDetalhe(detalhe: ['Quantidade de agasalhos (jaqueta)', $uniformDistribution->coat_jacket_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de agasalhos (calça)', $uniformDistribution->coat_pants_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de camisetas (manga curta)', $uniformDistribution->shirt_short_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de camisetas (manga longa)', $uniformDistribution->shirt_long_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de camisetas infantis (sem manga)', $uniformDistribution->kids_shirt_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de calça jeans', $uniformDistribution->pants_jeans_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Quantidade de meias', $uniformDistribution->socks_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Bermudas tectels (masculino)', $uniformDistribution->shorts_tactel_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: ['Bermudas coton (feminino)', $uniformDistribution->shorts_coton_qty ?: '0']);
+        //         $this->addDetalhe(detalhe: [
+        //             '<span id=\'ffuniforme\'></span>' . 'Quantidade de tênis',
+        //             $uniformDistribution->sneakers_qty ?: '0'
+        //         ]);
+        //     }
+        // }
 
         $objMoradia = new clsModulesMoradiaAluno(ref_cod_aluno: $this->cod_aluno);
         $reg = $objMoradia->detalhe();
