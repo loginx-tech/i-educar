@@ -11,12 +11,9 @@ use App\Services\Sed\Alunos\{
 use App\Services\Sed\Escolas\GetEscolaByName;
 use App\Services\Sed\Escolas\GetEscolasService;
 use clsFisica;
-use clsPessoa_;
 use clsPessoaFj;
-use clsPessoaJuridica;
 use clsPmieducarAluno;
 use clsPmieducarEscola;
-use clsPmieducarInstituicao;
 use Illuminate\Support\Facades\Auth;
 
 class SedController extends Controller
@@ -180,8 +177,8 @@ class SedController extends Controller
 
     // Escolas -----------------------------------------------------------------
 
-    public function getSchool($cod_escola) {
-
+    public function getSchool($cod_escola)
+    {
         $this->menu(999847);
 
         $tmp_obj = new clsPmieducarEscola(cod_escola: $cod_escola);
@@ -199,6 +196,4 @@ class SedController extends Controller
     }
 
     // Salas   -----------------------------------------------------------------
-
-    
 }

@@ -13,7 +13,6 @@ Route::get('/sed/class/{cod_escola}/create', [SedController::class, 'createAluno
 // Escolas
 Route::get('/sed/school/{cod}', [SedController::class, 'getSchool'])->name('sed.school.get'); // Cadastro escola
 
-
 // APIs Internas (return JSON) |----------------------------------------------------------------------------------------|
 
 Route::get('/consulta-ra/{ra}', [SedController::class, 'consultaRa'])->name('sed.consulta.ra');

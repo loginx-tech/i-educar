@@ -18,11 +18,11 @@ class GetEscolasService extends SedAuthService
     /**
      * Retorna todas as escolas cadastradas no SED na diretoria informada
      *
-     * @param int $codEscola  Caso queria uma escola especifica apenas, não há rota para isso no SED
+     * @param int $codEscola Caso queria uma escola especifica apenas, não há rota para isso no SED
      */
     public function __invoke($codEscola = null)
     {
-        $cidade = Parent::getConfigSystemSed();
+        $cidade = parent::getConfigSystemSed();
         if (!$cidade) {
             abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
         }
