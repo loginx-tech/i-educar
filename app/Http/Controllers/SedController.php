@@ -8,21 +8,29 @@ use App\Services\Sed\Alunos\{
     GetAlunoService,
     StoreAlunoService
 };
+use App\Services\Sed\Escolas\GetEscolaByName;
+use App\Services\Sed\Escolas\GetEscolasService;
 use clsFisica;
+use clsPessoa_;
 use clsPessoaFj;
+use clsPessoaJuridica;
 use clsPmieducarAluno;
+use clsPmieducarEscola;
+use clsPmieducarInstituicao;
 use Illuminate\Support\Facades\Auth;
 
 class SedController extends Controller
 {
     public function __construct(
         protected StoreAlunoService $storeAlunoService,
-        protected GetAlunoService $getAlunoService
+        protected GetAlunoService $getAlunoService,
+        protected GetEscolasService $getEscolasService,
+        protected GetEscolaByName $getEscolaByName
     ) {
         //$this->middleware('auth');
     }
 
-    public function createAluno($codAluno)
+    public function createAluno($cod_escola)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -33,7 +41,7 @@ class SedController extends Controller
         $this->menu(999847);
 
         $user  = Auth::user();
-        $aluno = new clsPmieducarAluno($codAluno);
+        $aluno = new clsPmieducarAluno($cod_escola);
         $alunoDetalhe = $aluno->detalhe();
 
         $obj_fisica = new clsFisica($alunoDetalhe['ref_idpes']);
@@ -92,7 +100,7 @@ class SedController extends Controller
         return view('sed.store-aluno', [
             'aluno' => $aluno->detalhe(),
             'user' => $user,
-            'codAluno' => $codAluno,
+            'codAluno' => $cod_escola,
             'obj_pessoa_fj' => $obj_pessoa_fj,
             'det_fisica' => $det_fisica,
             'det_pessoa_pai' => $det_pessoa_pai,
@@ -100,7 +108,7 @@ class SedController extends Controller
         ]);
     }
 
-    public function storeAluno($codAluno, SedStoreAlunoRequest $request)
+    public function storeAluno($cod_escola, SedStoreAlunoRequest $request)
     {
         //Retira acentos e caracteres especiais e ifens da cidade
         if ($request->inNomeMunNascto) {
@@ -169,4 +177,28 @@ class SedController extends Controller
             'aluno' => $responseObj,
         ], 200);
     }
+
+    // Escolas -----------------------------------------------------------------
+
+    public function getSchool($cod_escola) {
+
+        $this->menu(999847);
+
+        $tmp_obj = new clsPmieducarEscola(cod_escola: $cod_escola);
+        $registro = $tmp_obj->detalhe();
+
+        $escola_simples = ($this->getEscolasService)($cod_escola);
+
+        // Pegando o nome da escola sem o código para pesquisar no service completo do sed
+        $nome_escola = substr($escola_simples->outDescNomeEscola, 0, strpos($escola_simples->outDescNomeEscola, ' -'));
+        $response = ($this->getEscolaByName)($nome_escola);
+
+        return view('sed.schools.show-school', [
+            'escola' => $response,
+        ]);
+    }
+
+    // Salas   -----------------------------------------------------------------
+
+    
 }

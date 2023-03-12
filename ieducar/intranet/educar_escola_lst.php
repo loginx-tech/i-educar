@@ -73,7 +73,6 @@ return new class extends clsListagem {
             str_nome: $this->nm_escola,
             cod_usuario: $this->pessoa_logada
         );
-
         $total = $obj_escola->_total;
 
         if (is_array($lista) && count($lista)) {

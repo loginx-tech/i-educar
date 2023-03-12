@@ -18,17 +18,26 @@ class GetEscolasService extends SedAuthService
     /**
      * Retorna todas as escolas cadastradas no SED na diretoria informada
      *
+     * @param int $codEscola  Caso queria uma escola especifica apenas, não há rota para isso no SED
      */
-    public function __invoke()
+    public function __invoke($codEscola = null)
     {
+        $cidade = Parent::getConfigSystemSed();
+        if (!$cidade) {
+            abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
+        }
+
         $response = parent::get(
             SedRouters::GET_ESCOLAS->value,
             [
-                'inCodDiretoria'  => config('sed.diretoriaId'),
-                'inCodMunicipio'  => config('sed.municipioId'),
+                //'inCodDiretoria'  => config('sed.diretoriaId_' . 'JACEREI'),
+                'inCodMunicipio'  => config('sed.municipioId_'. $cidade),
                 'inCodRedeEnsino' => config('sed.redeEnsinoCod'),
             ]
         );
+        if ($codEscola) {
+            return collect($response->object()->outEscolas)->where('outCodEscola', $codEscola)->first();
+        }
 
         return $response->collect();
     }

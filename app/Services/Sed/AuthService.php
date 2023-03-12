@@ -124,13 +124,13 @@ class AuthService
             $request->withToken($this->getAccessToken());
 
             return true;
-        })
+        }, throw: false)
         ->withHeaders($headers)
         ->get(config('sed.url') . $route, $body);
 
-        // if ($response->failed()) {
-        //     dd('Erro get do auth do sed', $response->object());
-        // }
+        if ($response->failed()) {
+            abort(403, 'Erro ao tentar se comunicar com o SED: ' . $response->object()->outErro);
+        }
 
         return $response;
     }
@@ -159,6 +159,10 @@ class AuthService
         }, throw: false)
         ->withHeaders($headers)
         ->post(config('sed.url') . $route, $body);
+
+        if ($response->failed()) {
+            abort(403, 'Erro ao tentar se comunicar com o SED: ' . $response->object()->outErro);
+        }
 
         return $response;
     }

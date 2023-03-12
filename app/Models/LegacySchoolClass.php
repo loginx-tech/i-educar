@@ -136,6 +136,7 @@ class LegacySchoolClass extends Model
         'formas_organizacao_turma',
         'unidade_curricular',
         'cod_sed',
+        'cod_unidade_sed',
     ];
 
     protected function id(): Attribute
