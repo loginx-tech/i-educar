@@ -27,7 +27,7 @@ class SedController extends Controller
         //$this->middleware('auth');
     }
 
-    public function createAluno($cod_escola)
+    public function createAluno($codAluno)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -38,7 +38,7 @@ class SedController extends Controller
         $this->menu(999847);
 
         $user  = Auth::user();
-        $aluno = new clsPmieducarAluno($cod_escola);
+        $aluno = new clsPmieducarAluno($codAluno);
         $alunoDetalhe = $aluno->detalhe();
 
         $obj_fisica = new clsFisica($alunoDetalhe['ref_idpes']);
@@ -97,7 +97,7 @@ class SedController extends Controller
         return view('sed.store-aluno', [
             'aluno' => $aluno->detalhe(),
             'user' => $user,
-            'codAluno' => $cod_escola,
+            'codAluno' => $codAluno,
             'obj_pessoa_fj' => $obj_pessoa_fj,
             'det_fisica' => $det_fisica,
             'det_pessoa_pai' => $det_pessoa_pai,
@@ -105,7 +105,7 @@ class SedController extends Controller
         ]);
     }
 
-    public function storeAluno($cod_escola, SedStoreAlunoRequest $request)
+    public function storeAluno($codAluno, SedStoreAlunoRequest $request)
     {
         //Retira acentos e caracteres especiais e ifens da cidade
         if ($request->inNomeMunNascto) {
