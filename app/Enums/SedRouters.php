@@ -22,4 +22,13 @@ enum SedRouters: string
 
     // Obtem os dados da escola
     case GET_ESCOLA = '/DadosBasicos/Escolas';
+
+
+    /*-- Sala ---------------------------------------------------------------------*/
+
+    // Obtem as salas da escola
+    case GET_SALAS = '/RelacaoAlunosClasse/RelacaoClasses';
+
+    // Obtem os dados da sala
+    case GET_SALA = '/TurmaClasse/ConsultaTurmaClasse';
 }

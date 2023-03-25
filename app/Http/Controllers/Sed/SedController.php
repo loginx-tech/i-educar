@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Sed;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\SedStoreAlunoRequest;
 use App\Models\LegacyStudent;
 use App\Services\Sed\Alunos\{
@@ -196,4 +197,15 @@ class SedController extends Controller
     }
 
     // Salas   -----------------------------------------------------------------
+
+    public function editSchool($cod_school)
+    {
+        $this->menu(999847);
+
+        // $escola_simples = ($this->getEscolasService)($cod_escola);
+
+        // return view('sed.schools.show-school', [
+        //     'escola' => $response,
+        // ]);
+    }
 }

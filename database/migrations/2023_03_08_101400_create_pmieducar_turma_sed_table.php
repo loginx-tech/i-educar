@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -12,12 +13,11 @@ return new class () extends Migration {
      */
     public function up()
     {
-        Schema::create('sed_configs', function (Blueprint $table) {
+        Schema::create('pmieducar.turma_sed', function (Blueprint $table) {
             $table->id();
-            $table->string('key', 255);
-            $table->string('description', 500)->nullable();
-            $table->string('value', 255)->nullable(); // Campo para configs que necessitam de valores a mais do que true ou false
-            $table->boolean('is_enabled', 255)->default(true);
+            //$table->foreign('cod_turma_id')->references('cod_turma')->on('pmieducar.turma')->cascadeOnDelete();
+            $table->integer('cod_turma_id');
+            $table->integer('cod_sed')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +29,7 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('sed_configs');
+        Schema::dropIfExists('pmieducar.turma_sed');
+
     }
 };

@@ -1,17 +1,21 @@
 <?php
 
-use App\Http\Controllers\SedController;
+use App\Http\Controllers\Sed\SedClassroomController;
+use App\Http\Controllers\Sed\SedController;
 use Illuminate\Support\Facades\Route;
 
 // Alunos
 Route::get('/intranet/sed/aluno/create/{cod}', [SedController::class, 'createAluno'])->name('sed.aluno.create');
 Route::post('/intranet/sed/aluno/store/{cod}', [SedController::class, 'storeAluno'])->name('sed.aluno.store');
 
-// Salas
-Route::get('/sed/class/{cod_escola}/create', [SedController::class, 'createAluno'])->name('sed.class.create');
-
 // Escolas
 Route::get('/sed/school/{cod}', [SedController::class, 'getSchool'])->name('sed.school.get'); // Cadastro escola
+
+// Salas
+Route::get('/sed/sala/{cod_class}/atribuir-codigo', [SedClassroomController::class, 'setCod'])->name('sed.class.set-code'); //TO-DO
+
+Route::get('/sed/sala/{cod_class}/editar', [SedClassroomController::class, 'edit'])->name('sed.class.edit'); //TO-DO
+Route::post('/sed/sala/{cod_class}/update', [SedClassroomController::class, 'update'])->name('sed.class.update'); //TO-DO
 
 // APIs Internas (return JSON) |----------------------------------------------------------------------------------------|
 
