@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
@@ -6,8 +7,6 @@ use App\Services\Sed\Alunos\{
     GetAlunoService,
     StoreAlunoService
 };
-use App\Services\Sed\Escolas\GetEscolaByName;
-use App\Services\Sed\Escolas\GetEscolasService;
 use clsPmieducarTurma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

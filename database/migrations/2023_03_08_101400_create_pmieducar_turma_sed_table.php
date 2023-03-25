@@ -30,6 +30,5 @@ return new class () extends Migration {
     public function down()
     {
         Schema::dropIfExists('pmieducar.turma_sed');
-
     }
 };
