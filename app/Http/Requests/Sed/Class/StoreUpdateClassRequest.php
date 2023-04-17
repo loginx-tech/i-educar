@@ -65,7 +65,8 @@ class StoreUpdateClassRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    public function messages() {
+    public function messages()
+    {
         return [
             'inAnoLetivo.required' => 'O campo ano letivo é obrigatório.',
             'inAnoLetivo.date_format' => 'O campo ano letivo deve ser um ano válido.',
@@ -97,7 +98,6 @@ class StoreUpdateClassRequest extends FormRequest
             // 'inCodigoAtividadeComplementar.*.string' => 'O campo atividade complementar deve ser uma string.',
             'inNumeroSala.required' => 'O campo número da sala é obrigatório.',
             'inNumeroSala.string' => 'O campo número da sala deve ser uma string.',
-
 
         ];
     }

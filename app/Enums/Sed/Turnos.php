@@ -15,6 +15,7 @@ enum Turnos: int
     {
         switch ($this->value) {
             case self::MANHA->value:          return 'Manhã';
+            // no break
             case self::INTERMEDIARIO->value:  return 'Intermediario';
             case self::TARDE->value:          return 'Tarde';
             case self::VESPERTINO->value:     return 'Vespertino';

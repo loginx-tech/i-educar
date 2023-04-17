@@ -45,5 +45,4 @@ enum SedRouters: string
     case TIPOS_CLASSE = '/DadosBasicos/TipoClasse';
 
     case TIPOS_ENSINO = '/DadosBasicos/TipoEnsino';
-
 }

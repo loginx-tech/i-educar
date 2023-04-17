@@ -15,7 +15,8 @@ class GetTiposEnsinoService extends SedAuthService
     public function __invoke()
     {
         $response = parent::get(
-            SedRouters::TIPOS_ENSINO->value, []
+            SedRouters::TIPOS_ENSINO->value,
+            []
         );
 
         return $response;

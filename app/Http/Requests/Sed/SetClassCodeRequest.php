@@ -33,7 +33,8 @@ class SetClassCodeRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    public function messages() {
+    public function messages()
+    {
         return [
             'inCodSed.required' => 'Código da turma é obrigatório.',
             'inCodSed.integer' => 'Código da turma deve ser um número inteiro.',

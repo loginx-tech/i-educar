@@ -10,7 +10,6 @@ use App\Services\Sed\Classrooms\StoreClassService;
 use App\Services\Sed\Classrooms\UpdateClassService;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
 use App\Services\Sed\DadosBasicos\GetTiposEnsinoService;
-use App\Services\Sed\Escolas\GetEscolaByName;
 use App\Services\Sed\Escolas\GetUnidadesByEscolaService;
 use clsPmieducarEscola;
 use clsPmieducarTurma;

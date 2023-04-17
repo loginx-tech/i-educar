@@ -15,7 +15,8 @@ class GetTiposClasseService extends SedAuthService
     public function __invoke()
     {
         $response = parent::get(
-            SedRouters::TIPOS_CLASSE->value, []
+            SedRouters::TIPOS_CLASSE->value,
+            []
         );
 
         return $response;

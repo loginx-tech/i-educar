@@ -14,6 +14,7 @@ enum SalaDuracao: int
     {
         switch ($this->value) {
             case self::ANUAL->value:                return 'Anual';
+            // no break
             case self::PRIMEIRO_SEMESTRE->value:    return 'Primeiro Semestre';
             case self::SEGUNDO_SEMESTRE->value:     return 'Segundo Semestre';
         }

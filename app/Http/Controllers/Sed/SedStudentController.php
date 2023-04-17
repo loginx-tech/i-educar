@@ -3,14 +3,9 @@
 namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Sed\Class\StoreUpdateClassRequest;
-use App\Http\Requests\Sed\SetClassCodeRequest;
-use App\Models\LegacyStudent;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
 use App\Services\Sed\DadosBasicos\GetTiposEnsinoService;
 use App\Services\Sed\Escolas\GetUnidadesByEscolaService;
-use clsFisica;
-use clsPessoaFj;
 use clsPmieducarAluno;
 use clsPmieducarCurso;
 use clsPmieducarEscola;
@@ -18,11 +13,9 @@ use clsPmieducarInstituicao;
 use clsPmieducarMatricula;
 use clsPmieducarMatriculaTurma;
 use clsPmieducarSerie;
-use clsPmieducarTurma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 
 class SedStudentController extends Controller
 {
@@ -40,11 +33,11 @@ class SedStudentController extends Controller
      * ensino profissionalizante, atividade complementar, etc..)
      *
      * @param Request $request
+     *
      * @return View
      */
     public function CreateMatricula($matricula_cod, $aluno_cod)
     {
-
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
         if (!$sed) {
@@ -113,15 +106,19 @@ class SedStudentController extends Controller
         // ----------------------- Aluno ------------------------
 
         if (!$det_aluno['aluno_estado_id']) {
-            return redirect()->route('intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod)->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+            return redirect()->route(
+                'intranet.page',
+                'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
         }
 
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
 
         if ($classSed) {
-            return redirect()->route('intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod)->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+            return redirect()->route(
+                'intranet.page',
+                'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
         }
 
         //$tiposClasse = ($this->getTiposClasseService)();
@@ -146,10 +143,7 @@ class SedStudentController extends Controller
         if (!$sed) {
             abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
         }
-
-
     }
 
     // ---------------------------------------------------------------------------------------------
-
 }

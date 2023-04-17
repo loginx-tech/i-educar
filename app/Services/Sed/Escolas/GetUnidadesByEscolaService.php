@@ -28,6 +28,5 @@ class GetUnidadesByEscolaService extends SedAuthService
         );
 
         return $response;
-
     }
 }
