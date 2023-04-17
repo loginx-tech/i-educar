@@ -421,6 +421,11 @@ return new class extends clsDetalhe {
                 $this->array_botao[] = 'Desfazer reclassificação';
                 $this->array_botao_url_script[] = "deleteReclassificacao({$registro['cod_matricula']})";
             }
+
+            // SED
+            $this->array_botao[] = 'Subir Matrícula no SED';
+            $this->array_botao_url_script[] = sprintf('go("sed/matricular/%d/aluno/%d");', $registro['cod_matricula'], $registro['cod_aluno']);
+
         }
 
         if ($this->user()->can(abilities: 'view', arguments: Process::ENROLLMENT_HISTORY)) {

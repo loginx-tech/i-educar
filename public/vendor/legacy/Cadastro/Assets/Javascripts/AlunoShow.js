@@ -227,7 +227,6 @@ function onDataSaidaChange(matricula_id, key, campo){
     };
     postResource(options);
   }
-
 }
 
 const handlePostDataSaida = function(dataresponse){

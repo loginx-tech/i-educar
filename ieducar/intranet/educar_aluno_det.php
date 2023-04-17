@@ -582,12 +582,12 @@ return new class extends clsDetalhe {
 
             $this->url_editar = '/module/Cadastro/aluno?id=' . $registro['cod_aluno'];
 
-            $this->array_botao = ['Cadastro SED','Nova matrícula', 'Atualizar histórico', 'Distribuição de uniforme'];
+            $this->array_botao = ['Nova matrícula', 'Atualizar histórico', 'Distribuição de uniforme', 'Cadastro SED'];
             $this->array_botao_url_script = [
-                sprintf('go("sed/aluno/create/%d");', $registro['cod_aluno']),
                 sprintf('go("educar_matricula_cad.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
                 sprintf('go("educar_historico_escolar_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
-                sprintf('go("educar_distribuicao_uniforme_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno'])
+                sprintf('go("educar_distribuicao_uniforme_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
+                sprintf('go("sed/aluno/create/%d");', $registro['cod_aluno']),
             ];
 
             if ($titulo = config(key: 'legacy.app.alunos.sistema_externo.titulo')) {

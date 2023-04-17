@@ -36,11 +36,6 @@ class ImportController extends Controller
         return redirect()->route('educacenso.history');
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return View
-     */
     public function index(Request $request)
     {
         $this->breadcrumb('Historico de importações', [

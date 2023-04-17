@@ -23,6 +23,9 @@ enum SedRouters: string
     // Obtem os dados da escola
     case GET_ESCOLA = '/DadosBasicos/Escolas';
 
+    //obtem as unidades
+    case GET_UNIDADES = '/DadosBasicos/UnidadesPorEscola';
+
     /*-- Sala ---------------------------------------------------------------------*/
 
     // Obtem as salas da escola
@@ -30,4 +33,17 @@ enum SedRouters: string
 
     // Obtem os dados da sala
     case GET_SALA = '/TurmaClasse/ConsultaTurmaClasse';
+
+    // Update da sala
+    case UPDATE_SALA = '/TurmaClasse/ManutencaoTurmaClasse';
+
+    // Cria a sala
+    case STORE_SALA = '/TurmaClasse/IncluirTurmaClasse';
+
+    /*-- Dados Basicos ------------------------------------------------------------*/
+
+    case TIPOS_CLASSE = '/DadosBasicos/TipoClasse';
+
+    case TIPOS_ENSINO = '/DadosBasicos/TipoEnsino';
+
 }

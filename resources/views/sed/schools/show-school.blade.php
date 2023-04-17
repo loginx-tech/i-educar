@@ -8,14 +8,6 @@
 @section('breadcrumb_url', url('/intranet/educar_escola_lst.php'))
 
 @section('content')
-
-<table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0">
-    <tbody>
-    <tr>
-        <td class="formdktd" colspan="2" height="24"><b>Ficha de Cadastro no SED</b></td>
-    </tr>
-
-    @section('content')
     <form id="formcadastro" action="" method="post">
         <table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0">
             <tbody>
