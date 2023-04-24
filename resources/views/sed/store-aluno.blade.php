@@ -4,6 +4,9 @@
     <link rel="stylesheet" type="text/css" href="{{ Asset::get('css/ieducar.css') }}"/>
 @endpush
 
+@section('breadcrumb', 'Alunos')
+@section('breadcrumb_url', url('/intranet/educar_aluno_lst.php'))
+
 @section('content')
     <form id="formcadastro" action="{{ route('sed.aluno.store', $codAluno) }}" method="post">
         @csrf

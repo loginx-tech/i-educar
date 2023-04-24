@@ -1,23 +1,29 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Sed;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\SedStoreAlunoRequest;
 use App\Models\LegacyStudent;
 use App\Services\Sed\Alunos\{
     GetAlunoService,
     StoreAlunoService
 };
+use App\Services\Sed\Escolas\GetEscolaByName;
+use App\Services\Sed\Escolas\GetEscolasService;
 use clsFisica;
 use clsPessoaFj;
 use clsPmieducarAluno;
+use clsPmieducarEscola;
 use Illuminate\Support\Facades\Auth;
 
 class SedController extends Controller
 {
     public function __construct(
         protected StoreAlunoService $storeAlunoService,
-        protected GetAlunoService $getAlunoService
+        protected GetAlunoService $getAlunoService,
+        protected GetEscolasService $getEscolasService,
+        protected GetEscolaByName $getEscolaByName
     ) {
         //$this->middleware('auth');
     }
@@ -168,5 +174,38 @@ class SedController extends Controller
             'message' => 'RA encontrado no SED.',
             'aluno' => $responseObj,
         ], 200);
+    }
+
+    // Escolas -----------------------------------------------------------------
+
+    public function getSchool($cod_escola)
+    {
+        $this->menu(999847);
+
+        $tmp_obj = new clsPmieducarEscola(cod_escola: $cod_escola);
+        $registro = $tmp_obj->detalhe();
+
+        $escola_simples = ($this->getEscolasService)($cod_escola);
+
+        // Pegando o nome da escola sem o código para pesquisar no service completo do sed
+        $nome_escola = substr($escola_simples->outDescNomeEscola, 0, strpos($escola_simples->outDescNomeEscola, ' -'));
+        $response = ($this->getEscolaByName)($nome_escola);
+
+        return view('sed.schools.show-school', [
+            'escola' => $response,
+        ]);
+    }
+
+    // Salas   -----------------------------------------------------------------
+
+    public function editSchool($cod_school)
+    {
+        $this->menu(999847);
+
+        // $escola_simples = ($this->getEscolasService)($cod_escola);
+
+        // return view('sed.schools.show-school', [
+        //     'escola' => $response,
+        // ]);
     }
 }

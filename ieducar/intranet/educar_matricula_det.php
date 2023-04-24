@@ -459,6 +459,10 @@ return new class extends clsDetalhe {
             $this->array_botao_url_script[] = "go(\"{$link}\")";
         }
 
+        // SED
+        $this->array_botao[] = 'Subir Matrícula no SED';
+        $this->array_botao_url_script[] = sprintf('go("sed/matricular/%d/aluno/%d");', $registro['cod_matricula'], $registro['cod_aluno']);
+
         $this->url_cancelar = 'educar_aluno_det.php?cod_aluno=' . $registro['ref_cod_aluno'];
         $this->largura = '100%';
 

@@ -175,8 +175,8 @@ return new class extends clsDetalhe {
 
         if ($canEdit) {
             $this->url_editar = "educar_escola_cad.php?cod_escola={$registro['cod_escola']}";
-            $this->array_botao = ['Definir Ano Letivo'];
-            $this->array_botao_url = ["educar_escola_ano_letivo_cad.php?cod_escola={$registro['cod_escola']}"];
+            $this->array_botao = ['Definir Ano Letivo', 'Cadastro SED'];
+            $this->array_botao_url = ["educar_escola_ano_letivo_cad.php?cod_escola={$registro['cod_escola']}", "/sed/school/{$registro['cod_escola']}"];
         }
 
         $styles = ['/vendor/legacy/Cadastro/Assets/Stylesheets/EscolaAnosLetivos.css'];
