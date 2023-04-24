@@ -13,8 +13,8 @@ enum SedNacionalidades: int
         switch ($nacionalidade) {
             case self::BRASILEIRO->value:          return 'Brasileiro';
 
-            
-            // no break
+                
+                // no break
             case self::ESTRANGEIRO->value:         return 'Estrangeiro';
             case self::BRASILEIRO_EXTERIOR->value: return 'Brasileiro Nascido no Exterior';
         }

@@ -56,15 +56,15 @@ class SedController extends Controller
             $det_pessoa_pai = $obj_pessoa_pai->detalhe();
 
         // if ($det_pessoa_pai) {
-            //     $nome_pai = $det_pessoa_pai['nome'];
+        //     $nome_pai = $det_pessoa_pai['nome'];
 
-            //     // CPF
-            //     $obj_cpf = new clsFisica($idpes_pai);
-            //     $det_cpf = $obj_cpf->detalhe();
+        //     // CPF
+        //     $obj_cpf = new clsFisica($idpes_pai);
+        //     $det_cpf = $obj_cpf->detalhe();
 
-            //     if ($det_cpf['cpf']) {
-            //         $cpf_pai = $det_cpf['cpf'];
-            //     }
+        //     if ($det_cpf['cpf']) {
+        //         $cpf_pai = $det_cpf['cpf'];
+        //     }
         // }
         } else {
             $det_pessoa_pai['nome'] = '';
@@ -75,15 +75,15 @@ class SedController extends Controller
             $det_pessoa_mae = $obj_pessoa_mae->detalhe();
 
         // if ($det_pessoa_mae) {
-            //     $nome_mae = $det_pessoa_mae['nome'];
+        //     $nome_mae = $det_pessoa_mae['nome'];
 
-            //     // CPF
-            //     $obj_cpf = new clsFisica($idpes_mae);
-            //     $det_cpf = $obj_cpf->detalhe();
+        //     // CPF
+        //     $obj_cpf = new clsFisica($idpes_mae);
+        //     $det_cpf = $obj_cpf->detalhe();
 
-            //     if ($det_cpf['cpf']) {
-            //         $cpf_mae = $det_cpf['cpf'];
-            //     }
+        //     if ($det_cpf['cpf']) {
+        //         $cpf_mae = $det_cpf['cpf'];
+        //     }
         // }
         } else {
             $det_pessoa_mae['nome'] = '';
