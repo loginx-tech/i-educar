@@ -162,13 +162,13 @@
 
                                                     <a class="breadcrumb-separator"> / </a>
 
-                                                    <a href="{{ url('/intranet/educar_aluno_lst.php') }}" title="Alunos">
-                                                        <span> Alunos</span>
+                                                    <a href="@yield('breadcrumb_url')" title="@yield('breadcrumb')">
+                                                        <span>@yield('breadcrumb')</span>
                                                     </a>
 
                                                     <a class="breadcrumb-separator"> / </a>
 
-                                                    <span class="breadcrumb-current">{{ 'Dados Adicionais' }}</span>
+                                                    <span class="breadcrumb-current">{{ 'Cadastro no SED' }}</span>
                                                 </div>
 
                                             </td>

@@ -346,6 +346,9 @@ return new class extends clsDetalhe {
             $this->array_botao_url_script[] = sprintf('go("educar_parecer_turma_cad.php?cod_turma=%d");', $registro['cod_turma']);
         }
 
+        $this->array_botao[] = 'Cadastro SED';
+        $this->array_botao_url_script[] = sprintf('go("/intranet/sed/salas/%d/situacao-sed");', $registro['cod_turma']);
+
         $this->url_cancelar = 'educar_turma_lst.php';
         $this->largura = '100%';
 
