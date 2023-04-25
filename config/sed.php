@@ -44,6 +44,8 @@ return [
     */
 
     'diretoriaId' => 20207, // Jacarei
+    'diretoriaId_JACAREI' => 20207,
+    'diretoriaId_PARAIBUNA' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -56,6 +58,8 @@ return [
     */
 
     'municipioId' => 9267, // Jacarei
+    'municipioId_JACAREI' => 9267,
+    'municipioId_PARAIBUNA' => 9448,
 
     /*
     |--------------------------------------------------------------------------
