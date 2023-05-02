@@ -137,7 +137,7 @@ class SedStudentController extends Controller
 
     public function StoreMatricula($matricula_cod, $aluno_cod, Request $request)
     {
-        dd($request->all(), $matricula_cod, $aluno_cod);
+        dd("Em Correção");
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
         if (!$sed) {

@@ -48,6 +48,7 @@
             <tr>
                 <td class="formmdtd" valign="top">
                     <span class="form">Código SED da Turma </span>
+                    <span class="form">Código SED da Turma </span>
                 </td>
                 <td class="formmdtd" valign="top">
                     <span class="form">

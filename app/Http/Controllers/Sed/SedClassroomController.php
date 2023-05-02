@@ -182,6 +182,7 @@ class SedClassroomController extends Controller
         }
 
         $class = ($this->getClassroomService)($classSedLocal->cod_sed);
+        dd($class);
         $tiposClasse = ($this->getTiposClasseService)();
         $tiposEnsino = ($this->getTiposEnsinoService)();
 
