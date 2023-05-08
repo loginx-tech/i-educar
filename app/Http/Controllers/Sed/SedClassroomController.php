@@ -76,7 +76,7 @@ class SedClassroomController extends Controller
         if (!$classSed) {
             DB::table('pmieducar.turma_sed')->insert([
                 'cod_turma_id' => $codClass,
-                'cod_sed' => $request->codinCodSed_sed,
+                'cod_sed' => $request->inCodSed,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -174,15 +174,19 @@ class SedClassroomController extends Controller
         }
 
         $classSedLocal = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $codClass)->first();
-
         if (!$classSedLocal) {
             return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
             ->with('error', 'A turma não está vinculada a uma sala cadastrada no SED.
             Por favor, cadastre o código SED da turma ou crie um novo cadastro antes de editar o cadastro SED.');
         }
-
+        //dd($classSedLocal);
         $class = ($this->getClassroomService)($classSedLocal->cod_sed);
-        dd($class);
+
+        if (isset($class['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
+            ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
+        }
+
         $tiposClasse = ($this->getTiposClasseService)();
         $tiposEnsino = ($this->getTiposEnsinoService)();
 
@@ -193,6 +197,7 @@ class SedClassroomController extends Controller
         return view('sed.classrooms.edit', [
             'codClass' => $codClass,
             'class' => $class,
+            'codClassSed' => $classSedLocal->cod_sed,
             'tiposClasse' => $tiposClasse->object()->outTipoClasse,
             'tiposEnsino' => $tiposEnsino->object()->outTipoEnsino,
             'escolas' => $escolas,
@@ -213,7 +218,6 @@ class SedClassroomController extends Controller
             ->with('error', 'A turma não está vinculada a uma sala cadastrada no SED.
             Por favor, cadastre o código SED da turma ou crie um novo cadastro antes de editar o cadastro SED.');
         }
-
         $response = ($this->updateClassService)($request);
         $responseObj = $response->collect();
 

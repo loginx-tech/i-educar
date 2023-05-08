@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
+use App\Models\LegacyStudent;
+use App\Services\Sed\Alunos\StoreMatriculaService;
+use App\Services\Sed\Classrooms\GetClassroomService;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
 use App\Services\Sed\DadosBasicos\GetTiposEnsinoService;
 use App\Services\Sed\Escolas\GetUnidadesByEscolaService;
@@ -23,6 +26,8 @@ class SedStudentController extends Controller
         protected GetUnidadesByEscolaService $getUnidadesByEscolaService,
         protected GetTiposEnsinoService $getTiposEnsinoService,
         protected GetTiposClasseService $getTiposClasseService,
+        protected StoreMatriculaService $storeMatriculaService,
+        protected GetClassroomService $getClassroomService,
     ) {
         //$this->middleware('auth');
     }
@@ -113,8 +118,7 @@ class SedStudentController extends Controller
         }
 
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
-
-        if ($classSed) {
+        if (!$classSed) {
             return redirect()->route(
                 'intranet.page',
                 'educar_aluno_det.php?cod_aluno='.$aluno_cod
@@ -137,13 +141,119 @@ class SedStudentController extends Controller
 
     public function StoreMatricula($matricula_cod, $aluno_cod, Request $request)
     {
-        dd("Em Correção");
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
         if (!$sed) {
             abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
         }
-    }
 
-    // ---------------------------------------------------------------------------------------------
+        // --------------------- Matricula ---------------------
+
+        $obj_matricula = new clsPmieducarMatricula();
+        $lst_matricula = $obj_matricula->lista(int_cod_matricula: $matricula_cod);
+
+        if ($lst_matricula) {
+            $registro = array_shift(array: $lst_matricula);
+        }
+
+        if (!$registro) {
+            return redirect()->route('intranet.page', 'educar_aluno_det.php?cod_aluno=' . $aluno_cod)->with('error', 'Matrícula não encontrada.');
+        }
+
+        $verificaMatriculaUltimoAno = $obj_matricula->verificaMatriculaUltimoAno(codAluno: $registro['ref_cod_aluno'], codMatricula: $registro['cod_matricula']);
+        $existeSaidaEscola = $obj_matricula->existeSaidaEscola(codMatricula: $registro['cod_matricula']);
+
+        // Curso
+        $obj_ref_cod_curso = new clsPmieducarCurso(cod_curso: $registro['ref_cod_curso']);
+        $det_ref_cod_curso = $obj_ref_cod_curso->detalhe();
+        $curso_id = $registro['ref_cod_curso'];
+        $registro['ref_cod_curso'] = $det_ref_cod_curso['nm_curso'];
+
+        // Série
+        $obj_serie = new clsPmieducarSerie(cod_serie: $registro['ref_ref_cod_serie']);
+        $det_serie = $obj_serie->detalhe();
+        $serie_id = $registro['ref_ref_cod_serie'];
+        $registro['ref_ref_cod_serie'] = $det_serie['nm_serie'];
+
+        // Nome da instituição
+        $obj_cod_instituicao = new clsPmieducarInstituicao(cod_instituicao: $registro['ref_cod_instituicao']);
+        $obj_cod_instituicao_det = $obj_cod_instituicao->detalhe();
+        $registro['ref_cod_instituicao'] = $obj_cod_instituicao_det['nm_instituicao'];
+
+        // Escola
+        $obj_ref_cod_escola = new clsPmieducarEscola(cod_escola: $registro['ref_ref_cod_escola']);
+        $det_ref_cod_escola = $obj_ref_cod_escola->detalhe();
+        $escola_id = $registro['ref_ref_cod_escola'];
+        $registro['ref_ref_cod_escola'] = $det_ref_cod_escola['nome'];
+
+        // Nome do aluno
+        $obj_aluno = new clsPmieducarAluno();
+        $lst_aluno = $obj_aluno->lista(
+            int_cod_aluno: $registro['ref_cod_aluno'],
+            int_ativo: 1
+        );
+
+        if (is_array(value: $lst_aluno)) {
+            $det_aluno = array_shift(array: $lst_aluno);
+            $nm_aluno = $det_aluno['nome_aluno'];
+        }
+
+        // Nome da turma
+        $enturmacoes = new clsPmieducarMatriculaTurma();
+        $enturmacoes = $enturmacoes->lista(
+            int_ref_cod_matricula: $matricula_cod
+        );
+
+        // ----------------------- Aluno ------------------------
+
+        if (!$det_aluno['aluno_estado_id']) {
+            return redirect()->route(
+                'intranet.page',
+                'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+        }
+
+        // Retira pontuações do RA e o digito verificador
+        $ra = explode('-', $det_aluno['aluno_estado_id']);
+        $ra = preg_replace('/[^0-9]/', '', $ra[0]);
+
+        $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
+        if (!$classSed) {
+            return redirect()->route(
+                'intranet.page',
+                'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+        }
+
+        $class = ($this->getClassroomService)($classSed->cod_sed);
+        if (isset($class['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
+            ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
+        }
+
+        $data_matricula = [
+            "inAnoLetivo" => date('Y'),
+            "inNumRA"     => $ra,
+            //"inDigitoRA"  => "",
+            "inSiglaUFRA" => "SP", // TO-DO: Pegar UF do aluno
+
+            "inDataInicioMatricula" => $enturmacoes[0]['data_enturmacao'],
+            // "inNumAluno"  => "",
+            "inNumClasse" => $classSed->cod_sed,
+
+            "inCodTipoEnsino" => $class['outCodTipoEnsino'],
+            "inCodSerieAno"   => $class['outCodSerieAno'],
+        ];
+
+        $response = ($this->storeMatriculaService)($data_matricula);
+        $responseObj = $response->collect();
+
+        if ($response->failed() || isset($responseObj['outErro'])) {
+            return back()->withInput()->withErrors(['Error' => $responseObj['outErro']]);
+        }
+
+        return redirect()
+                    ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+                    ->with('success', 'Matricula SED criada com sucesso.');
+    }
 }

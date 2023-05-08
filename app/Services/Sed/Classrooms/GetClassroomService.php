@@ -22,7 +22,7 @@ class GetClassroomService extends SedAuthService
         $response = parent::get(
             SedRouters::GET_SALA->value,
             [
-                'inAnoLetivo'  => $anoLetivo ? $anoLetivo : date('Y'),
+                'inAnoLetivo' => $anoLetivo ? $anoLetivo : date('Y'),
                 'inNumClasse' => $codSala,
             ]
         );

@@ -48,13 +48,13 @@
             <tr>
                 <td class="formmdtd" valign="top">
                     <span class="form">Código SED da Turma </span>
-                    <span class="form">Código SED da Turma </span>
                 </td>
                 <td class="formmdtd" valign="top">
                     <span class="form">
                         <input class="obrigatorio @error('inNumClasse') is-invalid @enderror" style="width: 435px;" disabled
                             type="number" name="inNumClasse" id="inNumClasse" max="999999999" min="0"
-                            value="{{ old('inNumClasse') ? old('inNumClasse') : $class['outCodTurmaClasse'] }}"
+                            {{-- value="{{ old('inNumClasse') ? old('inNumClasse') : $class['outCodTurmaClasse'] }}" --}}
+                            value="{{ old('inNumClasse') ? old('inNumClasse') : $codClassSed }}"
                             size="50" minlength="0">
                     </span>
                 </td>
