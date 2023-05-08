@@ -15,6 +15,9 @@ enum SedRouters: string
     // Mostra a ficha do aluno no SED
     case GET_ALUNO = '/Aluno/ExibirFichaAluno';
 
+    // Matricula de continuidade (rematricula), efetivação de inscrições e definições (matricula antecipada)
+    case STORE_MATRICULA = '/Matricula/MatricularAluno';
+
     /*-- Escola -------------------------------------------------------------------*/
 
     // Obtem as escolas pela diretoria e município
