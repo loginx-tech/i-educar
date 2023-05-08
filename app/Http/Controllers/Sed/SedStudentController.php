@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
-use App\Models\LegacyStudent;
 use App\Services\Sed\Alunos\StoreMatriculaService;
 use App\Services\Sed\Classrooms\GetClassroomService;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
@@ -232,17 +231,17 @@ class SedStudentController extends Controller
         }
 
         $data_matricula = [
-            "inAnoLetivo" => date('Y'),
-            "inNumRA"     => $ra,
+            'inAnoLetivo' => date('Y'),
+            'inNumRA'     => $ra,
             //"inDigitoRA"  => "",
-            "inSiglaUFRA" => "SP", // TO-DO: Pegar UF do aluno
+            'inSiglaUFRA' => 'SP', // TO-DO: Pegar UF do aluno
 
-            "inDataInicioMatricula" => $enturmacoes[0]['data_enturmacao'],
+            'inDataInicioMatricula' => $enturmacoes[0]['data_enturmacao'],
             // "inNumAluno"  => "",
-            "inNumClasse" => $classSed->cod_sed,
+            'inNumClasse' => $classSed->cod_sed,
 
-            "inCodTipoEnsino" => $class['outCodTipoEnsino'],
-            "inCodSerieAno"   => $class['outCodSerieAno'],
+            'inCodTipoEnsino' => $class['outCodTipoEnsino'],
+            'inCodSerieAno'   => $class['outCodSerieAno'],
         ];
 
         $response = ($this->storeMatriculaService)($data_matricula);
