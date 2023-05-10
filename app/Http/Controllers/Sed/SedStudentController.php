@@ -213,8 +213,13 @@ class SedStudentController extends Controller
         }
 
         // Retira pontuações do RA e o digito verificador
+
         $ra = explode('-', $det_aluno['aluno_estado_id']);
         $ra = preg_replace('/[^0-9]/', '', $ra[0]);
+
+        if (strlen($ra) == 13 || strlen($ra) == 10) {
+            $ra = substr($ra, 0, -1);
+        }
 
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
         if (!$classSed) {
