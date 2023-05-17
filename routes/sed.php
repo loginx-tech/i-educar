@@ -28,3 +28,14 @@ Route::post('/sed/salas/{cod_class}/update', [SedClassroomController::class, 'up
 // APIs Internas (return JSON) |----------------------------------------------------------------------------------------|
 
 Route::get('/consulta-ra/{ra}', [SedController::class, 'consultaRa'])->name('sed.consulta.ra');
+
+/*
+    routes/web.php                                             -  adicionei a importação do arquivo sed.php, e adicionei o ->name('intranet.page'); em uma das rotas do ieducar
+    ieducar/intranet/educar_aluno_det.php                      - adicionei o link para a tela de cadastro de aluno no SED, comentei a função de uniformes
+    ieducar/intranet/educar_escola_det.php                     - adicionei o link para a tela de cadastro de escola no SED
+    ieducar/intranet/educar_matricula_det.php                  - adicionei o link para a tela de cadastro de matricula no SED
+    ieducar/intranet/educar_turma_det.php                      - adicionei o link para a tela de cadastro de turma no SED
+    modules/Cadastro/Views/AlunoController.php                 - adicionei a importação do java script ConsultaRA.js
+    public/vendor/legacy/Cadastro/Assets/Javascripts/Aluno.js  - adicionei selected na opção de solteiro no input de estado civil
+
+*/
