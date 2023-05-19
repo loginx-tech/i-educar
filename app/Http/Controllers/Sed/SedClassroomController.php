@@ -181,7 +181,6 @@ class SedClassroomController extends Controller
         }
         //dd($classSedLocal);
         $class = ($this->getClassroomService)($classSedLocal->cod_sed);
-
         if (isset($class['outErro'])) {
             return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
             ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
@@ -218,6 +217,7 @@ class SedClassroomController extends Controller
             ->with('error', 'A turma não está vinculada a uma sala cadastrada no SED.
             Por favor, cadastre o código SED da turma ou crie um novo cadastro antes de editar o cadastro SED.');
         }
+
         $response = ($this->updateClassService)($request);
         $responseObj = $response->collect();
 
