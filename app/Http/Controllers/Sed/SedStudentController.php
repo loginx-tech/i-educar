@@ -60,7 +60,10 @@ class SedStudentController extends Controller
         }
 
         if (!$registro) {
-            return redirect()->route('intranet.page', 'educar_aluno_det.php?cod_aluno=' . $aluno_cod)->with('error', 'Matrícula não encontrada.');
+            // return redirect()->route('intranet.page', 'educar_aluno_det.php?cod_aluno=' . $aluno_cod)->with('error', 'Matrícula não encontrada.');
+            return redirect()
+            ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+            ->with('error', 'Matrícula não encontrada.');
         }
 
         $verificaMatriculaUltimoAno = $obj_matricula->verificaMatriculaUltimoAno(codAluno: $registro['ref_cod_aluno'], codMatricula: $registro['cod_matricula']);
@@ -110,18 +113,24 @@ class SedStudentController extends Controller
         // ----------------------- Aluno ------------------------
 
         if (!$det_aluno['aluno_estado_id']) {
-            return redirect()->route(
-                'intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod
-            )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+            // return redirect()->route(
+            //     'intranet.page',
+            //     'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            // )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+            return redirect()
+                ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+                ->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
         }
 
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
         if (!$classSed) {
-            return redirect()->route(
-                'intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod
-            )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+            // return redirect()->route(
+            //     'intranet.page',
+            //     'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            // )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+            return redirect()
+            ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+            ->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
         }
 
         //$tiposClasse = ($this->getTiposClasseService)();
@@ -206,10 +215,14 @@ class SedStudentController extends Controller
         // ----------------------- Aluno ------------------------
 
         if (!$det_aluno['aluno_estado_id']) {
-            return redirect()->route(
-                'intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod
-            )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+            // return redirect()->route(
+            //     'intranet.page',
+            //     'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            // )->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
+
+            return redirect()
+                ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+                ->with('error', 'O aluno(a) " ' . $nm_aluno . ' " não possui RA cadastrado no i-educar.');
         }
 
         // Retira pontuações do RA e o digito verificador
@@ -220,26 +233,29 @@ class SedStudentController extends Controller
         if (strlen($ra) == 13 || strlen($ra) == 10) {
             $ra = substr($ra, 0, -1);
         }
-
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $enturmacoes[0]['ref_cod_turma'])->first();
         if (!$classSed) {
-            return redirect()->route(
-                'intranet.page',
-                'educar_aluno_det.php?cod_aluno='.$aluno_cod
-            )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+            // return redirect()->route(
+            //     'intranet.page',
+            //     'educar_aluno_det.php?cod_aluno='.$aluno_cod
+            // )->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
+
+            return redirect()
+                ->route('intranet.page', 'educar_matricula_det.php?cod_matricula=' . $matricula_cod)
+                ->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
         }
 
         $class = ($this->getClassroomService)($classSed->cod_sed);
         if (isset($class['outErro'])) {
-            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
-            ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $classSed->cod_turma_id)
+                ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
         }
 
         $data_matricula = [
             'inAnoLetivo' => date('Y'),
             'inNumRA'     => $ra,
             //"inDigitoRA"  => "",
-            'inSiglaUFRA' => 'SP', // TO-DO: Pegar UF do aluno
+            'inSiglaUFRA' => config('sed.inSiglaUFRA'),
 
             'inDataInicioMatricula' => $enturmacoes[0]['data_enturmacao'],
             // "inNumAluno"  => "",
