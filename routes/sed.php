@@ -25,6 +25,8 @@ Route::post('/sed/salas/{cod_class}/store', [SedClassroomController::class, 'sto
 Route::get('/sed/salas/{cod_class}/editar', [SedClassroomController::class, 'edit'])->name('sed.class.edit');
 Route::post('/sed/salas/{cod_class}/update', [SedClassroomController::class, 'update'])->name('sed.class.update');
 
+Route::get('/sed/salas/{cod_class}/formacao', [SedClassroomController::class, 'formation'])->name('sed.class.formation');
+
 // APIs Internas (return JSON) |----------------------------------------------------------------------------------------|
 
 Route::get('/consulta-ra/{ra}', [SedController::class, 'consultaRa'])->name('sed.consulta.ra');

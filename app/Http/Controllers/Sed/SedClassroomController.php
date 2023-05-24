@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sed;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sed\Class\StoreUpdateClassRequest;
 use App\Http\Requests\Sed\SetClassCodeRequest;
+use App\Services\Sed\Classrooms\FormationClassroomService;
 use App\Services\Sed\Classrooms\GetClassroomService;
 use App\Services\Sed\Classrooms\StoreClassService;
 use App\Services\Sed\Classrooms\UpdateClassService;
@@ -26,6 +27,7 @@ class SedClassroomController extends Controller
         protected GetTiposEnsinoService $getTiposEnsinoService,
         protected GetTiposClasseService $getTiposClasseService,
         protected GetUnidadesByEscolaService $getUnidadesByEscolaService,
+        protected FormationClassroomService $formationClassroomService,
     ) {
         //$this->middleware('auth');
     }
@@ -43,7 +45,8 @@ class SedClassroomController extends Controller
         if (!$classSed) {
             return redirect()->route('sed.class.create-code', $codClass)->with('success', 'Turma não possui código SED.');
         } else {
-            return redirect()->route('sed.class.edit', $codClass)->with('success', 'Cadastro SED encontrado.');
+            return redirect()->route('sed.class.formation', $codClass);
+            // return redirect()->route('sed.class.edit', $codClass)->with('success', 'Cadastro SED encontrado.');
         }
     }
 
@@ -66,6 +69,34 @@ class SedClassroomController extends Controller
             'classSed' => $classSed,
             'action' => $classSed ? 'edit' : 'create',
             'codClass' => $codClass,
+        ]);
+    }
+
+    /**
+     * Pega os dados da sala no SED pelo código da sala com a formação da turma
+     *
+     * @param int $codClass
+     */
+    public function formation($codClass)
+    {
+        $this->menu(999847);
+
+        $classSedLocal = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $codClass)->first();
+        if (!$classSedLocal) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
+            ->with('error', 'A turma não está vinculada a uma sala cadastrada no SED.
+            Por favor, cadastre o código SED da turma ou crie um novo cadastro antes de editar o cadastro SED.');
+        }
+
+        $class = ($this->formationClassroomService)($classSedLocal->cod_sed);
+        if (isset($class['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
+                ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
+        }
+       
+        return view('sed.classrooms.formation', [
+            'codClass' => $codClass,
+            'class' => $class
         ]);
     }
 
@@ -179,7 +210,7 @@ class SedClassroomController extends Controller
             ->with('error', 'A turma não está vinculada a uma sala cadastrada no SED.
             Por favor, cadastre o código SED da turma ou crie um novo cadastro antes de editar o cadastro SED.');
         }
-        //dd($classSedLocal);
+
         $class = ($this->getClassroomService)($classSedLocal->cod_sed);
         if (isset($class['outErro'])) {
             return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)

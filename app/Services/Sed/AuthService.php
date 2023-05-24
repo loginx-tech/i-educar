@@ -60,7 +60,6 @@ class AuthService
         //Acessa a config de cada cidade
         $user_sed = env('SED_USER_' . strtoupper($cidade));
         $password_sed = env('SED_PASSWORD_' . strtoupper($cidade));
-
         if (!$user_sed || !$password_sed) {
             abort(403, 'Sistema não configurado para utilizar o sed em ' . $cidade . '.');
         }
