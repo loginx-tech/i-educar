@@ -93,7 +93,7 @@ class SedClassroomController extends Controller
             return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass)
                 ->with('error', 'Algo de errado aconteceu: ' . $class['outErro'] . '. Por favor, tente novamente.');
         }
-       
+
         return view('sed.classrooms.formation', [
             'codClass' => $codClass,
             'class' => $class
