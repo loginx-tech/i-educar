@@ -112,9 +112,9 @@
             <a href="{{ route('sed.class.edit', $codClass) }}">
                 <button class="btn-green" type="button">Editar Cadastro SED</button>
             </a>
-            <a href="{{ route('student-log-unification.undo', ['unification' => $codClass]) }}">
+            {{-- <a href="{{ route('student-log-unification.undo', ['unification' => $codClass]) }}">
                 <button class="btn-green" type="button">Alterar Vínculo de Codigo SED</button>
-            </a>
+            </a> --}}
 
         <a href="{{ route('intranet.page', 'educar_turma_det.php?cod_turma=' . $codClass) }}">
             <button class="btn" type="button">Voltar</button>
