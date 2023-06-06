@@ -6,7 +6,7 @@ use App\Enums\SedRouters;
 use App\Services\Sed\AuthService as SedAuthService;
 use Illuminate\Support\Facades\{DB, Http};
 
-class GetAlunoService extends SedAuthService
+class GetClassroomsService extends SedAuthService
 {
     /**
      * Pega os dados das salas no SED pelo código da escola

@@ -19,7 +19,7 @@ enum SedRouters: string
     case STORE_MATRICULA = '/Matricula/MatricularAluno';
 
     // Remanejamento
-    case STORE_REMANEJAMENTO = '/Matricula/RemanejarAluno';
+    case STORE_REMANEJAMENTO = '/Matricula/RemanejarMatricula';
 
     // Transferência
     case STORE_TRANSFERENCIA = '/Inscricao/Transferencia';

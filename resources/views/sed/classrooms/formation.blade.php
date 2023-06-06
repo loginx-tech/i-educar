@@ -131,7 +131,7 @@
                 </tr>
 
                 <tr>
-                    <td class="formmdtd bold" valign="top"><span class="form"><b>Aluno</b></span></td>
+                    <td class="formmdtd bold" valign="top"><span class="form"><b>Nome</b></span></td>
                     <td class="formmdtd bold" valign="top"><span class="form"><b>RA</b></span></td>
                     <td class="formmdtd bold" valign="top"><span class="form"><b>Situação Matricula</b></span></td>
                     <td class="formmdtd bold" valign="top"><span class="form"><b>Ações</b></span></td>
@@ -144,7 +144,22 @@
                         <td class="formmdtd" valign="top"><span class="form">{{ $student['outDescSitMatricula'] ?? '-' }}</span></td>
                         <td class="formmdtd" valign="top">
                             <span class="form">
-                                -
+
+                                {{-- Situação 0 é matricula ativa --}}
+                                @if ($student['outNumRA'] && $student['outCodSitMatricula'] == 0)
+                                    <a href="{{ route('sed.remanejamento.create', [$student['outNumRA'], $class['outNumClasse']]) }}">
+                                        {{-- <img src="{{ Asset::get('img/ver.gif') }}" border="0" alt="Visualizar"> --}}
+                                        Remanejar
+                                    </a>
+
+                                    <a style="margin-left: 8px" href="{{ route('sed.remanejamento.create', [$student['outNumRA'], $class['outNumClasse']]) }}">
+                                        {{-- <img src="{{ Asset::get('img/ver.gif') }}" border="0" alt="Visualizar"> --}}
+                                        Transferir
+                                    </a>
+                                @else
+                                    -
+                                @endif
+
                             </span>
                         </td>
                     </tr>

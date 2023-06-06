@@ -6,7 +6,7 @@ use App\Enums\SedRouters;
 use App\Services\Sed\AuthService as SedAuthService;
 use Illuminate\Support\Facades\{DB, Http};
 
-class StoreMatriculaService extends SedAuthService
+class StoreTransferenciaService extends SedAuthService
 {
     /**
      * Transferencia de aluno
