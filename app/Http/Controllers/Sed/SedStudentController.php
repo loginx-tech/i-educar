@@ -21,7 +21,6 @@ use clsPmieducarMatricula;
 use clsPmieducarMatriculaTurma;
 use clsPmieducarSerie;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SedStudentController extends Controller
@@ -271,7 +270,8 @@ class SedStudentController extends Controller
      * Create remanejamento
      *
      * @param string $aluno_ra
-     * @param int $sala_cod (Sala atual do aluno)
+     * @param int    $sala_cod (Sala atual do aluno)
+     *
      * @return View
      */
     public function createRemanejamento($aluno_ra, $sala_cod)

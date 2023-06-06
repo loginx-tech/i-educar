@@ -38,4 +38,3 @@ Route::get('/sed/salas/{cod_sala}/formacao', [SedClassroomController::class, 'fo
 // APIs Internas (return JSON) |----------------------------------------------------------------------------------------|
 
 Route::get('/consulta-ra/{ra}', [SedController::class, 'consultaRa'])->name('sed.consulta.ra');
-
