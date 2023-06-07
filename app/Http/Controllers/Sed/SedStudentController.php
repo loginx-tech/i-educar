@@ -12,6 +12,7 @@ use App\Services\Sed\Classrooms\GetClassroomsService;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
 use App\Services\Sed\DadosBasicos\GetTiposEnsinoService;
 use App\Services\Sed\DadosBasicos\TipoEnsinoService;
+use App\Services\Sed\Escolas\GetEscolasService;
 use App\Services\Sed\Escolas\GetUnidadesByEscolaService;
 use clsPmieducarAluno;
 use clsPmieducarCurso;
@@ -37,6 +38,7 @@ class SedStudentController extends Controller
         protected GetAlunoService $getAlunoService,
         protected GetClassroomsService $getClassroomsService,
         protected StoreRemanejamentoService $storeRemanejamentoService,
+        protected GetEscolasService $getEscolasService,
     ) {
         $this->inAnoLetivo = date('Y'); // TODO: Pegar de uma configuração
     }
@@ -372,7 +374,52 @@ class SedStudentController extends Controller
                     ->with('success', 'Remanejamento SED realizado com sucesso.');
     }
 
-    public function createTransferencia($aluno_cod)
+
+    /**
+     * Primeira tela de seleção para transferência (Aqui seleciona a escola de destino)
+     *
+     * @return View
+     */
+    public function preCreateTransferencia($aluno_ra)
+    {
+        $sedService = new \App\Services\Sed\AuthService();
+        $sed = $sedService->getConfigSystemSed();
+        if (!$sed) {
+            abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
+        }
+
+        $this->menu(999847);
+
+        // Get student
+        $response_aluno = ($this->getAlunoService)($aluno_ra, $this->inSiglaUFRA)->collect();
+        if (isset($response_aluno['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
+                ->with('error', 'Algo de errado aconteceu: ' . $response_aluno['outErro'] . '. Por favor, tente novamente.');
+        }
+
+        // Get schools
+        $response_escolas = ($this->getEscolasService)();
+        if (isset($response_escolas['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
+                ->with('error', 'Algo de errado aconteceu: ' . $response_escolas['outErro'] . '. Por favor, tente novamente.');
+        }
+
+        return view('sed.students.pre-create-transferencia', [
+            'escolas' => $response_escolas['outEscolas'] ?? [],
+            'aluno' => $response_aluno,
+        ]);
+    }
+
+    /**
+     * Create remanejamento (Aqui com escola já seleciona, preenche o restante dos dados)
+     *
+     * @param string $aluno_cod
+     * @param string $sala_cod
+     * @param string $escola_cod
+     *
+     * @return View
+     */
+    public function createTransferencia($aluno_cod, $sala_cod, $escola_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();

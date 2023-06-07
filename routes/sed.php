@@ -9,13 +9,14 @@ Route::get('/intranet/sed/aluno/create/{cod}', [SedController::class, 'createAlu
 Route::post('/intranet/sed/aluno/store/{cod}', [SedController::class, 'storeAluno'])->name('sed.aluno.store');
 
 Route::get('/intranet/sed/matricular/{matricula_id}/aluno/{cod}', [SedStudentController::class, 'createMatricula'])->name('sed.matricula.edit');
-Route::post('/sed/matricular/{matricula_id}/aluno/{cod}/store', [SedStudentController::class, 'storeMatricula'])->name('sed.matricula.store');
+Route::post('/sed/matricular/{matricula_cod}/aluno/{cod}/store', [SedStudentController::class, 'storeMatricula'])->name('sed.matricula.store');
 
 // - Movimentações
 Route::get('/intranet/sed/aluno/{cod_aluno}/sala/{cod_sala}/remanejar', [SedStudentController::class, 'createRemanejamento'])->name('sed.remanejamento.create');
 Route::post('/sed/aluno/{cod_aluno}/sala/{cod_sala}/remanejar', [SedStudentController::class, 'storeRemanejamento'])->name('sed.remanejamento.store');
 
-Route::get('/intranet/sed/aluno/{cod}/tranferir', [SedStudentController::class, 'createTransferencia'])->name('sed.transferencia.create');
+Route::get('/intranet/sed/aluno/{cod_aluno}/sala/{cod_sala}/transferir', [SedStudentController::class, 'preCreateTransferencia'])->name('sed.transferencia.pre-create');
+Route::get('/intranet/sed/aluno/{cod_aluno}/sala/{cod_sala}/escola/{cod_escola}/transferir', [SedStudentController::class, 'createTransferencia'])->name('sed.transferencia.create');
 Route::post('/sed/aluno/{cod}/transferir', [SedStudentController::class, 'storeTransferencia'])->name('sed.transferencia.store');
 
 // Escolas |-------------------------------------------------------------------------------------------------------------|
