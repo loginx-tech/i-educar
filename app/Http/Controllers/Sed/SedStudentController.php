@@ -292,7 +292,7 @@ class SedStudentController extends Controller
         }
 
         // Get student
-        $response_aluno = ($this->getAlunoService)($aluno_ra, $this->inSiglaUFRA)->collect();
+        $response_aluno = ($this->getAlunoService)($aluno_ra, config('sed.inSiglaUFRA'))->collect();
         if (isset($response_aluno['outErro'])) {
             return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
                 ->with('error', 'Algo de errado aconteceu: ' . $response_aluno['outErro'] . '. Por favor, tente novamente.');
@@ -368,8 +368,8 @@ class SedStudentController extends Controller
         }
 
         return redirect()
-                    ->route('sed.class.formation', $sala_cod)
-                    ->with('success', 'Remanejamento SED realizado com sucesso.');
+                ->route('sed.class.formation', $sala_cod)
+                ->with('success', 'Remanejamento SED realizado com sucesso.');
     }
 
     public function createTransferencia($aluno_cod)
