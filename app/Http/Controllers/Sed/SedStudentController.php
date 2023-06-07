@@ -374,7 +374,6 @@ class SedStudentController extends Controller
                     ->with('success', 'Remanejamento SED realizado com sucesso.');
     }
 
-
     /**
      * Primeira tela de seleção para transferência (Aqui seleciona a escola de destino)
      *
