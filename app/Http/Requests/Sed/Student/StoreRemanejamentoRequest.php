@@ -4,7 +4,7 @@ namespace App\Http\Requests\Sed\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRemanejamento extends FormRequest
+class StoreRemanejamentoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

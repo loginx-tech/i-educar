@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Sed\Student\StoreRemanejamento;
+use App\Http\Requests\Sed\Student\StoreRemanejamentoRequest;
 use App\Services\Sed\Alunos\GetAlunoService;
 use App\Services\Sed\Alunos\StoreMatriculaService;
 use App\Services\Sed\Alunos\StoreRemanejamentoService;
@@ -325,7 +325,7 @@ class SedStudentController extends Controller
         ]);
     }
 
-    public function storeRemanejamento(StoreRemanejamento $request, $aluno_ra, $sala_cod)
+    public function storeRemanejamento(StoreRemanejamentoRequest $request, $aluno_ra, $sala_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -379,7 +379,7 @@ class SedStudentController extends Controller
      *
      * @return View
      */
-    public function preCreateTransferencia($aluno_ra)
+    public function preCreateTransferencia($aluno_ra, $sala_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -388,6 +388,13 @@ class SedStudentController extends Controller
         }
 
         $this->menu(999847);
+
+        // Get classroom
+        $response_sala = ($this->getClassroomService)($sala_cod);
+        if (isset($response_sala['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
+                ->with('error', 'Algo de errado aconteceu: ' . $response_sala['outErro'] . '. Por favor, tente novamente.');
+        }
 
         // Get student
         $response_aluno = ($this->getAlunoService)($aluno_ra, $this->inSiglaUFRA)->collect();
@@ -404,8 +411,11 @@ class SedStudentController extends Controller
         }
 
         return view('sed.students.pre-create-transferencia', [
+            'aluno_ra' => $aluno_ra,
+            'sala_cod' => $sala_cod,
             'escolas' => $response_escolas['outEscolas'] ?? [],
             'aluno' => $response_aluno,
+            'sala_atual' => $response_sala,
         ]);
     }
 
