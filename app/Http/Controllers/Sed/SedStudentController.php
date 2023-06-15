@@ -455,8 +455,6 @@ class SedStudentController extends Controller
 
             'inNumClasseMatriculaAtual' => $sala_cod,
 
-
-
             'inDataMovimento'    => $request['inDataMovimento'],
             // 'inNumAluno'         => ,
             'inNumClasseOrigem'  => $sala_cod,

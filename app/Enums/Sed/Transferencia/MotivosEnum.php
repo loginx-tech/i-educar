@@ -11,7 +11,6 @@ enum TipoTransferenciaEnum: int
     // Terceiro digito: O proprio codigo do motivo vindo do SED
     // Se houver apenas 2 digitos ele é tanto para medio quanto fundamental entao não conta o digito dois.
 
-
     case TRANSFERENCIA_FUND_MUDANCA   = 001;
     case TRANSFERENCIA_FUND_TRABALHO  = 002;
     case TRANSFERENCIA_FUND_FAMILIA   = 003;
@@ -33,6 +32,7 @@ enum TipoTransferenciaEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA->value:   return 'INSCRIÇÃO DE ALUNOS POR TRANSFERÊNCIA';
+                // no break
             case self::DESLOCAMENTO->value:    return 'INSCRIÇÃO DE ALUNOS POR DESLOCAMENTO';
             case self::INTENCAO->value:        return 'INSCRIÇÃO POR INTENÇÃO DE TRANSFERÊNCIA';
         }
