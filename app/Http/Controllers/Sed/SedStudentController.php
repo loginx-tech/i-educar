@@ -7,6 +7,7 @@ use App\Http\Requests\Sed\Student\StoreRemanejamentoRequest;
 use App\Services\Sed\Alunos\GetAlunoService;
 use App\Services\Sed\Alunos\StoreMatriculaService;
 use App\Services\Sed\Alunos\StoreRemanejamentoService;
+use App\Services\Sed\Alunos\StoreTransferenciaService;
 use App\Services\Sed\Classrooms\GetClassroomService;
 use App\Services\Sed\Classrooms\GetClassroomsService;
 use App\Services\Sed\DadosBasicos\GetTiposClasseService;
@@ -39,6 +40,7 @@ class SedStudentController extends Controller
         protected GetClassroomsService $getClassroomsService,
         protected StoreRemanejamentoService $storeRemanejamentoService,
         protected GetEscolasService $getEscolasService,
+        protected StoreTransferenciaService $storeTransferenciaService,
     ) {
         $this->inAnoLetivo = date('Y'); // TODO: Pegar de uma configuração
     }
@@ -379,7 +381,7 @@ class SedStudentController extends Controller
      *
      * @return View
      */
-    public function preCreateTransferencia($aluno_ra, $sala_cod)
+    public function createTransferencia($aluno_ra, $sala_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -410,7 +412,7 @@ class SedStudentController extends Controller
                 ->with('error', 'Algo de errado aconteceu: ' . $response_escolas['outErro'] . '. Por favor, tente novamente.');
         }
 
-        return view('sed.students.pre-create-transferencia', [
+        return view('sed.students.create-transferencia', [
             'aluno_ra' => $aluno_ra,
             'sala_cod' => $sala_cod,
             'escolas' => $response_escolas['outEscolas'] ?? [],
@@ -419,16 +421,7 @@ class SedStudentController extends Controller
         ]);
     }
 
-    /**
-     * Create remanejamento (Aqui com escola já seleciona, preenche o restante dos dados)
-     *
-     * @param string $aluno_cod
-     * @param string $sala_cod
-     * @param string $escola_cod
-     *
-     * @return View
-     */
-    public function createTransferencia($aluno_cod, $sala_cod, $escola_cod)
+    public function storeTransferencia(Request $request, $aluno_ra, $sala_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -436,15 +429,53 @@ class SedStudentController extends Controller
             abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
         }
 
-        $this->menu(999847);
+        // Get classroom (Sala atual)
+        $response_sala = ($this->getClassroomService)($sala_cod);
+        if (isset($response_sala['outErro'])) {
+            return redirect()->route('sed.transferencia.create', [$aluno_ra, $sala_cod])
+                ->with('error', 'Algo de errado aconteceu: ' . $response_sala['outErro'] . '. Por favor, tente novamente.');
+        }
 
-        // return view('sed.students.create-transferencia', [
+        // Get student
+        $response_aluno = ($this->getAlunoService)($aluno_ra, $this->inSiglaUFRA)->collect();
+        if (isset($response_aluno['outErro'])) {
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
+                ->with('error', 'Algo de errado aconteceu: ' . $response_aluno['outErro'] . '. Por favor, tente novamente.');
+        }
 
-        // ]);
-    }
+        $data = [
+            'inNumRA'     => $aluno_ra,
+            // 'inDigitoRA'  => ,
+            'inSiglaUFRA' => $response_aluno['outDadosPessoais']['outSiglaUFRA'],
 
-    public function storeTransferencia(Request $request, $aluno_cod)
-    {
+            'inAnoLetivo'         => $response_sala['outAnoLetivo'],
+            'inCodEscola'         => $request->inCodEscola,
+            'inFase'              => $request->inFase,
+            'inInteresseIntegral' => $request->inInteresseIntegral,
 
+            'inNumClasseMatriculaAtual' => $sala_cod,
+
+
+
+            'inDataMovimento'    => $request['inDataMovimento'],
+            // 'inNumAluno'         => ,
+            'inNumClasseOrigem'  => $sala_cod,
+            'inNumClasseDestino' => $request['inNumClasseDestino'],
+
+            'inCodTipoEnsino' => $response_sala['outCodTipoEnsino'],
+            'inCodSerieAno'   => $response_sala['outCodSerieAno'],
+
+        ];
+
+        $response = ($this->storeTransferenciaService)($data);
+        $responseObj = $response->collect();
+
+        if ($response->failed() || isset($responseObj['outErro'])) {
+            return back()->withInput()->withErrors(['Error' => $responseObj['outErro']]);
+        }
+
+        return redirect()
+                ->route('sed.class.formation', $sala_cod)
+                ->with('success', 'Remanejamento SED realizado com sucesso.');
     }
 }

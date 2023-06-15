@@ -152,7 +152,7 @@
                                         Remanejar
                                     </a>
 
-                                    <a style="margin-left: 8px" href="{{ route('sed.transferencia.pre-create', [$student['outNumRA'], $class['outNumClasse']]) }}">
+                                    <a style="margin-left: 8px" href="{{ route('sed.transferencia.create', [$student['outNumRA'], $class['outNumClasse']]) }}">
                                         {{-- <img src="{{ Asset::get('img/ver.gif') }}" border="0" alt="Visualizar"> --}}
                                         Transferir
                                     </a>
