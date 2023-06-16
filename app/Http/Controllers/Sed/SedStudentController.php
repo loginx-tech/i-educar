@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sed;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sed\Student\StoreRemanejamentoRequest;
+use App\Http\Requests\Sed\Student\StoreTransferenciaRequest;
 use App\Services\Sed\Alunos\GetAlunoService;
 use App\Services\Sed\Alunos\StoreMatriculaService;
 use App\Services\Sed\Alunos\StoreRemanejamentoService;
@@ -421,7 +422,7 @@ class SedStudentController extends Controller
         ]);
     }
 
-    public function storeTransferencia(Request $request, $aluno_ra, $sala_cod)
+    public function storeTransferencia(StoreTransferenciaRequest $request, $aluno_ra, $sala_cod)
     {
         $sedService = new \App\Services\Sed\AuthService();
         $sed = $sedService->getConfigSystemSed();
@@ -458,7 +459,6 @@ class SedStudentController extends Controller
 
             'inCodTipoEnsino' => $response_sala['outCodTipoEnsino'],
             'inCodSerieAno'   => $response_sala['outCodSerieAno'],
-
         ];
 
         $response = ($this->storeTransferenciaService)($data);
