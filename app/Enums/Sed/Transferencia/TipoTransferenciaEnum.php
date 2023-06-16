@@ -12,6 +12,7 @@ enum TipoTransferenciaEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA->value:   return 'INSCRIÇÃO DE ALUNOS POR TRANSFERÊNCIA';
+                // no break
             case self::DESLOCAMENTO->value:    return 'INSCRIÇÃO DE ALUNOS POR DESLOCAMENTO';
             case self::INTENCAO->value:        return 'INSCRIÇÃO POR INTENÇÃO DE TRANSFERÊNCIA';
         }

@@ -32,6 +32,7 @@ enum MotivosEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA_FUND_MUDANCA->value:   return 'Mudança de Residência';
+                // no break
             case self::TRANSFERENCIA_FUND_TRABALHO->value:  return 'Proximidade local de trabalho dos pais';
             case self::TRANSFERENCIA_FUND_FAMILIA->value:   return 'Endereço dos familiares';
 
@@ -72,7 +73,7 @@ enum MotivosEnum: int
         }
     }
 
-    public function getEnsino() : string
+    public function getEnsino(): string
     {
         // verificando se o segundo digito é 0
         if (substr($this->value, 1, 1) == 0) {
@@ -82,7 +83,7 @@ enum MotivosEnum: int
         }
     }
 
-    public function getEnsinoCod() : int
+    public function getEnsinoCod(): int
     {
         // verificando se o segundo digito é 0
         if (substr($this->value, 1, 1) == 0) {
@@ -92,7 +93,7 @@ enum MotivosEnum: int
         }
     }
 
-    public function getTipo() : string
+    public function getTipo(): string
     {
         // verificando se o primeiro digito é 1
         if (substr($this->value, 0, 1) == 1) {
@@ -104,7 +105,7 @@ enum MotivosEnum: int
         }
     }
 
-    public function getTipoCod() : int
+    public function getTipoCod(): int
     {
         // verificando se o primeiro digito é 1
         if (substr($this->value, 0, 1) == 1) {
@@ -120,9 +121,10 @@ enum MotivosEnum: int
      *  Retorna as opções para a inFase de transferencia
      *
      *  @param string $ensino - 0 para fundamental e 1 para medio
+     *
      *  @return array
      */
-    public static function casesTransferencia($ensino) : array
+    public static function casesTransferencia($ensino): array
     {
         if ($ensino == 0 || $ensino == 'Fundamental') {
             return [
@@ -142,9 +144,10 @@ enum MotivosEnum: int
      *  Retorna as opções para a inFase de deslocamento
      *
      *  @param string $ensino - 0 para fundamental e 1 para medio
+     *
      *  @return array
      */
-    public static function casesDescolamento($ensino) : array
+    public static function casesDescolamento($ensino): array
     {
         if ($ensino == 0 || $ensino == 'Fundamental') {
             return [
@@ -165,9 +168,10 @@ enum MotivosEnum: int
      *  Retorna as opções para a inFase de intenção
      *
      *  @param string $ensino - 0 para fundamental e 1 para medio
+     *
      *  @return array
      */
-    public static function casesIntencao($ensino) : array
+    public static function casesIntencao($ensino): array
     {
         // Nessas opções não importa o ensino
         return [
