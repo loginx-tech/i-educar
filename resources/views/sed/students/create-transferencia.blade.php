@@ -86,25 +86,6 @@
 
             <tr>
                 <td class="formmdtd" valign="top">
-                    <span class="form">Tipo de Transferência *</span>
-                </td>
-                <td class="formmdtd dd" valign="top">
-                    <select disabled required class="geral" name="inMotivo" id="inMotivo_TRANSFERENCIA" style="width: 438px;">
-                        <option value="">Selecione...</option>
-                        @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesTranferencias() as $enum)
-                            <option value="{{ $enum->value }}"
-                                @if(old('inMotivo') === $enum->value )
-                                    selected
-                                @endif>
-                                {{ $enum->toString() }}
-                            </option>
-                        @endforeach
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="formmdtd" valign="top">
                     <span class="form">Motivo *</span>
                 </td>
                 <td class="formmdtd dd" valign="top">
@@ -115,7 +96,7 @@
 
                     <select disabled required class="geral" name="inMotivo" id="inMotivo_TRANSFERENCIA" style="width: 438px; display: none;">
                         <option value="">Selecione...</option>
-                        @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesTranferencias(0) as $enum)
+                        @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesTransferencia(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
                                 @if(old('inMotivo') === $enum->getCod() )
                                     selected
@@ -190,7 +171,7 @@
 
 @prepend('scripts')
     <script type="text/javascript"
-        src="{{ Asset::get("/vendor/legacy/Portabilis/Assets/Javascripts/HandleMotivoTransferencia.js") }}"></script>
+        src="{{ Asset::get("/vendor/legacy/Sed/Assets/HandleMotivoTransferencia.js") }}"></script>
     <script type="text/javascript"
             src="{{ Asset::get("/vendor/legacy/Portabilis/Assets/Javascripts/ClientApi.js") }}"></script>
     <script type="text/javascript"

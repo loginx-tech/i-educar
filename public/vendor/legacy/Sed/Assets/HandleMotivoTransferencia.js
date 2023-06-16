@@ -18,7 +18,6 @@ function resetCampos() {
     inMotivo_Intencao.css('display', 'none');
 }
 
-
 function HandleMotivoTransferencia() {
     let inFase = $j('#inFase').val();
     let inMotivo_generic = $j('#inMotivo_GENERIC');
@@ -31,7 +30,6 @@ function HandleMotivoTransferencia() {
     if (inFase != "" && inFase != null) {
 
         if (inFase == 8) {
-            // removendo o disabled e display none do campo  inMotivo_deslocamento
             inMotivo_generic.attr('disabled', 'disabled');
             inMotivo_generic.css('display', 'none');
             inMotivo_deslocamento.removeAttr('disabled');
@@ -51,5 +49,7 @@ function HandleMotivoTransferencia() {
 }
 
 $j(document).ready(function () {
-    $j('#inFase').onChange(consultaRA);
+    $j('#inFase').change(function () {
+        HandleMotivoTransferencia();
+    });
 });
