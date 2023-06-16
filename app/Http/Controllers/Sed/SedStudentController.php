@@ -454,11 +454,7 @@ class SedStudentController extends Controller
             'inInteresseIntegral' => $request->inInteresseIntegral,
 
             'inNumClasseMatriculaAtual' => $sala_cod,
-
-            'inDataMovimento'    => $request['inDataMovimento'],
-            // 'inNumAluno'         => ,
-            'inNumClasseOrigem'  => $sala_cod,
-            'inNumClasseDestino' => $request['inNumClasseDestino'],
+            'inMotivo'                  => $request->inMotivo,
 
             'inCodTipoEnsino' => $response_sala['outCodTipoEnsino'],
             'inCodSerieAno'   => $response_sala['outCodSerieAno'],
