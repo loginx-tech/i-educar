@@ -90,11 +90,28 @@
                 </td>
                 <td class="formmdtd dd" valign="top">
 
+                    <select
+                        required class="geral" name="inMotivo" id="inMotivo_GENERIC"
+                        @if(old('inFase'))
+                            disabled
+                            style="width: 438px; display: none;"
+                        @else
+                            style="width: 438px;"
+                        @endif
+                    >
                     <select disabled class="geral" name="inMotivo" id="inMotivo_GENERIC" style="width: 438px;">
                         <option value="">Selecione um tipo de transferência antes...</option>
                     </select>
 
-                    <select disabled required class="geral" name="inMotivo" id="inMotivo_TRANSFERENCIA" style="width: 438px; display: none;">
+                    <select
+                        required class="geral" name="inMotivo" id="inMotivo_TRANSFERENCIA"
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::TRANSFERENCIA)
+                            disabled
+                            style="width: 438px; display: none;"
+                        @else
+                            style="width: 438px;"
+                        @endif
+                    >
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesTransferencia(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
@@ -106,7 +123,15 @@
                         @endforeach
                     </select>
 
-                    <select disabled required class="geral" name="inMotivo" id="inMotivo_DESLOCAMENTO" style="width: 438px; display: none;">
+                    <select
+                        required class="geral" name="inMotivo" id="inMotivo_DESLOCAMENTO"
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::DESLOCAMENTO)
+                            disabled
+                            style="width: 438px; display: none;"
+                        @else
+                            style="width: 438px;"
+                        @endif
+                    >
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesDescolamento(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
@@ -118,7 +143,15 @@
                         @endforeach
                     </select>
 
-                    <select disabled required class="geral" name="inMotivo" id="inMotivo_INTENCAO" style="width: 438px; display: none;">
+                    <select
+                        required class="geral" name="inMotivo" id="inMotivo_INTENCAO"
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::INTENCAO)
+                            disabled
+                            style="width: 438px; display: none;"
+                        @else
+                            style="width: 438px;"
+                        @endif
+                    >
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesIntencao(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
