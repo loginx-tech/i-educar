@@ -32,6 +32,7 @@ enum MotivosEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA_FUND_MUDANCA->value:   return 'Mudança de Residência';
+                // no break
             case self::TRANSFERENCIA_FUND_TRABALHO->value:  return 'Proximidade local de trabalho dos pais';
             case self::TRANSFERENCIA_FUND_FAMILIA->value:   return 'Endereço dos familiares';
 
