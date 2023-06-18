@@ -437,10 +437,16 @@ class SedStudentController extends Controller
                 ->with('error', 'Algo de errado aconteceu: ' . $response_sala['outErro'] . '. Por favor, tente novamente.');
         }
 
+        $classSedLocal = DB::table('pmieducar.turma_sed')->where('cod_sed', $sala_cod)->first();
+        if (!$classSedLocal) {
+            return redirect()->back()
+                ->with('error', 'Algo de errado aconteceu: Não foi possível encontrar a turma no SED. Por favor, tente novamente.');
+        }
+
         // Get student
         $response_aluno = ($this->getAlunoService)($aluno_ra, $this->inSiglaUFRA)->collect();
         if (isset($response_aluno['outErro'])) {
-            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=')
+            return redirect()->route('intranet.page', 'educar_turma_det.php?cod_turma=', $classSedLocal->cod_turma_id)
                 ->with('error', 'Algo de errado aconteceu: ' . $response_aluno['outErro'] . '. Por favor, tente novamente.');
         }
 
@@ -451,7 +457,8 @@ class SedStudentController extends Controller
 
             'inAnoLetivo'         => $response_sala['outAnoLetivo'],
             'inCodEscola'         => $request->inCodEscola,
-            'inFase'              => $request->inFase,
+            // inFase é enviado 100 em uma das opções, porem no sed é necessario enviar 0
+            'inFase'              => $request->inFase == 100 ? 0 : $request->inFase,
             'inInteresseIntegral' => $request->inInteresseIntegral,
 
             'inNumClasseMatriculaAtual' => $sala_cod,
@@ -463,13 +470,12 @@ class SedStudentController extends Controller
 
         $response = ($this->storeTransferenciaService)($data);
         $responseObj = $response->collect();
-
         if ($response->failed() || isset($responseObj['outErro'])) {
             return back()->withInput()->withErrors(['Error' => $responseObj['outErro']]);
         }
 
         return redirect()
-                ->route('sed.class.formation', $sala_cod)
-                ->with('success', 'Remanejamento SED realizado com sucesso.');
+                ->route('sed.class.formation', $classSedLocal->cod_turma_id)
+                ->with('success', 'Inscrição de transferêcia SED realizada com sucesso.');
     }
 }

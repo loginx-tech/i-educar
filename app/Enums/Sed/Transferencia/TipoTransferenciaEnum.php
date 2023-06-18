@@ -4,7 +4,7 @@ namespace App\Enums\Sed\Transferencia;
 
 enum TipoTransferenciaEnum: int
 {
-    case TRANSFERENCIA   = 0;
+    case TRANSFERENCIA   = 100; // Aqui o value final é 0, porem é complexo manipular inputs com valor 0. Na função store o valor é convertido
     case DESLOCAMENTO    = 8;
     case INTENCAO        = 9;
 

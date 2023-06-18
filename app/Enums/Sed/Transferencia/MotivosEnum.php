@@ -6,7 +6,7 @@ enum MotivosEnum: int
 {
     // Retorna um codigo caso queria manupular o valor fora das funções do enum Ex. 000
 
-    // Primeiro digito: 1 - Inscrição de Alunos por Transferência, 8 - Inscrição de Alunos por Deslocamento, 9 - Inscrição por Intenção de Transferência
+    // Primeiro digito: 100 ou 0 - Inscrição de Alunos por Transferência, 8 - Inscrição de Alunos por Deslocamento, 9 - Inscrição por Intenção de Transferência
     // Segundo digito: 0 - Ensino Fundamental, 1 - Ensino Médio
     // Terceiro digito: O proprio codigo do motivo vindo do SED
     // Se houver apenas 2 digitos ele é tanto para medio quanto fundamental entao não conta o digito dois.
@@ -32,7 +32,6 @@ enum MotivosEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA_FUND_MUDANCA->value:   return 'Mudança de Residência';
-                // no break
             case self::TRANSFERENCIA_FUND_TRABALHO->value:  return 'Proximidade local de trabalho dos pais';
             case self::TRANSFERENCIA_FUND_FAMILIA->value:   return 'Endereço dos familiares';
 

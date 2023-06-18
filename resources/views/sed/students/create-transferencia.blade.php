@@ -74,7 +74,7 @@
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\TipoTransferenciaEnum::cases() as $enum)
                             <option value="{{ $enum->value }}"
-                                @if(old('inFase') === $enum->value )
+                                @if(old('inFase') == $enum->value )
                                     selected
                                 @endif>
                                 {{ $enum->toString() }}
@@ -91,21 +91,19 @@
                 <td class="formmdtd dd" valign="top">
 
                     <select
-                        required class="geral" name="inMotivo" id="inMotivo_GENERIC"
+                        required class="geral" name="inMotivo" id="inMotivo_GENERIC" disabled
                         @if(old('inFase'))
-                            disabled
                             style="width: 438px; display: none;"
                         @else
                             style="width: 438px;"
                         @endif
                     >
-                    <select disabled class="geral" name="inMotivo" id="inMotivo_GENERIC" style="width: 438px;">
                         <option value="">Selecione um tipo de transferência antes...</option>
                     </select>
 
                     <select
                         required class="geral" name="inMotivo" id="inMotivo_TRANSFERENCIA"
-                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::TRANSFERENCIA)
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::TRANSFERENCIA->value)
                             disabled
                             style="width: 438px; display: none;"
                         @else
@@ -115,7 +113,7 @@
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesTransferencia(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
-                                @if(old('inMotivo') === $enum->getCod() )
+                                @if(old('inMotivo') == $enum->getCod())
                                     selected
                                 @endif>
                                 {{ $enum->toString() }}
@@ -125,7 +123,7 @@
 
                     <select
                         required class="geral" name="inMotivo" id="inMotivo_DESLOCAMENTO"
-                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::DESLOCAMENTO)
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::DESLOCAMENTO->value)
                             disabled
                             style="width: 438px; display: none;"
                         @else
@@ -135,7 +133,7 @@
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesDescolamento(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
-                                @if(old('inMotivo') === $enum->getCod() )
+                                @if(old('inMotivo') == $enum->getCod() )
                                     selected
                                 @endif>
                                 {{ $enum->toString() }}
@@ -145,7 +143,7 @@
 
                     <select
                         required class="geral" name="inMotivo" id="inMotivo_INTENCAO"
-                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::INTENCAO)
+                        @if(old('inFase') != \App\Enums\Sed\Transferencia\TipoTransferenciaEnum::INTENCAO->value)
                             disabled
                             style="width: 438px; display: none;"
                         @else
@@ -155,7 +153,7 @@
                         <option value="">Selecione...</option>
                         @foreach(\App\Enums\Sed\Transferencia\MotivosEnum::casesIntencao(0) as $enum)
                             <option value="{{ $enum->getCod() }}"
-                                @if(old('inMotivo') === $enum->getCod() )
+                                @if(old('inMotivo') == $enum->getCod() )
                                     selected
                                 @endif>
                                 {{ $enum->toString() }}
@@ -172,7 +170,7 @@
                 </td>
                 <td class="formmdtd dd" valign="top">
                     <select class="geral" name="inInteresseIntegral" id="inInteresseIntegral" style="width: 438px;">
-                        <option value="" selected>NÃO POSSUÍ INTERESSE</option>
+                        <option value="0" selected>NÃO POSSUÍ INTERESSE</option>
                         <option value="1"
                             @if(old('inInteresseIntegral') == 1 )
                                 selected
