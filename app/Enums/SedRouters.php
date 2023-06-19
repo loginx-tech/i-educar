@@ -18,6 +18,12 @@ enum SedRouters: string
     // Matricula de continuidade (rematricula), efetivação de inscrições e definições (matricula antecipada)
     case STORE_MATRICULA = '/Matricula/MatricularAluno';
 
+    // Remanejamento
+    case STORE_REMANEJAMENTO = '/Matricula/RemanejarMatricula';
+
+    // Transferência
+    case STORE_TRANSFERENCIA = '/Inscricao/Transferencia';
+
     /*-- Escola -------------------------------------------------------------------*/
 
     // Obtem as escolas pela diretoria e município
@@ -42,6 +48,9 @@ enum SedRouters: string
 
     // Cria a sala
     case STORE_SALA = '/TurmaClasse/IncluirTurmaClasse';
+
+    // Formação da turma, exibe a lista de alunos
+    case FORMACAO_TURMA = '/RelacaoAlunosClasse/FormacaoClasse';
 
     /*-- Dados Basicos ------------------------------------------------------------*/
 

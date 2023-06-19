@@ -6,13 +6,13 @@ use App\Enums\SedRouters;
 use App\Services\Sed\AuthService as SedAuthService;
 use Illuminate\Support\Facades\{DB, Http};
 
-class GetClassroomsService extends SedAuthService
+class FormationClassroomService extends SedAuthService
 {
     /**
-     * Pega os dados das salas no SED pelo código da escola
+     * Pega os dados da sala no SED pelo código da sala com a formação da turma
      *
      */
-    public function __invoke($codEscola, $anoLetivo = null)
+    public function __invoke($codSala)
     {
         $cidade = parent::getConfigSystemSed();
         if (!$cidade) {
@@ -20,10 +20,9 @@ class GetClassroomsService extends SedAuthService
         }
 
         $response = parent::get(
-            SedRouters::GET_SALAS->value,
+            SedRouters::FORMACAO_TURMA->value,
             [
-                'inAnoLetivo'  => $anoLetivo ? $anoLetivo : date('Y'),
-                'inCodEscola' => $codEscola,
+                'inNumClasse' => $codSala,
             ]
         );
 
