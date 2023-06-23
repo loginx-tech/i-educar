@@ -73,6 +73,7 @@
             "ieducar/intranet/include/funcoes.inc.php"
         ],
         "psr-4": {
+            "Edutopia\\Sed\\": "packages/Edutopia/Sed/src",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Custom\\": "database/custom/",
@@ -82,6 +83,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Edutopia\\Sed\\": "packages/Edutopia/Sed/src",
             "Tests\\": "tests/"
         },
         "classmap": [

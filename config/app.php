@@ -168,6 +168,7 @@ return [
          * Package Service Providers...
          */
 
+
         /*
          * Application Service Providers...
          */
@@ -178,7 +179,8 @@ return [
         // App\Providers\TelescopeServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\AssetServiceProvider::class,
-        App\Providers\HorizonServiceProvider::class
+        App\Providers\HorizonServiceProvider::class,
+        Edutopia\Sed\SedServiceProvider::class,
     ],
 
     /*
