@@ -50,20 +50,12 @@ return new class extends clsCadastro {
     {
         $this->uniformDistribution ?? $this->uniformDistribution = new UniformDistribution();
 
-        $objEscola = new clsPmieducarEscola();
-        $lista = $objEscola->lista();
-
-        $escolaOpcoes = ['' => 'Selecione'];
-
-        foreach ($lista as $escola) {
-            $escolaOpcoes["{$escola['cod_escola']}"] = "{$escola['nome']}";
-        }
-
         $this->campoOculto('id', $this->uniformDistribution->id);
 
         $this->campoNumero('year', 'Ano', request('year', $this->uniformDistribution->year), 4, 4, true);
 
-        $this->inputsHelper()->dynamic(['instituicao', 'escola']);
+        $this->inputsHelper()->dynamic('instituicao');
+        $this->inputsHelper()->dynamic('escola', ['value' => $this->uniformDistribution->school_id]);
 
         $this->campoQuebra();
 

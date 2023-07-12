@@ -66,8 +66,12 @@ class UniformDistribution extends Model
 
     protected function distributionDate(): Attribute
     {
-        return Attribute::make(
-            set: fn ($value) => Carbon::createFromFormat('d/m/Y', $value),
-        );
+        return Attribute::make(set: function ($value) {
+            if (empty($value)) {
+                return null;
+            }
+
+            return Carbon::createFromFormat('d/m/Y', $value);
+        });
     }
 }

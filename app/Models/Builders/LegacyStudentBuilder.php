@@ -149,7 +149,7 @@ class LegacyStudentBuilder extends LegacyBuilder
         return $this->with(
             [
                 'individual' => function (BelongsTo $query) {
-                    $query->select(['idpes', 'idpes_mae', 'idpes_pai', 'nome_social']);
+                    $query->select(['idpes', 'idpes_mae', 'idpes_pai', 'idpes_responsavel', 'nome_social']);
                     $query
                         ->with('father:nome,idpes', 'father.individual:cpf,idpes')
                         ->with('mother:nome,idpes', 'mother.individual:cpf,idpes')
