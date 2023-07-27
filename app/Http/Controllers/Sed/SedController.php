@@ -195,17 +195,4 @@ class SedController extends Controller
             'escola' => $response,
         ]);
     }
-
-    // Salas   -----------------------------------------------------------------
-
-    public function editSchool($cod_school)
-    {
-        $this->menu(999847);
-
-        // $escola_simples = ($this->getEscolasService)($cod_escola);
-
-        // return view('sed.schools.show-school', [
-        //     'escola' => $response,
-        // ]);
-    }
 }

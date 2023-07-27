@@ -42,8 +42,6 @@ Route::any('intranet/suspenso.php', 'LegacyController@intranet')
 Route::group(['middleware' => ['auth']], function () {
     Route::get('alterar-senha', 'PasswordController@change')->name('change-password');
     Route::post('alterar-senha', 'PasswordController@change')->name('post-change-password');
-
-    require __DIR__.'/sed.php';
 });
 
 Route::group(['middleware' => ['ieducar.navigation', 'ieducar.footer', 'ieducar.xssbypass', 'ieducar.suspended', 'auth', 'ieducar.checkresetpassword']], function () {
@@ -117,7 +115,7 @@ Route::group(['middleware' => ['ieducar.navigation', 'ieducar.footer', 'ieducar.
 
     Route::any('module/{uri}', 'LegacyController@module')->where('uri', '.*');
     Route::any('modules/{uri}', 'LegacyController@modules')->where('uri', '.*');
-    Route::any('intranet/{uri}', 'LegacyController@intranet')->where('uri', '.*')->name('intranet.page');
+    Route::any('intranet/{uri}', 'LegacyController@intranet')->where('uri', '.*');
 
     Route::group(['namespace' => 'Educacenso', 'prefix' => 'educacenso'], function () {
         Route::get('validar/{validator}', 'ValidatorController@validation');

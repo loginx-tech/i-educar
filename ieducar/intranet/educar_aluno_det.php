@@ -589,7 +589,7 @@ return new class extends clsDetalhe {
                 sprintf('go("educar_matricula_cad.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
                 sprintf('go("educar_historico_escolar_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
                 sprintf('go("educar_distribuicao$this->array_botao_uniforme_lst.php?ref_cod_aluno=%d");', $registro['cod_aluno']),
-                sprintf('go("sed/aluno/create/%d");', $registro['cod_aluno']),
+                sprintf('javascript:go("/sed/aluno/create/%d");', $registro['cod_aluno']),
             ];
 
 

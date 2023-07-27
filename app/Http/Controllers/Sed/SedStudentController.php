@@ -140,7 +140,7 @@ class SedStudentController extends Controller
             ->with('error', 'A turma que o aluno(a) " ' . $nm_aluno . ' " está matriculado(a) não possui código SED cadastrado no i-educar.');
         }
 
-        return view('sed.students.create-matricula', [
+        return view('sed::alunos.create-matricula', [
             'aluno' => $det_aluno,
             'codAluno' => $aluno_cod,
             'matricula' => $registro,
