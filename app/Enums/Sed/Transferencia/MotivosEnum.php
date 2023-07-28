@@ -32,6 +32,7 @@ enum MotivosEnum: int
     {
         switch ($this->value) {
             case self::TRANSFERENCIA_FUND_MUDANCA->value:   return 'Mudança de Residência';
+                
                 // no break
             case self::TRANSFERENCIA_FUND_TRABALHO->value:  return 'Proximidade local de trabalho dos pais';
             case self::TRANSFERENCIA_FUND_FAMILIA->value:   return 'Endereço dos familiares';
@@ -120,9 +121,9 @@ enum MotivosEnum: int
     /**
      *  Retorna as opções para a inFase de transferencia
      *
-     *  @param string $ensino - 0 para fundamental e 1 para medio
+     * @param string $ensino - 0 para fundamental e 1 para medio
      *
-     *  @return array
+     * @return array
      */
     public static function casesTransferencia($ensino): array
     {
@@ -143,9 +144,9 @@ enum MotivosEnum: int
     /**
      *  Retorna as opções para a inFase de deslocamento
      *
-     *  @param string $ensino - 0 para fundamental e 1 para medio
+     * @param string $ensino - 0 para fundamental e 1 para medio
      *
-     *  @return array
+     * @return array
      */
     public static function casesDescolamento($ensino): array
     {
@@ -167,9 +168,9 @@ enum MotivosEnum: int
     /**
      *  Retorna as opções para a inFase de intenção
      *
-     *  @param string $ensino - 0 para fundamental e 1 para medio
+     * @param string $ensino - 0 para fundamental e 1 para medio
      *
-     *  @return array
+     * @return array
      */
     public static function casesIntencao($ensino): array
     {

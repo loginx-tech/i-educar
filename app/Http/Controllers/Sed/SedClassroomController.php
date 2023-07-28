@@ -39,7 +39,7 @@ class SedClassroomController extends Controller
         if (!$sed) {
             abort(403, 'Sistema Escolar Digital(SED) não está habilitado para esta cidade.');
         }
-        
+
         $classSed = DB::table('pmieducar.turma_sed')->where('cod_turma_id', $codClass)->first();
 
         if (!$classSed) {

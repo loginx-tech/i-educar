@@ -16,6 +16,7 @@ enum TipoEnsino: int
     {
         switch ($this->value) {
             case self::ENSINO_MEDIO->value:                     return 'ENSINO MEDIO';
+
                 
                 // no break
             case self::EJA_FUNDAMENTAL_ANOS_INICIAIS->value:    return 'EJA FUNDAMENTAL - ANOS INICIAIS';
