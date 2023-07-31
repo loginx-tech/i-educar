@@ -431,6 +431,21 @@ return new class extends clsDetalhe
             $this->array_botao_url_script[] = "go(\"{$link}\")";
         }
 
+        if (config(key: 'sed.create_matricula.display')) {
+            $link = config('sed.create_matricula.route');
+
+            $link = str_replace(search: [
+                '@matricula',
+                '@aluno',
+            ], replace: [
+                $registro['cod_matricula'],
+                $registro['cod_aluno'],
+            ], subject: $link);
+
+            array_push($this->array_botao, config(key: 'sed.create_matricula.title'));
+            array_push($this->array_botao_url_script, $link);
+        }
+
         $this->url_cancelar = 'educar_aluno_det.php?cod_aluno=' . $registro['ref_cod_aluno'];
         $this->largura = '100%';
 
