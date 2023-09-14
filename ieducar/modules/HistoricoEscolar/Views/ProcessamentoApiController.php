@@ -6,11 +6,17 @@ use Illuminate\Support\Facades\DB;
 class ProcessamentoApiController extends Core_Controller_Page_EditController
 {
     protected $_dataMapper = 'Avaliacao_Model_NotaComponenteDataMapper';
+
     protected $_processoAp = 999613;
+
     protected $_nivelAcessoOption = App_Model_NivelAcesso::SOMENTE_ESCOLA;
+
     protected $_saveOption = false;
+
     protected $_deleteOption = false;
+
     protected $_titulo = '';
+
     public $DISCIPLINA_DISPENSADA = 'Disp';
 
     protected function validatesPresenceOf(
@@ -476,24 +482,16 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
 
     protected function getdadosEscola($escolaId)
     {
-        $sql = 'select
-            (select pes.nome from pmieducar.escola esc, cadastro.pessoa pes
-            where esc.ref_cod_instituicao = $1 and esc.cod_escola = $2
-            and pes.idpes = esc.ref_idpes) as nome,
+        $sql = '
+            SELECT
+                nome,
+                municipio AS cidade,
+                uf_municipio AS uf
+            FROM relatorio.view_dados_escola
+            WHERE cod_escola = $1
+        ';
 
-            (select municipio.nome from public.municipio,
-            cadastro.endereco_pessoa, cadastro.juridica, public.bairro, pmieducar.escola
-            where endereco_pessoa.idbai = bairro.idbai and bairro.idmun = municipio.idmun and
-            juridica.idpes = endereco_pessoa.idpes and juridica.idpes = escola.ref_idpes and
-            escola.cod_escola = $2) as cidade,
-
-            (select municipio.sigla_uf from public.municipio,
-            cadastro.endereco_pessoa, cadastro.juridica, public.bairro, pmieducar.escola
-            where endereco_pessoa.idbai = bairro.idbai and bairro.idmun = municipio.idmun and
-            juridica.idpes = endereco_pessoa.idpes and juridica.idpes = escola.ref_idpes and
-            escola.cod_escola = $2) as uf';
-
-        $params = ['params' => [$this->getrequest()->instituicao_id, $escolaId], 'return_only' => 'first-line'];
+        $params = ['params' => [$escolaId], 'return_only' => 'first-line'];
 
         return Portabilis_Utils_Database::fetchPreparedQuery($sql, $params);
     }
@@ -532,7 +530,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 'em-andamento' => App_Model_MatriculaSituacao::EM_ANDAMENTO,
                 'transferido' => App_Model_MatriculaSituacao::TRANSFERIDO,
                 'reclassificado' => App_Model_MatriculaSituacao::RECLASSIFICADO,
-                'abandono' => App_Model_MatriculaSituacao::ABANDONO
+                'abandono' => App_Model_MatriculaSituacao::ABANDONO,
             ];
             $situacao = $situacoes[$this->getRequest()->situacao];
         }
@@ -752,14 +750,14 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 } elseif ($this->getRequest()->notas == 'buscar-boletim') {
                     if ($tpNota == RegraAvaliacao_Model_Nota_TipoValor::CONCEITUAL) {
                         if (config('legacy.app.processar_historicos_conceituais') == '1') {
-                            $nota = (string)$mediasCc[$ccId][0]->mediaArredondada;
-                            $notaConceitualNumerica = (string)$mediasCc[$ccId][0]->media;
+                            $nota = (string) $mediasCc[$ccId][0]->mediaArredondada;
+                            $notaConceitualNumerica = (string) $mediasCc[$ccId][0]->media;
                         }
                     } elseif ($tpNota == RegraAvaliacao_Model_Nota_TipoValor::NUMERICA) {
-                        $nota = (string)$mediasCc[$ccId][0]->mediaArredondada;
+                        $nota = (string) $mediasCc[$ccId][0]->mediaArredondada;
                     } elseif ($tpNota == RegraAvaliacao_Model_Nota_TipoValor::NUMERICACONCEITUAL) {
-                        $nota = (string)$mediasCc[$ccId][0]->mediaArredondada;
-                        $notaConceitualNumerica = (string)$mediasCc[$ccId][0]->media;
+                        $nota = (string) $mediasCc[$ccId][0]->mediaArredondada;
+                        $notaConceitualNumerica = (string) $mediasCc[$ccId][0]->media;
                     }
                 } else {
                     $nota = $this->getRequest()->notas;
@@ -784,7 +782,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                         $arrayAreaConhecimento[$componenteCurricular->area_conhecimento->id]['nota'] = 0;
                     }
 
-                    $arrayAreaConhecimento[$componenteCurricular->area_conhecimento->id]['nota_conceitual_numerica'] ??= 0 ;
+                    $arrayAreaConhecimento[$componenteCurricular->area_conhecimento->id]['nota_conceitual_numerica'] ??= 0;
                     $arrayAreaConhecimento[$componenteCurricular->area_conhecimento->id]['falta'] ??= 0;
 
                     $arrayAreaConhecimento[$componenteCurricular->area_conhecimento->id]['nota'] += $nota;
@@ -1083,7 +1081,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 'aprovado-conselho' => App_Model_MatriculaSituacao::APROVADO_PELO_CONSELHO,
                 'aprovado-dependencia' => App_Model_MatriculaSituacao::APROVADO_COM_DEPENDENCIA,
                 'reclassificado' => App_Model_MatriculaSituacao::RECLASSIFICADO,
-                'abandono' => App_Model_MatriculaSituacao::ABANDONO
+                'abandono' => App_Model_MatriculaSituacao::ABANDONO,
             ];
 
             foreach ($alunos as $aluno) {
@@ -1142,7 +1140,6 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
     /**
      * @param bool $raiseExceptionOnErrors
      * @param bool $appendMsgOnErrors
-     *
      * @return Avaliacao_Service_Boletim|null
      *
      * @throws Exception
@@ -1273,7 +1270,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
     protected function appendMsg($msg, $type = 'error', $encodeToUtf8 = false)
     {
         if ($encodeToUtf8) {
-            $msg = utf8_encode($msg);
+            $msg = mb_convert_encoding($msg, 'UTF-8');
         }
 
         //error_log("$type msg: '$msg'");

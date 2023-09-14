@@ -10,13 +10,19 @@ use DateTime;
 class SchoolHistory
 {
     private $service;
+
     private $seriesYearsModel;
-    private $certificationText;
+
+    private array $certificationText = [];
+
     private $formatScoresGreaterThanTen;
+
     public $disciplines;
 
     public const GRADE_SERIE = 1;
+
     public const GRADE_ANO = 2;
+
     public const GRADE_EJA = 3;
 
     public function __construct(SchoolHistoryService $service, $seriesYearsModel)
@@ -41,7 +47,7 @@ class SchoolHistory
         $discipline = $this->getDiscipline($data['cod_aluno'], $data['nm_disciplina']);
 
         $discipline->registro_nascimento = $data['registro_nascimento'] ?? null;
-        $discipline->cod_rg = $data['cod_rg']?? null;
+        $discipline->cod_rg = $data['cod_rg'] ?? null;
         $discipline->cod_ra = $data['cod_ra'] ?? null;
         $discipline->nm_disciplina = $data['nm_disciplina'];
         $discipline->cod_aluno = $data['cod_aluno'];
@@ -57,7 +63,7 @@ class SchoolHistory
         $discipline->nome_da_mae = $data['nome_da_mae'];
         $discipline->data_atual = $data['data_atual'];
         $discipline->data_atual_extenso = $data['data_atual_extenso'];
-        $discipline->nome_serie_aux = $this->certificationText;
+        $discipline->nome_serie_aux = $this->certificationText[$data['cod_aluno']];
         $discipline->municipio = $data['municipio'];
         $discipline->ato_poder_publico = $data['ato_poder_publico'];
         $discipline->ato_autorizativo = $data['ato_autorizativo'];
@@ -185,7 +191,16 @@ class SchoolHistory
 
     public function makeTextoCertificacao($data)
     {
-        $this->certificationText = $this->service->getCertificationText($data);
+        // TODO: refatorar esta parte
+        // anteriormente o histórico quando emitido em lote estava considerando
+        // apenas o último item da iteração, foi preciso agrupar por aluno para
+        // garantir que o texto seja o adequeado para o aluno.
+
+        $students = collect($data)->groupBy('cod_aluno');
+
+        foreach ($students as $id => $student) {
+            $this->certificationText[$id] = $this->service->getCertificationText($student);
+        }
     }
 
     public function getStatus($status)

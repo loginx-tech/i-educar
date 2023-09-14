@@ -20,17 +20,11 @@ class Controller extends BaseController
 
     protected $beta = false;
 
-    /**
-     * @return Breadcrumb
-     */
     private function getBreadcrumbInstance(): Breadcrumb
     {
         return app(Breadcrumb::class);
     }
 
-    /**
-     * @return MenuCacheService
-     */
     private function getMenuCacheServiceInstance(): MenuCacheService
     {
         return app(MenuCacheService::class);
@@ -39,9 +33,7 @@ class Controller extends BaseController
     /**
      * Set the breadcrumbs of the action
      *
-     * @param       $currentPage
      * @param array $pages
-     *
      * @return $this
      */
     public function breadcrumb($currentPage, $pages = [])
@@ -60,7 +52,6 @@ class Controller extends BaseController
      * Share with view, title, mainmenu and menu links.
      *
      * @param int $process
-     *
      * @return $this
      */
     public function menu($process)
@@ -72,11 +63,20 @@ class Controller extends BaseController
             ->where('process', $process)
             ->first();
 
+        $ancestors = $topmenu === null ? [] : Menu::getMenuAncestors($topmenu);
+
         if ($topmenu) {
-            View::share('mainmenu', $topmenu->root()->getKey());
+            View::share([
+                'mainmenu' => $topmenu->root()->getKey(),
+                'currentMenu' => $topmenu,
+                'menuPaths' => $ancestors,
+            ]);
         }
 
-        View::share('menu', $menu);
+        View::share([
+            'menu' => $menu,
+            'root' => $topmenu?->root()->getKey(),
+        ]);
         View::share('title', $this->getPageTitle());
 
         return $this;

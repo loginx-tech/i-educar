@@ -43,20 +43,7 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
         $obj_instituicao->setOrderby('nm_instituicao ASC');
 
         $lista = $obj_instituicao->lista(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            1
+            int_ativo: 1
         );
 
         if (is_array($lista) && count($lista)) {
@@ -89,7 +76,7 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
                     $retorno .= ' selected';
                 }
 
-                $retorno .=  ">$texto</option>";
+                $retorno .= ">$texto</option>";
             }
 
             $retorno .= '</select>';
@@ -119,17 +106,7 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
         $obj_escola = new clsPmieducarEscola();
 
         $lista = $obj_escola->lista(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            1
+            str_nome: 1
         );
 
         if (is_array($lista) && count($lista)) {
@@ -164,17 +141,8 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
             $opcoes_escola = ['' => 'Selecione'];
             $obj_escola = new clsPmieducarEscola();
             $lista = $obj_escola->lista(
-                null,
-                null,
-                null,
-                $this->ref_cod_instituicao,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                1
+                int_ref_cod_instituicao: $this->ref_cod_instituicao,
+                str_nome: 1
             );
 
             if (is_array($lista) && count($lista)) {
@@ -297,7 +265,7 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
       <td>&nbsp;</td>
     </tr>', $validacao); ?>
 
-<?php if ($nivel_usuario == 1 || $nivel_usuario == 2): ?>
+<?php if ($nivel_usuario == 1 || $nivel_usuario == 2) { ?>
   <script type="text/javascript">
   var before_getEscola = function() {}
   var after_getEscola  = function() {}
@@ -350,6 +318,6 @@ if ($nivel_usuario <= 4 && !empty($nivel_usuario)) {
     }
   }
   </script>
-<?php endif; ?>
+<?php } ?>
 <?php
 }

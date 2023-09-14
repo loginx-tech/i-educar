@@ -1,49 +1,41 @@
 <?php
 
+use App\Models\LegacyCalendarDayNote;
+use App\Models\LegacyCalendarYear;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
 
-return new class extends clsListagem {
-    /**
-     * Referencia pega da session para o idpes do usuario atual
-     *
-     * @var int
-     */
+return new class extends clsListagem
+{
     public $pessoa_logada;
 
-    /**
-     * Titulo no topo da pagina
-     *
-     * @var int
-     */
     public $titulo;
 
-    /**
-     * Quantidade de registros a ser apresentada em cada pagina
-     *
-     * @var int
-     */
     public $limite;
 
-    /**
-     * Inicio dos registros a serem exibidos (limit)
-     *
-     * @var int
-     */
     public $offset;
 
     public $cod_calendario_anotacao;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $nm_anotacao;
+
     public $descricao;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
 
     public $dia;
+
     public $mes;
+
     public $ano;
 
     public $ref_cod_calendario_ano_letivo;
@@ -51,14 +43,17 @@ return new class extends clsListagem {
     public function Gerar()
     {
         foreach ($_GET as $var => $val) { // passa todos os valores obtidos no GET para atributos do objeto
-            $this->$var = ($val === '') ? null: $val;
+            $this->$var = ($val === '') ? null : $val;
         }
 
         if ($this->ref_cod_calendario_ano_letivo && $this->ano && $this->mes && $this->dia) {
-            $obj_calendario = new clsPmieducarCalendarioAnoLetivo($this->ref_cod_calendario_ano_letivo);
-            if (!$obj_calendario->existe()) {
+            $exists = LegacyCalendarYear::query()
+                ->where('cod_calendario_ano_letivo', $this->ref_cod_calendario_ano_letivo)
+                ->exists();
+
+            if (!$exists) {
                 throw new HttpResponseException(
-                    new RedirectResponse('educar_calendario_ano_letivo_lst.php')
+                    response: new RedirectResponse(url: 'educar_calendario_ano_letivo_lst.php')
                 );
             }
             $this->titulo = "Anotaçõoes Calendário <b>{$this->dia}/{$this->mes}/{$this->ano}</b> - Listagem";
@@ -70,48 +65,47 @@ return new class extends clsListagem {
                 'calendario.anotacao.ref_cod_calendario_ano_letivo' => $this->ref_cod_calendario_ano_letivo,
             ]);
         } else {
-            $this->simpleRedirect('educar_calendario_ano_letivo_lst.php');
+            $this->simpleRedirect(url: 'educar_calendario_ano_letivo_lst.php');
         }
 
-        $this->addCabecalhos([
+        $this->addCabecalhos(coluna: [
             'Anotacão',
-            'Descrição'
+            'Descrição',
         ]);
 
         // Paginador
         $this->limite = 20;
-        $this->offset = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"]*$this->limite-$this->limite: 0;
 
-        $obj_calendario_anotacao_dia = new clsPmieducarCalendarioDiaAnotacao();
-        $obj_calendario_anotacao_dia->setLimite($this->limite, $this->offset);
+        $query = LegacyCalendarDayNote::query()
+            ->where('ref_dia', $this->dia)
+            ->where('ref_mes', $this->mes)
+            ->where('ref_ref_cod_calendario_ano_letivo', $this->ref_cod_calendario_ano_letivo)
+            ->orderBy('ref_cod_calendario_anotacao');
 
-        $lista = $obj_calendario_anotacao_dia->lista($this->dia, $this->mes, $this->ref_cod_calendario_ano_letivo, null, 1);
+        $result = $query->paginate(perPage: $this->limite, pageName: 'pagina_' . $this->nome);
 
-        $total = $obj_calendario_anotacao_dia->_total;
+        $lista = $result->items();
+        $total = $result->total();
 
         // monta a lista
         $get = "&dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}";
-        if (is_array($lista) && count($lista)) {
+        if (is_array(value: $lista) && count(value: $lista)) {
             foreach ($lista as $registro) {
-                $obj_calendario_anotacao = new clsPmieducarCalendarioAnotacao($registro['ref_cod_calendario_anotacao'], null, null, null, null, null, null, 1);
-                $det = $obj_calendario_anotacao->detalhe();
-                /*
-                    "<a href=\"educar_calendario_anotacao_det.php?cod_calendario_anotacao={$det["cod_calendario_anotacao"]}\">{$registro["ref_dia"]}</a>",
-                    "<a href=\"educar_calendario_anotacao_det.php?cod_calendario_anotacao={$det["cod_calendario_anotacao"]}\">{$registro["ref_mes"]}</a>",
-                */
-                $this->addLinhas([
+                $det = $registro->calendarNote;
+
+                $this->addLinhas(linha: [
                     "<a href=\"educar_calendario_anotacao_cad.php?cod_calendario_anotacao={$det['cod_calendario_anotacao']}{$get}\">{$det['nm_anotacao']}</a>",
-                    "<a href=\"educar_calendario_anotacao_cad.php?cod_calendario_anotacao={$det['cod_calendario_anotacao']}{$get}\">{$det['descricao']}</a>"
+                    "<a href=\"educar_calendario_anotacao_cad.php?cod_calendario_anotacao={$det['cod_calendario_anotacao']}{$get}\">{$det['descricao']}</a>",
                 ]);
             }
         }
-        $this->addPaginador2('educar_calendario_anotacao_lst.php', $total, $_GET, $this->nome, $this->limite);
+        $this->addPaginador2(strUrl: 'educar_calendario_anotacao_lst.php', intTotalRegistros: $total, mixVariaveisMantidas: $_GET, nome: $this->nome, intResultadosPorPagina: $this->limite);
         $obj_permissoes = new clsPermissoes();
-        if ($obj_permissoes->permissao_cadastra(620, $this->pessoa_logada, 7)) {
+        if ($obj_permissoes->permissao_cadastra(int_processo_ap: 620, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7)) {
             $this->acao = "go(\"educar_calendario_anotacao_cad.php?dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}\")";
             $this->nome_acao = 'Nova Anotação';
-            $this->array_botao = ['Dia Extra/Não Letivo','Calendário'];
-            $this->array_botao_url = ["educar_calendario_dia_cad.php?dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}","educar_calendario_ano_letivo_lst.php?dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}"];
+            $this->array_botao = ['Dia Extra/Não Letivo', 'Calendário'];
+            $this->array_botao_url = ["educar_calendario_dia_cad.php?dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}", "educar_calendario_ano_letivo_lst.php?dia={$this->dia}&mes={$this->mes}&ano={$this->ano}&ref_cod_calendario_ano_letivo={$this->ref_cod_calendario_ano_letivo}"];
         }
 
         $this->largura = '100%';

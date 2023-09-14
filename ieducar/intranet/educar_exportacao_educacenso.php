@@ -2,13 +2,18 @@
 
 use Illuminate\Support\Facades\DB;
 
-return new class extends clsCadastro {
+return new class extends clsCadastro
+{
     public $pessoa_logada;
 
     public $ano;
+
     public $ref_cod_instituicao;
+
     public $escola_em_andamento;
+
     public $segunda_fase = false;
+
     public $nome_url_sucesso = 'Analisar';
 
     public function Inicializar()
@@ -19,23 +24,23 @@ return new class extends clsCadastro {
 
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra(
-            $codigoMenu,
-            $this->pessoa_logada,
-            7,
-            'educar_index.php'
+            int_processo_ap: $codigoMenu,
+            int_idpes_usuario: $this->pessoa_logada,
+            int_soma_nivel_acesso: 7,
+            str_pagina_redirecionar: 'educar_index.php'
         );
         $this->ref_cod_instituicao = $obj_permissoes->getInstituicao($this->pessoa_logada);
 
         $nomeTela = $this->segunda_fase ? '2ª fase - Situação final' : '1ª fase - Matrícula inicial';
 
-        $this->breadcrumb($nomeTela, [
-        url('intranet/educar_educacenso_index.php') => 'Educacenso',
-    ]);
+        $this->breadcrumb(currentPage: $nomeTela, breadcrumbs: [
+            url('intranet/educar_educacenso_index.php') => 'Educacenso',
+        ]);
 
         $exportacao = $_POST['exportacao'];
 
         if ($exportacao) {
-            $converted_to_iso88591 = utf8_decode($exportacao);
+            $converted_to_iso88591 = mb_convert_encoding($exportacao, 'ISO-8859-1', 'UTF-8');
 
             $inepEscola = DB::selectOne('SELECT cod_escola_inep FROM modules.educacenso_cod_escola WHERE cod_escola = ?', [$_POST['escola']]);
 
@@ -45,10 +50,10 @@ return new class extends clsCadastro {
             header('Content-Length: ' . strlen($converted_to_iso88591));
             header('Content-Disposition: attachment; filename=' . $nomeArquivo);
             echo $converted_to_iso88591;
-            die();
+            exit();
         }
 
-        $this->acao_enviar      = 'acaoExportar();';
+        $this->acao_enviar = 'acaoExportar();';
 
         return 'Nova exportação';
     }
@@ -61,15 +66,15 @@ return new class extends clsCadastro {
 
         if ($fase2 == 1) {
             $dicaCampoData = 'A data informada neste campo, deverá ser a mesma informada na 1ª fase da exportação (Matrícula inicial).';
-            $this->campoOculto('fase2', 'true');
+            $this->campoOculto(nome: 'fase2', valor: 'true');
         }
 
-        $this->campoOculto('enable_export', (int) config('legacy.educacenso.enable_export'));
+        $this->campoOculto(nome: 'enable_export', valor: (int) config('legacy.educacenso.enable_export'));
         $this->inputsHelper()->dynamic(['ano', 'instituicao', 'escola']);
-        $this->inputsHelper()->hidden('escola_em_andamento', [ 'value' => $this->escola_em_andamento ]);
+        $this->inputsHelper()->hidden(attrName: 'escola_em_andamento', inputOptions: ['value' => $this->escola_em_andamento]);
 
         if (!empty($this->ref_cod_escola)) {
-            Portabilis_View_Helper_Application::loadJavascript($this, '/vendor/legacy/Educacenso/Assets/Javascripts/Educacenso.js');
+            Portabilis_View_Helper_Application::loadJavascript(viewInstance: $this, files: '/vendor/legacy/Educacenso/Assets/Javascripts/Educacenso.js');
         }
     }
 

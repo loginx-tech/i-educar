@@ -1,42 +1,33 @@
 <?php
 
-return new class extends clsListagem {
-    /**
-     * Referencia pega da session para o idpes do usuario atual
-     *
-     * @var int
-     */
+use App\Models\LegacyRole;
+
+return new class extends clsListagem
+{
     public $pessoa_logada;
 
-    /**
-     * Titulo no topo da pagina
-     *
-     * @var int
-     */
     public $titulo;
 
-    /**
-     * Quantidade de registros a ser apresentada em cada pagina
-     *
-     * @var int
-     */
     public $limite;
 
-    /**
-     * Inicio dos registros a serem exibidos (limit)
-     *
-     * @var int
-     */
     public $offset;
 
     public $cod_funcao;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $nm_funcao;
+
     public $abreviatura;
+
     public $professor;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
 
     public $ref_cod_instituicao;
@@ -46,13 +37,13 @@ return new class extends clsListagem {
         $this->titulo = 'Função - Listagem';
 
         foreach ($_GET as $var => $val) { // passa todos os valores obtidos no GET para atributos do objeto
-            $this->$var = ($val === '') ? null: $val;
+            $this->$var = ($val === '') ? null : $val;
         }
 
         $lista_busca = [
             'Nome Funcão',
             'Abreviatura',
-            'Professor'
+            'Professor',
         ];
 
         $obj_permissoes = new clsPermissoes();
@@ -64,48 +55,50 @@ return new class extends clsListagem {
         $this->addCabecalhos($lista_busca);
 
         // Filtros de Foreign Keys
-        include('include/pmieducar/educar_campo_lista.php');
+        include 'include/pmieducar/educar_campo_lista.php';
 
         // outros Filtros
-        $this->campoTexto('nm_funcao', 'Nome Função', $this->nm_funcao, 30, 255, false);
-        $this->campoTexto('abreviatura', 'Abreviatura', $this->abreviatura, 30, 255, false);
-        $opcoes = ['' => 'Selecione',
-                        'N' => 'Não',
-                        'S' => 'Sim'
-                        ];
+        $this->campoTexto(nome: 'nm_funcao', campo: 'Nome Função', valor: $this->nm_funcao, tamanhovisivel: 30, tamanhomaximo: 255);
+        $this->campoTexto(nome: 'abreviatura', campo: 'Abreviatura', valor: $this->abreviatura, tamanhovisivel: 30, tamanhomaximo: 255);
+        $opcoes = [
+            '' => 'Selecione',
+            'N' => 'Não',
+            'S' => 'Sim',
+        ];
 
-        $this->campoLista('professor', 'Professor', $opcoes, $this->professor, '', false, '', '', false, false);
+        $this->campoLista(nome: 'professor', campo: 'Professor', valor: $opcoes, default: $this->professor, obrigatorio: false);
 
         if ($this->professor == 'N') {
-            $this->professor =  '0';
+            $this->professor = '0';
         } elseif ($this->professor == 'S') {
             $this->professor = '1';
         }
 
         // Paginador
         $this->limite = 20;
-        $this->offset = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"]*$this->limite-$this->limite: 0;
+        $this->offset = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"] * $this->limite - $this->limite : 0;
 
-        $obj_funcao = new clsPmieducarFuncao();
-        $obj_funcao->setOrderby('nm_funcao ASC');
-        $obj_funcao->setLimite($this->limite, $this->offset);
+        $query = LegacyRole::query()
+            ->where('ativo', 1)
+            ->orderBy('nm_funcao', 'ASC');
 
-        $lista = $obj_funcao->lista(
-            $this->cod_funcao,
-            null,
-            null,
-            $this->nm_funcao,
-            $this->abreviatura,
-            $this->professor,
-            null,
-            null,
-            null,
-            null,
-            1,
-            $this->ref_cod_instituicao
-        );
+        if (is_string(value: $this->nm_funcao)) {
+            $query->where('nm_funcao', 'ilike', '%' . $this->nm_funcao . '%');
+        }
+        if (is_string(value: $this->abreviatura)) {
+            $query->where('nm_funcao', 'ilike', '%' . $this->abreviatura . '%');
+        }
+        if (is_numeric(value: $this->ref_cod_instituicao)) {
+            $query->where('ref_cod_instituicao', $this->ref_cod_instituicao);
+        }
+        if (is_numeric(value: $this->professor)) {
+            $query->where('professor', $this->professor);
+        }
 
-        $total = $obj_funcao->_total;
+        $result = $query->paginate(perPage: $this->limite, pageName: 'pagina_'.$this->nome);
+
+        $lista = $result->items();
+        $total = $result->total();
 
         // monta a lista
         if (is_array($lista) && count($lista)) {
@@ -119,7 +112,7 @@ return new class extends clsListagem {
                 $lista_busca = [
                     "<a href=\"educar_funcao_det.php?cod_funcao={$registro['cod_funcao']}&ref_cod_instituicao={$registro['ref_cod_instituicao']}\">{$registro['nm_funcao']}</a>",
                     "<a href=\"educar_funcao_det.php?cod_funcao={$registro['cod_funcao']}&ref_cod_instituicao={$registro['ref_cod_instituicao']}\">{$registro['abreviatura']}</a>",
-                    "<a href=\"educar_funcao_det.php?cod_funcao={$registro['cod_funcao']}&ref_cod_instituicao={$registro['ref_cod_instituicao']}\">{$registro['professor']}</a>"
+                    "<a href=\"educar_funcao_det.php?cod_funcao={$registro['cod_funcao']}&ref_cod_instituicao={$registro['ref_cod_instituicao']}\">{$registro['professor']}</a>",
                 ];
 
                 if ($nivel_usuario == 1) {
@@ -128,16 +121,16 @@ return new class extends clsListagem {
                 $this->addLinhas($lista_busca);
             }
         }
-        $this->addPaginador2('educar_funcao_lst.php', $total, $_GET, $this->nome, $this->limite);
+        $this->addPaginador2(strUrl: 'educar_funcao_lst.php', intTotalRegistros: $total, mixVariaveisMantidas: $_GET, nome: $this->nome, intResultadosPorPagina: $this->limite);
 
-        if ($obj_permissoes->permissao_cadastra(634, $this->pessoa_logada, 3)) {
+        if ($obj_permissoes->permissao_cadastra(int_processo_ap: 634, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3)) {
             $this->acao = 'go("educar_funcao_cad.php")';
             $this->nome_acao = 'Novo';
         }
 
         $this->largura = '100%';
 
-        $this->breadcrumb('Funções do servidor', [
+        $this->breadcrumb(currentPage: 'Funções do servidor', breadcrumbs: [
             url('intranet/educar_servidores_index.php') => 'Servidores',
         ]);
     }

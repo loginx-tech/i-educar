@@ -30,8 +30,6 @@ class Employee extends LegacyModel
 
     /**
      * Builder dos filtros
-     *
-     * @var string
      */
     protected string $builder = EmployeeBuilder::class;
 
@@ -42,7 +40,7 @@ class Employee extends LegacyModel
 
     public array $legacy = [
         'id' => 'cod_servidor',
-        'workload' => 'carga_horaria'
+        'workload' => 'carga_horaria',
     ];
 
     /**
@@ -60,10 +58,15 @@ class Employee extends LegacyModel
         );
     }
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->person->nome
+        );
+    }
+
     /**
      * Servidor alocação
-     *
-     * @return HasMany
      */
     public function employeeAllocations(): HasMany
     {
@@ -72,8 +75,6 @@ class Employee extends LegacyModel
 
     /**
      * Servidor função
-     *
-     * @return HasMany
      */
     public function employeeRoles(): HasMany
     {
@@ -82,17 +83,12 @@ class Employee extends LegacyModel
 
     /**
      * Pessoa física
-     *
-     * @return BelongsTo
      */
     public function individual(): BelongsTo
     {
         return $this->belongsTo(LegacyIndividual::class, 'cod_servidor');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function schools(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -104,17 +100,11 @@ class Employee extends LegacyModel
             ->where('servidor_alocacao.ativo', 1);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function person(): BelongsTo
     {
         return $this->belongsTo(LegacyPerson::class, 'cod_servidor');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function schoolingDegree(): BelongsTo
     {
         return $this->belongsTo(LegacySchoolingDegree::class, 'ref_idesco');
@@ -125,9 +115,6 @@ class Employee extends LegacyModel
         return $this->hasMany(EmployeeGraduation::class, 'employee_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function disciplines(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -135,7 +122,17 @@ class Employee extends LegacyModel
             'pmieducar.servidor_disciplina',
             'ref_cod_servidor',
             'ref_cod_disciplina'
-        )->withPivot('ref_ref_cod_instituicao', 'ref_cod_curso');
+        )->withPivot('ref_ref_cod_instituicao', 'ref_cod_curso', 'ref_cod_funcao');
+    }
+
+    public function courses(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            LegacyCourse::class,
+            'pmieducar.servidor_curso_ministra',
+            'ref_cod_servidor',
+            'ref_cod_curso'
+        )->withPivot('ref_ref_cod_instituicao');
     }
 
     public function scopeActive(Builder $query): Builder
@@ -160,5 +157,10 @@ class Employee extends LegacyModel
     {
         return $query->join('pmieducar.servidor_alocacao', 'servidor.cod_servidor', '=', 'servidor_alocacao.ref_cod_servidor')
             ->where('servidor_alocacao.ano', date('Y'));
+    }
+
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(EmployeeWithdrawal::class, 'ref_cod_servidor', 'cod_servidor');
     }
 }

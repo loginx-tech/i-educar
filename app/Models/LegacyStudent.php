@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Builders\LegacyStudentBuilder;
+use App\Models\View\HistoricGradeYear;
 use App\Traits\HasLegacyDates;
 use App\Traits\LegacyAttribute;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,11 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
+use Ankurk91\Eloquent\BelongsToOne;
 
 class LegacyStudent extends LegacyModel
 {
     use LegacyAttribute;
     use HasLegacyDates;
+    use BelongsToOne;
 
     public const CREATED_AT = 'data_cadastro';
 
@@ -39,27 +43,76 @@ class LegacyStudent extends LegacyModel
         'tipo_responsavel',
     ];
 
-    /**
-     * @return BelongsTo
-     */
+    public array $legacy = [
+        'id' => 'cod_aluno',
+        'person_id' => 'ref_idpes',
+    ];
+
     public function individual(): BelongsTo
     {
         return $this->belongsTo(LegacyIndividual::class, 'ref_idpes');
     }
 
+    public function document(): BelongsTo
+    {
+        return $this->belongsTo(LegacyDocument::class, 'ref_idpes');
+    }
+
     protected function name(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->individual->person->name
+            get: fn () => $this->person->name
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
+    protected function birthdate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->individual->data_nasc,
+        );
+    }
+
+    protected function socialName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->individual->social_name ?? null
+        );
+    }
+
+    protected function realName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->person->real_name
+        );
+    }
+
     public function person(): BelongsTo
     {
         return $this->belongsTo(LegacyPerson::class, 'ref_idpes');
+    }
+
+    public function deficiencies(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            LegacyDeficiency::class,
+            'cadastro.fisica_deficiencia',
+            'ref_idpes',
+            'ref_cod_deficiencia',
+            'ref_idpes',
+            'cod_deficiencia'
+        );
+    }
+
+    public function deficiency()
+    {
+        return $this->belongsToOne(
+            LegacyDeficiency::class,
+            'cadastro.fisica_deficiencia',
+            'ref_idpes',
+            'ref_cod_deficiencia',
+            'ref_idpes',
+            'cod_deficiencia'
+        );
     }
 
     public function registrations(): HasMany
@@ -67,9 +120,6 @@ class LegacyStudent extends LegacyModel
         return $this->hasMany(LegacyRegistration::class, 'ref_cod_aluno');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function guardians(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -87,6 +137,19 @@ class LegacyStudent extends LegacyModel
         return Attribute::make(
             get: fn () => $this->tipo_responsavel
         );
+    }
+
+    public function hasReport(): bool
+    {
+        return $this->url_laudo_medico !== null && $this->url_laudo_medico !== '[]';
+    }
+
+    public function getGuardions(): Collection
+    {
+        return collect([
+            $this->individual->mother,
+            $this->individual->father,
+        ])->filter(fn ($person) => !empty($person) && $person->name !== 'NÃO REGISTRADO');
     }
 
     public function getGuardianName(): ?string
@@ -169,5 +232,120 @@ class LegacyStudent extends LegacyModel
     public function benefits(): BelongsToMany
     {
         return $this->belongsToMany(LegacyBenefit::class, 'pmieducar.aluno_aluno_beneficio', 'aluno_id', 'aluno_beneficio_id');
+    }
+
+    public function historicGradeYear(): HasMany
+    {
+        return $this->hasMany(HistoricGradeYear::class, 'cod_aluno', 'cod_aluno');
+    }
+
+    public function historicGradeYearNotDiversified(): HasMany
+    {
+        return $this->historicGradeYear()->whereRaw('(select max(unnest) from unnest(tipos_base)) != 2');
+    }
+
+    public function historicGradeYearDiversified(): HasMany
+    {
+        return $this->historicGradeYear()->whereRaw('(select max(unnest) from unnest(tipos_base)) = 2');
+    }
+
+    public function registration_transfer(): HasOne
+    {
+        return $this->hasOne(LegacyRegistration::class, 'ref_cod_aluno')->transfer();
+    }
+
+    public function workload1(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $maxWorkload = $this->historicGradeYearNotDiversified->max('carga_horaria1');
+                if ($maxWorkload !== null) {
+                    return $maxWorkload;
+                }
+
+                $sumWorkload = $this->historicGradeYearNotDiversified->sum('chd1');
+                if ($sumWorkload > 0) {
+                    return $sumWorkload;
+                }
+
+                return '-';
+            }
+        );
+    }
+
+    public function workload2(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $maxWorkload = $this->historicGradeYearNotDiversified->max('carga_horaria2');
+                if ($maxWorkload !== null) {
+                    return $maxWorkload;
+                }
+
+                $sumWorkload = $this->historicGradeYearNotDiversified->sum('chd2');
+                if ($sumWorkload > 0) {
+                    return $sumWorkload;
+                }
+
+                return '-';
+            }
+        );
+    }
+
+    public function workload3(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $maxWorkload = $this->historicGradeYearNotDiversified->max('carga_horaria3');
+                if ($maxWorkload !== null) {
+                    return $maxWorkload;
+                }
+
+                $sumWorkload = $this->historicGradeYearNotDiversified->sum('chd3');
+                if ($sumWorkload > 0) {
+                    return $sumWorkload;
+                }
+
+                return '-';
+            }
+        );
+    }
+
+    public function workload4(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $maxWorkload = $this->historicGradeYearNotDiversified->max('carga_horaria4');
+                if ($maxWorkload !== null) {
+                    return $maxWorkload;
+                }
+
+                $sumWorkload = $this->historicGradeYearNotDiversified->sum('chd4');
+                if ($sumWorkload > 0) {
+                    return $sumWorkload;
+                }
+
+                return '-';
+            }
+        );
+    }
+
+    public function workload5(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $maxWorkload = $this->historicGradeYearNotDiversified->max('carga_horaria5');
+                if ($maxWorkload !== null) {
+                    return $maxWorkload;
+                }
+
+                $sumWorkload = $this->historicGradeYearNotDiversified->sum('chd5');
+                if ($sumWorkload > 0) {
+                    return $sumWorkload;
+                }
+
+                return '-';
+            }
+        );
     }
 }

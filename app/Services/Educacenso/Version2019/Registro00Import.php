@@ -5,11 +5,9 @@ namespace App\Services\Educacenso\Version2019;
 use App\Models\City;
 use App\Models\Educacenso\Registro00;
 use App\Models\Educacenso\RegistroEducacenso;
-use App\Models\LegacyAcademicYearStage;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyOrganization;
 use App\Models\LegacyPerson;
-use App\Models\LegacyPersonAddress;
 use App\Models\LegacyPhone;
 use App\Models\LegacySchool;
 use App\Models\LegacySchoolAcademicYear;
@@ -32,10 +30,12 @@ class Registro00Import implements RegistroImportInterface
      * @var Registro00
      */
     private $model;
+
     /**
      * @var User
      */
     private $user;
+
     /**
      * @var int
      */
@@ -52,10 +52,7 @@ class Registro00Import implements RegistroImportInterface
     /**
      * Faz a importação dos dados a partir da linha do arquivo
      *
-     * @param RegistroEducacenso $model
      * @param int                $year
-     * @param                    $user
-     *
      * @return void
      */
     public function import(RegistroEducacenso $model, $year, $user)
@@ -145,7 +142,7 @@ class Registro00Import implements RegistroImportInterface
 
     private function createAddress($school)
     {
-        $personAddress = LegacyPersonAddress::where('idpes', $school->ref_idpes)->exists();
+        $personAddress = PersonHasPlace::where('person_id', $school->ref_idpes)->exists();
         if ($personAddress) {
             return;
         }
@@ -158,7 +155,7 @@ class Registro00Import implements RegistroImportInterface
         $place = Place::firstOrCreate([
             'city_id' => $city->getKey(),
             'address' => $this->model->logradouro,
-            'number' => (int)(is_numeric($this->model->numero) ? $this->model->numero : null),
+            'number' => (int) (is_numeric($this->model->numero) ? $this->model->numero : null),
             'complement' => $this->model->complemento,
             'neighborhood' => $this->model->bairro,
             'postal_code' => $this->model->cep,
@@ -216,12 +213,11 @@ class Registro00Import implements RegistroImportInterface
      */
     private function createAcademicYear($school)
     {
-        LegacySchoolAcademicYear::create([
+        $schoolAcademicYear = LegacySchoolAcademicYear::create([
             'ref_cod_escola' => $school->getKey(),
             'ano' => $this->year,
             'ref_usuario_cad' => $this->user->id,
             'andamento' => 1,
-            'data_cadastro' => now(),
             'ativo' => 1,
         ]);
 
@@ -237,7 +233,7 @@ class Registro00Import implements RegistroImportInterface
             ]);
         }
 
-        LegacyAcademicYearStage::create([
+        $schoolAcademicYear->academicYearStages()->create([
             'ref_ano' => $this->year,
             'ref_ref_cod_escola' => $school->getKey(),
             'sequencial' => 1,

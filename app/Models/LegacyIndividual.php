@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -24,6 +25,10 @@ class LegacyIndividual extends Model
      * @var string
      */
     protected $primaryKey = 'idpes';
+
+    protected $casts = [
+        'data_nasc' => 'date',
+    ];
 
     /**
      * @var array
@@ -48,7 +53,6 @@ class LegacyIndividual extends Model
         'data_chegada_brasil',
         'idmun_nascimento',
         'ultima_empresa',
-        'idocup',
         'nome_mae',
         'nome_pai',
         'nome_conjuge',
@@ -84,7 +88,8 @@ class LegacyIndividual extends Model
         'nome_social',
         'pais_residencia',
         'localizacao_diferenciada',
-        'ideciv'
+        'ideciv',
+        'observacao',
     ];
 
     /**
@@ -160,8 +165,18 @@ class LegacyIndividual extends Model
         return $this->hasOne(LegacyIndividualPicture::class, 'idpes');
     }
 
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(LegacyCity::class, 'idmun_nascimento', 'idmun');
+    }
+
+    public function cityBirth(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'idmun_nascimento');
+    }
+
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected static function boot()
     {
@@ -175,17 +190,12 @@ class LegacyIndividual extends Model
         });
     }
 
-    /**
-     * @param string|int $cpf
-     *
-     * @return Model|null
-     */
     public static function findByCpf(string|int $cpf): ?Model
     {
         $cpf = preg_replace('/\D/', '', $cpf);
 
         if ($cpf === null) {
-            return  null;
+            return null;
         }
 
         return static::query()->where('cpf', (int) $cpf)->first();
@@ -195,6 +205,46 @@ class LegacyIndividual extends Model
     {
         return Attribute::make(
             get: fn ($value) => int2CPF($value),
+        );
+    }
+
+    protected function socialName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => !empty($this->nome_social) ? $this->nome_social : null
+        );
+    }
+
+    protected function realName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->social_name) {
+                    return $this->social_name;
+                }
+
+                return $this->person->name;
+            }
+        );
+    }
+
+    protected function birthdate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->data_nasc,
+        );
+    }
+
+    protected function parentsName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $data = collect();
+                $data->push($this->father->name);
+                $data->push($this->mother->name);
+
+                return $data->filter()->implode(' e ');
+            },
         );
     }
 }

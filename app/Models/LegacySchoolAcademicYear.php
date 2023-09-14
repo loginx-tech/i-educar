@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Models\Builders\LegacySchoolAcademicYearBuilder;
-use App\Traits\HasLegacyDates;
 use App\Traits\LegacyAttribute;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * LegacySchoolAcademicYear
@@ -18,35 +18,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LegacySchoolAcademicYear extends LegacyModel
 {
     use LegacyAttribute;
-    use HasLegacyDates;
+
+    public const NOT_INITIALIZED = 0;
+
+    public const IN_PROGRESS = 1;
+
+    public const FINALIZED = 2;
 
     /**
      * @var string
      */
     protected $table = 'pmieducar.escola_ano_letivo';
 
-    public const CREATED_AT = null;
-
-    /**
-     * @var string
-     */
-    protected $primaryKey = 'ref_cod_escola';
-
     /**
      * Builder dos filtros
-     *
-     * @var string
      */
     protected string $builder = LegacySchoolAcademicYearBuilder::class;
-
-    /**
-     * Atributos legados para serem usados nas queries
-     *
-     * @var string[]
-     */
-    public array $legacy = [
-        'year' => 'ano'
-    ];
 
     /**
      * @var array
@@ -61,7 +48,7 @@ class LegacySchoolAcademicYear extends LegacyModel
         'ativo',
         'turmas_por_ano',
         'copia_dados_professor',
-        'copia_dados_demais_servidores'
+        'copia_dados_demais_servidores',
     ];
 
     protected function year(): Attribute
@@ -74,5 +61,10 @@ class LegacySchoolAcademicYear extends LegacyModel
     public function school(): BelongsTo
     {
         return $this->belongsTo(LegacySchool::class, 'ref_cod_escola');
+    }
+
+    public function academicYearStages(): HasMany
+    {
+        return $this->hasMany(LegacyAcademicYearStage::class, 'escola_ano_letivo_id');
     }
 }

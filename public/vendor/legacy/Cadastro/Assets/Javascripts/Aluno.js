@@ -53,6 +53,7 @@ var pessoaPaiOuMae;
 var $idField = $j("#id");
 var $nomeField = $j("#pessoa_nome");
 var $cpfField = $j("#id_federal");
+var obrigarCPF = $j("#obrigarCPF");
 
 var $resourceNotice = $j("<span>")
   .html("")
@@ -91,7 +92,7 @@ function excluirLaudoMedico(event) {
 function laudoMedicoObrigatorio() {
   $j("#laudo_medico").addClass("error");
   messageUtils.error(
-    "Deve ser anexado um laudo médico para alunos com deficiências"
+    "Deve ser anexado um laudo médico para alunos com deficiências ou transtornos"
   );
 }
 
@@ -198,7 +199,7 @@ function certidaoCasamentoInvalida() {
 }
 
 var newSubmitForm = function (event) {
-  if ($j("#deficiencias").val().length > 1) {
+  if ($j("#deficiencias").val().length > 1 || $j("#transtornos").val().length > 1) {
     let laudos = $j("#url_laudo_medico").val();
     let temLaudos = false;
 
@@ -207,7 +208,7 @@ var newSubmitForm = function (event) {
     }
 
     var additionalVars = {
-      deficiencias: $j("#deficiencias").val(),
+      deficiencias: $j.merge($j("#deficiencias").val(), $j("#transtornos").val()),
     };
 
     var options = {
@@ -241,6 +242,13 @@ function handleShowSubmit() {
 };
 
 function formularioValido() {
+  if ( obrigarCPF.val() == 1 && $j("#tipo_nacionalidade").val() != 3  && !$cpfField.val()) {
+    messageUtils.error(
+      "É necessário o preenchimento do CPF"
+    );
+    return false;
+  }
+
   if (obrigarDocumentoPessoa && !possuiDocumentoObrigatorio()) {
     messageUtils.error(
       "É necessário o preenchimento de pelo menos um dos seguintes documentos: CPF, RG ou Certidão civil."
@@ -983,19 +991,6 @@ resourceOptions.handleGet = function (dataResponse) {
 
   camposTransporte();
 
-  function verificaObrigatoriedadeRg() {
-    $j("#data_emissao_rg").makeUnrequired();
-    $j("#orgao_emissao_rg").makeUnrequired();
-    $j("#uf_emissao_rg").makeUnrequired();
-    if ($j("#rg").val().trim().length && obrigarCamposCenso) {
-      $j("#data_emissao_rg").makeRequired();
-      $j("#orgao_emissao_rg").makeRequired();
-      $j("#uf_emissao_rg").makeRequired();
-    }
-  }
-
-  $j("#rg").on("change", verificaObrigatoriedadeRg);
-
   setTimeout(function () {
     $veiculo_transporte_escolar = $j("#veiculo_transporte_escolar");
     $veiculo_transporte_escolar.val(
@@ -1004,7 +999,6 @@ resourceOptions.handleGet = function (dataResponse) {
     $veiculo_transporte_escolar.trigger("chosen:updated");
   }, 550);
 
-  verificaObrigatoriedadeRg();
 };
 
 var changeVisibilityOfLinksToPessoaParent = function (parentType) {
@@ -1189,12 +1183,15 @@ var handleGetPersonDetails = function (dataResponse) {
   $j("#religiao_id").val(dataResponse.religiao_id);
 
   $deficiencias = $j("#deficiencias");
+  $transtornos = $j("#transtornos");
 
   $j.each(dataResponse.deficiencias, function (id, nome) {
     $deficiencias.children("[value=" + id + "]").attr("selected", "");
+    $transtornos.children("[value=" + id + "]").attr("selected", "");
   });
 
   $deficiencias.trigger("chosen:updated");
+  $transtornos.trigger("chosen:updated");
 
   function habilitaRecursosProvaInep() {
     var deficiencias = $j("#deficiencias").val();
@@ -1307,7 +1304,7 @@ var handleGetPersonDetails = function (dataResponse) {
 
   var mascara = null;
 
-  if (cpf) {
+  if (cpf && (obrigarCPF.val() == 0 || !ignoreValidation.includes(cpf))) {
     mascara = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   }
 
@@ -1956,14 +1953,14 @@ function canShowParentsFields() {
           <div id="dialog-recursos-prova-inep" style="font-size: 85%; z-index: 9999;">
           <ul style="padding-right: 30px;">
             <li>Dentre as opções: Prova Ampliada (Fonte 18), Prova superampliada (Fonte 24) ou Material didático e Prova em Braille, apenas uma deve ser informada;</li>
-            <li><b>Auxílio ledor</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. <b>Exceto</b> se possuir também Surdez;</li>
-            <li><b>Auxílio transcrição</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. Obs.: Quando a deficiência for Cegueira ou Surdocegueira, obrigatoriamente este auxílio deve ser informado junto com um outro auxílio;</li>
+            <li><b>Auxílio ledor</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Visão monocular, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. <b>Exceto</b> se possuir também Surdez;</li>
+            <li><b>Auxílio transcrição</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Visão monocular, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. Obs.: Quando a deficiência for Cegueira ou Surdocegueira, obrigatoriamente este auxílio deve ser informado junto com um outro auxílio;</li>
             <li><b>Guia-Intérprete</b>: pode ser informado quando o(a) aluno(a) possuir qualquer deficiência. <b>Exceto</b> se possuir Surdocegueira;</li>
             <li><b>Tradutor-Intérprete de Libras</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Surdez, Deficiência auditiva e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
             <li><b>Leitura Labial</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Surdez, Deficiência auditiva e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
             <li><b>Prova Ampliada (Fonte 18)</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Baixa visão e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
-            <li><b>Prova superampliada (Fonte 24)</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Baixa visão e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
-            <li><b>CD com áudio para deficiente visual</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. <b>Exceto</b> se possuir também Surdez;</li>
+            <li><b>Prova superampliada (Fonte 24)</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Baixa visão, Visão monocular e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
+            <li><b>CD com áudio para deficiente visual</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira, Baixa visão, Visão monocular, Surdocegueira, Deficiência física, Deficiência intelectual e Transtorno do espectro autista. <b>Exceto</b> se possuir também Surdez;</li>
             <li><b>Prova de Língua Portuguesa como segunda língua para surdos e deficientes auditivos</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Surdez, Deficiência auditiva e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
             <li><b>Prova em Vídeo em Libras</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Surdez, Deficiência auditiva e Surdocegueira. <b>Exceto</b> se possuir também Cegueira;</li>
             <li><b>Material didático e Prova em Braille</b>: pode ser informado quando o(a) aluno(a) possuir a(s) deficiência(s): Cegueira e Surdocegueira;</li>
@@ -2843,8 +2840,10 @@ function canShowParentsFields() {
 
       $cpfNotice.hide();
 
-      if (cpf && !ignoreValidation.includes(cpf) && validatesCpf()) {
-        getPersonByCpf(cpf);
+      if (cpf && (obrigarCPF.val() == 1 || !ignoreValidation.includes(cpf))) {
+        if (validatesCpf()) {
+          getPersonByCpf(cpf);
+        }
       }else{
         handleShowSubmit();
       }
@@ -2905,7 +2904,7 @@ function canShowParentsFields() {
 
       $cpfNotice.hide();
 
-      if (cpf && !ignoreValidation.includes(cpf) && !validationUtils.validatesCpf(cpf)) {
+      if (cpf && (obrigarCPF.val() == 1 || !ignoreValidation.includes(cpf)) && !validationUtils.validatesCpf(cpf)) {
         $cpfNotice.html("O CPF informado é inválido").slideDown("fast");
 
         $submitButton.attr("disabled", "disabled").hide();

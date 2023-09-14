@@ -23,8 +23,6 @@ class LegacyDisciplineAcademicYear extends Pivot
 
     /**
      * Builder dos filtros
-     *
-     * @var string
      */
     protected string $builder = LegacyDisciplineAcademicYearBuilder::class;
 
@@ -35,7 +33,7 @@ class LegacyDisciplineAcademicYear extends Pivot
      */
     public array $legacy = [
         'id' => 'componente_curricular_id',
-        'workload' => 'carga_horaria'
+        'workload' => 'carga_horaria',
     ];
 
     protected $fillable = [
@@ -44,6 +42,7 @@ class LegacyDisciplineAcademicYear extends Pivot
         'carga_horaria',
         'tipo_nota',
         'anos_letivos',
+        'hora_falta',
     ];
 
     public $timestamps = false;
@@ -52,8 +51,6 @@ class LegacyDisciplineAcademicYear extends Pivot
 
     /**
      * Serie
-     *
-     * @return BelongsTo
      */
     public function grade(): BelongsTo
     {
@@ -62,8 +59,6 @@ class LegacyDisciplineAcademicYear extends Pivot
 
     /**
      * Component Curricular
-     *
-     * @return BelongsTo
      */
     public function discipline(): BelongsTo
     {

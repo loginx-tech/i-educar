@@ -8,10 +8,6 @@ class LegacyDisciplineAcademicYearBuilder extends LegacyBuilder
 {
     /**
      * Retorna o recurso para os selects dos formulários
-     *
-     * @param array $filters
-     *
-     * @return Collection
      */
     public function getResource(array $filters = []): Collection
     {
@@ -23,8 +19,6 @@ class LegacyDisciplineAcademicYearBuilder extends LegacyBuilder
 
     /**
      * Filtra somente os distintos por id
-     *
-     * @return LegacyDisciplineAcademicYearBuilder
      */
     public function distinctDiscipline(): self
     {
@@ -33,10 +27,6 @@ class LegacyDisciplineAcademicYearBuilder extends LegacyBuilder
 
     /**
      * Filtra por série
-     *
-     * @param int $grade
-     *
-     * @return LegacyDisciplineAcademicYearBuilder
      */
     public function whereGrade(int $grade): self
     {
@@ -45,15 +35,33 @@ class LegacyDisciplineAcademicYearBuilder extends LegacyBuilder
 
     /**
      * Filtra por curso
-     *
-     * @param int $course
-     *
-     * @return LegacyDisciplineAcademicYearBuilder
      */
     public function whereCourse(int $course): self
     {
         return $this->whereHas('grade', function ($q) use ($course) {
             $q->whereCourse($course);
         });
+    }
+
+    /**
+     * Filtra por ano letivo
+     *
+     *
+     * @return LegacySchoolGradeDisciplineBuilder
+     */
+    public function whereYearEq(int $year)
+    {
+        return $this->whereRaw("anos_letivos @> ('{{$year}}')");
+    }
+
+    /**
+     * Filtra por Disciplina
+     *
+     *
+     * @return LegacySchoolGradeDisciplineBuilder
+     */
+    public function whereDiscipline(int $discipline): self
+    {
+        return $this->where('componente_curricular_id', $discipline);
     }
 }

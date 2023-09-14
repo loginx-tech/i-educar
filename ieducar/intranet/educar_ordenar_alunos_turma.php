@@ -1,25 +1,40 @@
 <?php
 
-return new class extends clsCadastro {
+use App\Models\LegacySchoolClass;
+
+return new class extends clsCadastro
+{
     public $pessoa_logada;
+
     public $cod_turma;
 
     public function Inicializar()
     {
         $retorno = 'Novo';
 
-        $this->cod_turma=$_GET['cod_turma'];
+        $this->cod_turma = $_GET['cod_turma'];
 
-        if (is_numeric($this->cod_turma)) {
+        if (is_numeric(value: $this->cod_turma)) {
+
+            $schoolclass = LegacySchoolClass::find(($this->cod_turma));
+
+            if ($schoolclass) {
+                $this->addHtml(view(
+                    'sequence.schoolclass', ['schoolclass' => $schoolclass]
+                )->render());
+
+                $this->campoQuebra();
+            }
+
             $matriculasTurma = new clsPmieducarMatriculaTurma();
-            $matriculasTurma = $matriculasTurma->listaPorSequencial($this->cod_turma);
+            $matriculasTurma = $matriculasTurma->listaPorSequencial(codTurma: $this->cod_turma);
 
             if ($matriculasTurma) {
                 foreach ($matriculasTurma as $val) {
-                    $this->campoTexto('nome_aluno_' . $val['id'], '', $val['nome'], 60, false, false, false, true, '', '', '', '', true);
-                    $this->campoTexto('situacao_' . $val['id'], '', $val['situacao'], 20, false, false, false, true, '', '', '', '', true);
+                    $this->campoTexto(nome: 'nome_aluno_' . $val['id'], campo: '', valor: $val['nome'], tamanhovisivel: 60, tamanhomaximo: false, duplo: true, disabled: true);
+                    $this->campoTexto(nome: 'situacao_' . $val['id'], campo: '', valor: $val['situacao'], tamanhovisivel: 20, tamanhomaximo: false, duplo: true, disabled: true);
                     $matriculaTurmaId = $val['id'];
-                    $this->campoTexto("sequencia[$matriculaTurmaId]", '', ($val['sequencial_fechamento']), 5, null, false, false, false);
+                    $this->campoTexto(nome: "sequencia[$matriculaTurmaId]", campo: '', valor: ($val['sequencial_fechamento']), tamanhovisivel: 5);
                 }
                 $retorno = 'Editar';
             }
@@ -27,9 +42,9 @@ return new class extends clsCadastro {
 
         $this->url_cancelar = "educar_turma_det.php?cod_turma={$this->cod_turma}";
 
-        $this->breadcrumb('Sequência manual dos alunos na turma', [
-        url('intranet/educar_index.php') => 'Escola',
-    ]);
+        $this->breadcrumb(currentPage: 'Sequência manual dos alunos na turma', breadcrumbs: [
+            url(path: 'intranet/educar_index.php') => 'Escola',
+        ]);
 
         $this->nome_url_cancelar = 'Cancelar';
 
@@ -51,14 +66,14 @@ return new class extends clsCadastro {
 
         foreach ($this->sequencia as $matriculaTurmaId => $sequencial) {
             Portabilis_Utils_Database::fetchPreparedQuery(
-                'UPDATE pmieducar.matricula_turma
+                sql: 'UPDATE pmieducar.matricula_turma
                        SET sequencial_fechamento = $1
                      WHERE id = $2',
-                ['params' => [$sequencial, $matriculaTurmaId]]
+                options: ['params' => [$sequencial, $matriculaTurmaId]]
             );
         }
 
-        $this->simpleRedirect("educar_turma_det.php?cod_turma={$_GET['cod_turma']}");
+        $this->simpleRedirect(url: "educar_turma_det.php?cod_turma={$_GET['cod_turma']}");
     }
 
     public function Excluir()
@@ -68,7 +83,7 @@ return new class extends clsCadastro {
 
     public function Formular()
     {
-        $this->title = 'Série';
+        $this->title = 'Sequência de alunos na turma';
         $this->processoAp = '586';
     }
 };

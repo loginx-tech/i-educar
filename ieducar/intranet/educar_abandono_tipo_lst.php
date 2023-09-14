@@ -1,6 +1,7 @@
 <?php
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     /**
      * Referencia pega da session para o idpes do usuario atual
      *
@@ -30,12 +31,19 @@ return new class extends clsListagem {
     public $offset;
 
     public $cod_abandono_tipo;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $nome;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
+
     public $ref_cod_instituicao;
 
     public function Gerar()
@@ -43,65 +51,65 @@ return new class extends clsListagem {
         $this->titulo = 'Motivo Abandono - Listagem';
 
         foreach ($_GET as $var => $val) { // passa todos os valores obtidos no GET para atributos do objeto
-            $this->$var = ($val === '') ? null: $val;
+            $this->$var = ($val === '') ? null : $val;
         }
 
         $lista_busca = [
-            'Abandono'
+            'Abandono',
         ];
 
         $obj_permissao = new clsPermissoes();
-        $nivel_usuario = $obj_permissao->nivel_acesso($this->pessoa_logada);
+        $nivel_usuario = $obj_permissao->nivel_acesso(int_idpes_usuario: $this->pessoa_logada);
         if ($nivel_usuario == 1) {
             $lista_busca[] = 'Instituição';
         }
 
-        $this->addCabecalhos($lista_busca);
+        $this->addCabecalhos(coluna: $lista_busca);
 
         // Filtros de Foreign Keys
-        include('include/pmieducar/educar_campo_lista.php');
+        include 'include/pmieducar/educar_campo_lista.php';
 
         // outros Filtros
-        $this->campoTexto('nome', 'Abandono', $this->nome, 30, 255, false);
+        $this->campoTexto(nome: 'nome', campo: 'Abandono', valor: $this->nome, tamanhovisivel: 30, tamanhomaximo: 255, obrigatorio: false);
 
         // Paginador
         $this->limite = 20;
 
         $query = \App\Models\LegacyAbandonmentType::query()
-            ->where('ativo', 1)
-            ->orderBy('nome', 'ASC');
+            ->where(column: 'ativo', operator: 1)
+            ->orderBy(column: 'nome', direction: 'ASC');
 
-        if (is_string($this->nome)) {
-            $query->where('nome', 'ilike', '%' . $this->nome . '%');
+        if (is_string(value: $this->nome)) {
+            $query->where(column: 'nome', operator: 'ilike', value: '%' . $this->nome . '%');
         }
 
-        if (is_numeric($this->ref_cod_instituicao)) {
-            $query->where('ref_cod_instituicao', $this->ref_cod_instituicao);
+        if (is_numeric(value: $this->ref_cod_instituicao)) {
+            $query->where(column: 'ref_cod_instituicao', operator: $this->ref_cod_instituicao);
         }
 
-        $result = $query->paginate($this->limite, pageName: 'pagina_');
+        $result = $query->paginate(perPage: $this->limite, pageName: 'pagina_');
 
         $lista = $result->items();
         $total = $result->total();
 
         // monta a lista
-        if (is_array($lista) && count($lista)) {
+        if (is_array(value: $lista) && count(value: $lista)) {
             foreach ($lista as $registro) {
-                $obj_cod_instituicao = new clsPmieducarInstituicao($registro['ref_cod_instituicao']);
+                $obj_cod_instituicao = new clsPmieducarInstituicao(cod_instituicao: $registro['ref_cod_instituicao']);
                 $obj_cod_instituicao_det = $obj_cod_instituicao->detalhe();
                 $registro['ref_cod_instituicao'] = $obj_cod_instituicao_det['nm_instituicao'];
 
                 $lista_busca = [
-                    "<a href=\"educar_abandono_tipo_det.php?cod_abandono_tipo={$registro['cod_abandono_tipo']}\">{$registro['nome']}</a>"
+                    "<a href=\"educar_abandono_tipo_det.php?cod_abandono_tipo={$registro['cod_abandono_tipo']}\">{$registro['nome']}</a>",
                 ];
 
                 if ($nivel_usuario == 1) {
                     $lista_busca[] = "<a href=\"educar_abandono_tipo_det.php?cod_abandono_tipo={$registro['cod_abandono_tipo']}\">{$registro['ref_cod_instituicao']}</a>";
                 }
-                $this->addLinhas($lista_busca);
+                $this->addLinhas(linha: $lista_busca);
             }
         }
-        $this->addPaginador2('educar_abandono_tipo_lst.php', $total, $_GET, null, $this->limite);
+        $this->addPaginador2(strUrl: 'educar_abandono_tipo_lst.php', intTotalRegistros: $total, mixVariaveisMantidas: $_GET, nome: null, intResultadosPorPagina: $this->limite);
 
         if ($obj_permissoes->permissao_cadastra(950, $this->pessoa_logada, 7)) {
             $this->acao = 'go("educar_abandono_tipo_cad.php")';
@@ -109,8 +117,8 @@ return new class extends clsListagem {
         }
         $this->largura = '100%';
 
-        $this->breadcrumb('Listagem de tipos de abandono', [
-            url('intranet/educar_index.php') => 'Escola',
+        $this->breadcrumb(currentPage: 'Listagem de tipos de abandono', breadcrumbs: [
+            url(path: 'intranet/educar_index.php') => 'Escola',
         ]);
     }
 

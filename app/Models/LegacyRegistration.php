@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Ankurk91\Eloquent\BelongsToOne;
+use App\Models\Builders\LegacyRegistrationBuilder;
+use App\Models\View\Situation;
 use App\Traits\HasLegacyDates;
 use App_Model_MatriculaSituacao;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,14 +18,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * LegacyRegistration
  *
- * @property integer              $id
- * @property boolean              $isTransferred
- * @property boolean              $isAbandoned
- * @property boolean              $isCanceled
- * @property boolean              $bloquear_troca_de_situacao
- * @property boolean              $dependencia
- * @property integer              $cod_matricula
- * @property integer              $ano
+ * @property int              $id
+ * @property bool              $isTransferred
+ * @property bool              $isAbandoned
+ * @property bool              $isCanceled
+ * @property bool              $bloquear_troca_de_situacao
+ * @property bool              $dependencia
+ * @property int              $cod_matricula
+ * @property int              $ano
  * @property LegacyStudentAbsence $studentAbsence
  * @property LegacyStudentScore   $studentScore
  * @property LegacyCourse         $course
@@ -31,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class LegacyRegistration extends LegacyModel
 {
     use HasLegacyDates;
+    use BelongsToOne;
 
     /**
      * @var string
@@ -38,12 +42,15 @@ class LegacyRegistration extends LegacyModel
     protected $table = 'pmieducar.matricula';
 
     public const CREATED_AT = 'data_cadastro';
+
     public const UPDATED_AT = 'updated_at';
 
     /**
      * @var string
      */
     protected $primaryKey = 'cod_matricula';
+
+    protected string $builder = LegacyRegistrationBuilder::class;
 
     /**
      * @var array
@@ -60,46 +67,62 @@ class LegacyRegistration extends LegacyModel
         'aprovado',
         'data_matricula',
         'ultima_matricula',
-        'bloquear_troca_de_situacao'
+        'bloquear_troca_de_situacao',
     ];
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'data_matricula'
+    protected $casts = [
+        'data_matricula' => 'date',
+        'data_cancel' => 'date',
+        'data_exclusao' => 'date',
+    ];
+
+    public array $legacy = [
+        'id' => 'cod_matricula',
+        'student_id' => 'ref_cod_aluno',
     ];
 
     protected function id(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->cod_matricula
+            get: fn () => $this->cod_matricula
+        );
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->student->name
         );
     }
 
     public function isLockedToChangeStatus(): bool
     {
-        return (bool)$this->bloquear_troca_de_situacao;
+        return (bool) $this->bloquear_troca_de_situacao;
     }
 
     protected function isDependency(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->dependencia
+            get: fn () => $this->dependencia
         );
     }
 
     protected function year(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->ano
+            get: fn () => $this->ano
+        );
+    }
+
+    protected function schoolId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->ref_ref_cod_escola
         );
     }
 
     /**
      * Relação com o aluno.
-     *
-     * @return BelongsTo
      */
     public function student(): BelongsTo
     {
@@ -108,8 +131,6 @@ class LegacyRegistration extends LegacyModel
 
     /**
      * Relação com a escola.
-     *
-     * @return BelongsTo
      */
     public function school(): BelongsTo
     {
@@ -118,8 +139,6 @@ class LegacyRegistration extends LegacyModel
 
     /**
      * Relação com a série.
-     *
-     * @return BelongsTo
      */
     public function grade(): BelongsTo
     {
@@ -128,17 +147,12 @@ class LegacyRegistration extends LegacyModel
 
     /**
      * Relação com o curso.
-     *
-     * @return BelongsTo
      */
     public function course(): BelongsTo
     {
         return $this->belongsTo(LegacyCourse::class, 'ref_cod_curso');
     }
 
-    /**
-     * @return HasMany
-     */
     public function enrollments(): HasMany
     {
         return $this->hasMany(LegacyEnrollment::class, 'ref_cod_matricula');
@@ -151,13 +165,55 @@ class LegacyRegistration extends LegacyModel
             'pmieducar.matricula_turma',
             'ref_cod_matricula',
             'ref_cod_turma',
-        )->wherePivot('ativo', 1)
-            ->where('pmieducar.turma.ativo', 1);
+        )->where('pmieducar.turma.ativo', 1);
     }
 
-    /**
-     * @return HasMany
-     */
+    public function situations(): HasMany
+    {
+        return $this->hasMany(Situation::class, 'cod_matricula');
+    }
+
+    public function situation(): HasOne
+    {
+        return $this->hasOne(Situation::class, 'cod_matricula');
+    }
+
+    public function situationApproved(): HasOne
+    {
+        return $this->hasOne(Situation::class, 'cod_matricula')->approved();
+    }
+
+    public function schoolClass()
+    {
+        return $this->belongsToOne(
+            LegacySchoolClass::class,
+            'pmieducar.matricula_turma',
+            'ref_cod_matricula',
+            'ref_cod_turma',
+        )->where('pmieducar.turma.ativo', 1)
+            ->orderBy('matricula_turma.sequencial', 'desc');
+    }
+
+    public function transferStart(): HasOne
+    {
+        return $this->hasOne(LegacyTransferRequest::class, 'ref_cod_matricula_entrada');
+    }
+
+    public function transferEnd(): HasOne
+    {
+        return $this->hasOne(LegacyTransferRequest::class, 'ref_cod_matricula_saida');
+    }
+
+    public function registrationStores(): HasMany
+    {
+        return $this->hasMany(LegacyRegistrationScore::class, 'matricula_id');
+    }
+
+    public function disciplineScores(): HasMany
+    {
+        return $this->hasMany(LegacyDisciplineScore::class, 'nota_aluno_id');
+    }
+
     public function activeEnrollments(): HasMany
     {
         return $this->hasMany(LegacyEnrollment::class, 'ref_cod_matricula')->where('ativo', 1);
@@ -171,9 +227,6 @@ class LegacyRegistration extends LegacyModel
         return $this->hasOne(LegacyEnrollment::class, 'ref_cod_matricula')->orderBy('sequencial', 'DESC');
     }
 
-    /**
-     * @return HasMany
-     */
     public function exemptions(): HasMany
     {
         return $this->hasMany(LegacyDisciplineExemption::class, 'ref_cod_matricula', 'cod_matricula');
@@ -181,7 +234,6 @@ class LegacyRegistration extends LegacyModel
 
     /**
      * @param Builder $query
-     *
      * @return Builder
      */
     public function scopeActive($query)
@@ -192,51 +244,39 @@ class LegacyRegistration extends LegacyModel
     protected function isTransferred(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->aprovado == App_Model_MatriculaSituacao::TRANSFERIDO
+            get: fn () => $this->aprovado == App_Model_MatriculaSituacao::TRANSFERIDO
         );
     }
 
     protected function isAbandoned(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->aprovado == App_Model_MatriculaSituacao::ABANDONO
+            get: fn () => $this->aprovado == App_Model_MatriculaSituacao::ABANDONO
         );
     }
 
     protected function isCanceledA(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->ativo === 0
+            get: fn () => $this->ativo === 0
         );
     }
 
-    /**
-     * @return HasOne
-     */
     public function studentAbsence(): HasOne
     {
         return $this->hasOne(LegacyStudentAbsence::class, 'matricula_id');
     }
 
-    /**
-     * @return HasOne
-     */
     public function studentScore(): HasOne
     {
         return $this->hasOne(LegacyStudentScore::class, 'matricula_id');
     }
 
-    /**
-     * @return HasOne
-     */
     public function studentDescriptiveOpinion(): HasOne
     {
         return $this->hasOne(LegacyStudentDescriptiveOpinion::class, 'matricula_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function dependencies(): HasMany
     {
         return $this->hasMany(LegacyDisciplineDependence::class, 'ref_cod_matricula', 'cod_matricula');
@@ -261,7 +301,7 @@ class LegacyRegistration extends LegacyModel
     protected function statusDescription(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new RegistrationStatus())->getDescriptiveValues()[(int)$this->aprovado]
+            get: fn () => (new RegistrationStatus())->getDescriptiveValues()[(int) $this->aprovado]
         );
     }
 

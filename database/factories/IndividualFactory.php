@@ -15,7 +15,7 @@ class IndividualFactory extends Factory
         ];
     }
 
-    public function forView(int|null $id = null): self
+    public function forView(int $id = null): self
     {
         $attributes = $id ? ['idpes' => $id] : [];
         $model = LegacyIndividualFactory::new($attributes)->create();
@@ -27,7 +27,7 @@ class IndividualFactory extends Factory
                 'created_at' => $model->data_cad,
                 'mother_individual_id' => 'idpes_mae',
                 'father_individual_id' => 'idpes_pai',
-                'guardian_individual_id' => 'idpes_responsavel'
+                'guardian_individual_id' => 'idpes_responsavel',
             ];
         });
     }

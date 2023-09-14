@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\LegacyIndividual;
+use App\Models\LegacyInstitution;
 use App\Models\PersonHasPlace;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
@@ -16,7 +17,7 @@ class PessoaController extends ApiCoreController
     {
         $can = true;
 
-        if (! $this->getRequest()->id && ! $this->getRequest()->cpf) {
+        if (!$this->getRequest()->id && !$this->getRequest()->cpf) {
             $can = false;
             $this->messenger->append('É necessário receber uma variavel \'id\' ou \'cpf\'');
         } elseif ($this->getRequest()->id) {
@@ -32,10 +33,9 @@ class PessoaController extends ApiCoreController
     {
         $existenceOptions = ['schema_name' => 'cadastro', 'field_name' => 'idpes'];
 
-        return (
+        return
             $this->validatesPresenceOf('id') &&
-            $this->validatesExistenceOf('fisica', $this->getRequest()->id, $existenceOptions)
-        );
+            $this->validatesExistenceOf('fisica', $this->getRequest()->id, $existenceOptions);
     }
 
     // load resources
@@ -73,9 +73,9 @@ class PessoaController extends ApiCoreController
 
     protected function loadPessoaByCpf($cpf = null)
     {
-        $cpf = preg_replace('/[^0-9]/', '', (string)$cpf);
+        $cpf = preg_replace('/[^0-9]/', '', (string) $cpf);
 
-        if (! $cpf) {
+        if (!$cpf) {
             throw new Exception('CPF deve conter caracteres numéricos');
         }
 
@@ -486,7 +486,7 @@ class PessoaController extends ApiCoreController
 
     private function validaNomeSocial()
     {
-        if($this->getRequest()->nome_social) {
+        if ($this->getRequest()->nome_social) {
             $validator = new NameValidator($this->getRequest()->nome_social);
 
             if (!$validator->isValid()) {
@@ -495,6 +495,7 @@ class PessoaController extends ApiCoreController
                 return false;
             }
         }
+
         return true;
     }
 
@@ -552,7 +553,7 @@ class PessoaController extends ApiCoreController
 
         $sql = 'select 1 from cadastro.pessoa WHERE idpes = $1 limit 1';
 
-        if (! $pessoaId || Portabilis_Utils_Database::selectField($sql, $pessoaId) != 1) {
+        if (!$pessoaId || Portabilis_Utils_Database::selectField($sql, $pessoaId) != 1) {
             $pessoa->tipo = 'F';
             $pessoa->idpes_cad = $this->currentUserId();
             $pessoaId = $pessoa->cadastra();
@@ -623,7 +624,7 @@ class PessoaController extends ApiCoreController
         $this->neighborhood = $this->getRequest()->neighborhood;
         $this->city_id = $this->getRequest()->city_id;
 
-        $this->saveAddress($this->getRequest()->person_id,true);
+        $this->saveAddress($this->getRequest()->person_id, true);
     }
 
     protected function getInep($servidorId)
@@ -656,6 +657,7 @@ class PessoaController extends ApiCoreController
 
         $_servidor['exist'] = $exist;
         $_servidor['id'] = $id;
+        $_servidor['instituicao_id'] = LegacyInstitution::active()->first()->cod_instituicao;
         $_servidor['nome'] = $exist ? $this->loadPessoa($id)['nome'] : null;
 
         return $_servidor;
@@ -730,7 +732,7 @@ class PessoaController extends ApiCoreController
         }
 
         return [
-            'pessoas' => $filters
+            'pessoas' => $filters,
         ];
     }
 

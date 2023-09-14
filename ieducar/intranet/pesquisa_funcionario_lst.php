@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Session;
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     public $chave_campo;
+
     public $importarCpf;
 
     public function Gerar()
@@ -21,12 +23,11 @@ return new class extends clsListagem {
             $parametros->preencheAtributosComArray(Session::get('campos'));
         }
 
-
         $this->addCabecalhos(['Matrícula', 'CPF', 'Funcionário']);
 
         // Filtros de Busca
-        $this->campoTexto('campo_busca', 'Funcionário', '', 50, 255, false, false, false, 'Matrícula/CPF/Nome do Funcionário');
-        $this->campoOculto('com_matricula', $_GET['com_matricula']);
+        $this->campoTexto(nome: 'campo_busca', campo: 'Funcionário', valor: '', tamanhovisivel: 50, tamanhomaximo: 255, descricao: 'Matrícula/CPF/Nome do Funcionário');
+        $this->campoOculto(nome: 'com_matricula', valor: $_GET['com_matricula']);
 
         if ($_GET['campo_busca']) {
             $chave_busca = @$_GET['campo_busca'];
@@ -38,10 +39,10 @@ return new class extends clsListagem {
 
         // Paginador
         $limite = 10;
-        $iniciolimit = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"] * $limite - $limite: 0;
+        $iniciolimit = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"] * $limite - $limite : 0;
 
         $this->chave_campo = $_GET['chave_campo'];
-        $this->campoOculto('chave_campo', $this->chave_campo);
+        $this->campoOculto(nome: 'chave_campo', valor: $this->chave_campo);
         if (is_numeric($this->chave_campo)) {
             $chave = "[$this->chave_campo]";
         } else {
@@ -58,14 +59,14 @@ return new class extends clsListagem {
 
         if ($busca == 'S') {
             $obj_funcionario = new clsFuncionario();
-            $lst_funcionario = $obj_funcionario->lista(false, $chave_busca, false, false, false, false, false, $iniciolimit, $limite, false, $com_matricula);
+            $lst_funcionario = $obj_funcionario->lista(str_nome: $chave_busca, int_qtd_registros: $limite);
 
             if (!$lst_funcionario) {
-                $lst_funcionario = $obj_funcionario->lista($chave_busca, false, false, false, false, false, false, $iniciolimit, $limite, false, $com_matricula);
+                $lst_funcionario = $obj_funcionario->lista(str_matricula: $chave_busca, int_inicio_limit: $iniciolimit, int_qtd_registros: $limite, matricula_is_not_null: $com_matricula);
             }
         } else {
             $obj_funcionario = new clsFuncionario();
-            $lst_funcionario = $obj_funcionario->lista(false, false, false, false, false, false, false, $iniciolimit, $limite, false, $com_matricula);
+            $lst_funcionario = $obj_funcionario->lista(int_inicio_limit: $iniciolimit, int_qtd_registros: $limite, matricula_is_not_null: $com_matricula);
         }
 
         if ($lst_funcionario) {
@@ -74,9 +75,9 @@ return new class extends clsListagem {
                 $det_cod_servidor = $obj_cod_servidor->detalhe();
                 $det_cod_servidor = $det_cod_servidor['idpes']->detalhe();
 
-                $funcao  = ' set_campo_pesquisa(';
+                $funcao = ' set_campo_pesquisa(';
                 $virgula = '';
-                $cont    = 0;
+                $cont = 0;
 
                 foreach ($parametros->getCampoNome() as $campo) {
                     if ($parametros->getCampoTipo($cont) == 'text') {
@@ -118,12 +119,12 @@ return new class extends clsListagem {
                 $this->addLinhas(["
                     <a href='javascript:void(0);' onclick=\"javascript:{$funcao}\">{$funcionario['matricula']}</a>",
                     "<a href='javascript:void(0);' onclick=\"javascript:{$funcao}\">{$det_cod_servidor['cpf']}</a>",
-                    "<a href='javascript:void(0);' onclick=\"javascript:{$funcao}\">{$funcionario['nome']}</a>" ]);
+                    "<a href='javascript:void(0);' onclick=\"javascript:{$funcao}\">{$funcionario['nome']}</a>"]);
                 $total = $funcionario['_total'];
             }
         }
         // Paginador
-        $this->addPaginador2('pesquisa_funcionario_lst.php', $total, $_GET, $this->nome, $limite);
+        $this->addPaginador2(strUrl: 'pesquisa_funcionario_lst.php', intTotalRegistros: $total, mixVariaveisMantidas: $_GET, nome: $this->nome, intResultadosPorPagina: $limite);
 
         // Define Largura da Página
         $this->largura = '100%';
@@ -132,8 +133,8 @@ return new class extends clsListagem {
     public function Formular()
     {
         $this->title = 'Pesquisa por Funcionário!';
-        $this->processoAp         = '0';
-        $this->renderMenu         = false;
+        $this->processoAp = '0';
+        $this->renderMenu = false;
         $this->renderMenuSuspenso = false;
     }
 };

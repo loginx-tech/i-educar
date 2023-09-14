@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\DB;
 class SequencialEnturmacao
 {
     public $refCodMatricula;
+
     public $refCodTurma;
+
     public $dataEnturmacao;
 
     /**
@@ -77,20 +79,6 @@ class SequencialEnturmacao
         }
     }
 
-    public function ordenaSequencialExcluiMatricula()
-    {
-        $sequencialFechamento = $this->existeMatriculaTurma();
-
-        $this->subtraiSequencialPosterior($sequencialFechamento);
-
-        // FIXME
-        // A implentação anterior retornava uma variável indefinida, ver
-        // impactos ao corrigir esta implementação para retornar o sequencial
-        // correto.
-
-        return null;
-    }
-
     private function sequencialAlunoAposData()
     {
         $sql = "  SELECT MAX(sequencial_fechamento)+1 as sequencial
@@ -99,6 +87,7 @@ class SequencialEnturmacao
                  INNER JOIN pmieducar.aluno ON (aluno.cod_aluno = matricula.ref_cod_aluno)
                  INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
                  WHERE matricula.ativo = 1
+                   AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
                    AND ref_cod_turma = {$this->refCodTurma}
                    AND matricula_turma.data_enturmacao <= '{$this->dataEnturmacao}'
                    AND (CASE WHEN matricula_turma.data_enturmacao = '{$this->dataEnturmacao}'
@@ -131,6 +120,7 @@ class SequencialEnturmacao
                INNER JOIN pmieducar.aluno ON (aluno.cod_aluno = matricula.ref_cod_aluno)
                INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
                WHERE matricula.ativo = 1
+                 AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
                  AND ref_cod_turma = {$this->refCodTurma}
                  AND matricula_turma.data_enturmacao < '{$relocationDate}'
                  AND pessoa.nome < (SELECT pessoa.nome
@@ -174,15 +164,7 @@ class SequencialEnturmacao
             INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
             WHERE matricula.ativo = 1
             AND ref_cod_turma = {$this->refCodTurma}
-            AND (CASE
-                WHEN matricula_turma.ativo = 1 THEN TRUE
-                WHEN matricula_turma.transferido THEN TRUE
-                WHEN matricula_turma.remanejado THEN TRUE
-                WHEN matricula.dependencia THEN TRUE
-                WHEN matricula_turma.abandono THEN TRUE
-                WHEN matricula_turma.reclassificado THEN TRUE
-                ELSE FALSE
-            END)
+            AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
             AND matricula.dependencia = false";
 
         return DB::selectOne($sql)->sequencial ?: 1;
@@ -197,15 +179,7 @@ class SequencialEnturmacao
             INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
             WHERE matricula.ativo = 1
             AND ref_cod_turma = {$this->refCodTurma}
-            AND (CASE
-                WHEN matricula_turma.ativo = 1 THEN TRUE
-                WHEN matricula_turma.transferido THEN TRUE
-                WHEN matricula_turma.remanejado THEN TRUE
-                WHEN matricula.dependencia THEN TRUE
-                WHEN matricula_turma.abandono THEN TRUE
-                WHEN matricula_turma.reclassificado THEN TRUE
-                ELSE FALSE
-            END)
+            AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
             AND matricula.dependencia = true
             AND matricula_turma.data_enturmacao <= '{$this->dataEnturmacao}'
             AND (CASE
@@ -221,7 +195,7 @@ class SequencialEnturmacao
                  END)";
 
         return DB::selectOne($sql)->sequencial;
-        ;
+
     }
 
     private function sequencialAlunoDependenciaPorData()
@@ -233,15 +207,7 @@ class SequencialEnturmacao
             INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
             WHERE matricula.ativo = 1
             AND ref_cod_turma = {$this->refCodTurma}
-            AND (CASE
-                WHEN matricula_turma.ativo = 1 THEN TRUE
-                WHEN matricula_turma.transferido THEN TRUE
-                WHEN matricula_turma.remanejado THEN TRUE
-                WHEN matricula.dependencia THEN TRUE
-                WHEN matricula_turma.abandono THEN TRUE
-                WHEN matricula_turma.reclassificado THEN TRUE
-                ELSE FALSE
-            END)
+            AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
             AND matricula.dependencia = true
             AND matricula_turma.data_enturmacao <= '{$this->dataEnturmacao}'
             AND (CASE
@@ -268,13 +234,7 @@ class SequencialEnturmacao
       INNER JOIN pmieducar.aluno ON (aluno.cod_aluno = matricula.ref_cod_aluno)
       INNER JOIN cadastro.pessoa ON (pessoa.idpes = aluno.ref_idpes)
       WHERE matricula.ativo = 1
-        AND (CASE WHEN matricula_turma.ativo = 1 THEN TRUE
-                  WHEN matricula_turma.transferido THEN TRUE
-                  WHEN matricula_turma.remanejado THEN TRUE
-                  WHEN matricula.dependencia THEN TRUE
-                  WHEN matricula_turma.abandono THEN TRUE
-                  WHEN matricula_turma.reclassificado THEN TRUE
-                  ELSE FALSE END)
+        AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
         AND matricula_turma.ref_cod_turma = $this->refCodTurma
       ORDER BY sequencial_fechamento";
 
@@ -316,7 +276,7 @@ class SequencialEnturmacao
                 AND sequencial_fechamento >= ?
             ',
             [
-                $this->refCodTurma, $sequencial
+                $this->refCodTurma, $sequencial,
             ]
         );
     }
@@ -331,7 +291,7 @@ class SequencialEnturmacao
                 AND sequencial_fechamento > ?
             ',
             [
-                $this->refCodTurma, $sequencial
+                $this->refCodTurma, $sequencial,
             ]
         );
     }
@@ -405,20 +365,15 @@ class SequencialEnturmacao
                 WHERE matricula.ativo = 1
                 AND ref_cod_matricula = ?
                 AND ref_cod_turma = ?
-                AND (
-                    CASE
-                        WHEN matricula_turma.ativo = 1 THEN TRUE
-                        WHEN matricula_turma.transferido THEN TRUE
-                        WHEN matricula_turma.remanejado THEN TRUE
-                        WHEN matricula.dependencia THEN TRUE
-                        WHEN matricula_turma.abandono THEN TRUE
-                        WHEN matricula_turma.reclassificado THEN TRUE
-                        ELSE FALSE
-                    END
-                )
+                AND (matricula_turma.ativo = 1 OR transferido OR remanejado OR reclassificado OR abandono OR matricula.dependencia)
+                AND (sequencial = (SELECT max(sequencial) FROM pmieducar.matricula_turma mt
+                                                          WHERE mt.ref_cod_matricula = ref_cod_matricula
+                                                            AND mt.ref_cod_turma = ref_cod_turma
+                                                            AND (mt.ativo = 1 OR mt.transferido OR mt.remanejado OR mt.reclassificado OR mt.abandono OR matricula.dependencia)
+                                                          ))
             ',
             [
-                $this->refCodMatricula, $this->refCodTurma
+                $this->refCodMatricula, $this->refCodTurma,
             ]
         );
 

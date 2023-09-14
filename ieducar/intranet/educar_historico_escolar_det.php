@@ -1,128 +1,143 @@
 <?php
 
-return new class extends clsDetalhe {
-    /**
-     * Titulo no topo da pagina
-     *
-     * @var int
-     */
+return new class extends clsDetalhe
+{
     public $titulo;
 
     public $ref_cod_aluno;
+
     public $sequencial;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $ano;
+
     public $carga_horaria;
+
     public $dias_letivos;
+
     public $escola;
+
     public $escola_cidade;
+
     public $escola_uf;
+
     public $observacao;
+
     public $aprovado;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
 
     public $ref_cod_instituicao;
+
     public $nm_serie;
+
     public $origem;
+
     public $extra_curricular;
+
     public $ref_cod_matricula;
+
     public $frequencia;
 
     public function Gerar()
     {
         $this->titulo = 'Histórico Escolar - Detalhe';
 
-        $this->sequencial=$_GET['sequencial'];
-        $this->ref_cod_aluno=$_GET['ref_cod_aluno'];
+        $this->sequencial = $_GET['sequencial'];
+        $this->ref_cod_aluno = $_GET['ref_cod_aluno'];
 
-        $tmp_obj = new clsPmieducarHistoricoEscolar($this->ref_cod_aluno, $this->sequencial);
+        $tmp_obj = new clsPmieducarHistoricoEscolar(ref_cod_aluno: $this->ref_cod_aluno, sequencial: $this->sequencial);
         $registro = $tmp_obj->detalhe();
 
-        if (! $registro) {
+        if (!$registro) {
             $this->simpleRedirect("educar_historico_escolar_lst.php?ref_cod_aluno={$this->ref_cod_aluno}");
         }
 
         $obj_aluno = new clsPmieducarAluno();
-        $lst_aluno = $obj_aluno->lista($registro['ref_cod_aluno'], null, null, null, null, null, null, null, null, null, 1);
+        $lst_aluno = $obj_aluno->lista(int_cod_aluno: $registro['ref_cod_aluno'], int_ativo: 1);
         if (is_array($lst_aluno)) {
             $det_aluno = array_shift($lst_aluno);
             $nm_aluno = $det_aluno['nome_aluno'];
         }
 
         if ($nm_aluno) {
-            $this->addDetalhe([ 'Aluno', "{$nm_aluno}"]);
+            $this->addDetalhe(['Aluno', "{$nm_aluno}"]);
         }
 
         if ($registro['extra_curricular']) {
             if ($registro['escola']) {
-                $this->addDetalhe([ 'Instituição', "{$registro['escola']}"]);
+                $this->addDetalhe(['Instituição', "{$registro['escola']}"]);
             }
             if ($registro['escola_cidade']) {
-                $this->addDetalhe([ 'Cidade da Instituição', "{$registro['escola_cidade']}"]);
+                $this->addDetalhe(['Cidade da Instituição', "{$registro['escola_cidade']}"]);
             }
             if ($registro['escola_uf']) {
-                $this->addDetalhe([ 'Estado da Instituição', "{$registro['escola_uf']}"]);
+                $this->addDetalhe(['Estado da Instituição', "{$registro['escola_uf']}"]);
             }
             if ($registro['nm_serie']) {
-                $this->addDetalhe([ 'Série', "{$registro['nm_serie']}"]);
+                $this->addDetalhe(['Série', "{$registro['nm_serie']}"]);
             }
         } else {
             if ($registro['escola']) {
-                $this->addDetalhe([ 'Escola', "{$registro['escola']}"]);
+                $this->addDetalhe(['Escola', "{$registro['escola']}"]);
             }
             if ($registro['escola_cidade']) {
-                $this->addDetalhe([ 'Cidade da Escola', "{$registro['escola_cidade']}"]);
+                $this->addDetalhe(['Cidade da Escola', "{$registro['escola_cidade']}"]);
             }
             if ($registro['escola_uf']) {
-                $this->addDetalhe([ 'Estado da Escola', "{$registro['escola_uf']}"]);
+                $this->addDetalhe(['Estado da Escola', "{$registro['escola_uf']}"]);
             }
             if ($registro['nm_serie']) {
-                $this->addDetalhe([ 'Série', "{$registro['nm_serie']}"]);
+                $this->addDetalhe(['Série', "{$registro['nm_serie']}"]);
             }
         }
 
         if ($registro['nm_curso']) {
-            $this->addDetalhe([ 'Curso', "{$registro['nm_curso']}"]);
+            $this->addDetalhe(['Curso', "{$registro['nm_curso']}"]);
         }
 
         if ($registro['ano']) {
-            $this->addDetalhe([ 'Ano', "{$registro['ano']}"]);
+            $this->addDetalhe(['Ano', "{$registro['ano']}"]);
         }
         if ($registro['carga_horaria']) {
-            $registro['carga_horaria'] = str_replace('.', ',', $registro['carga_horaria']);
+            $registro['carga_horaria'] = str_replace(search: '.', replace: ',', subject: $registro['carga_horaria']);
 
-            $this->addDetalhe([ 'Carga Horária', "{$registro['carga_horaria']}"]);
+            $this->addDetalhe(['Carga Horária', "{$registro['carga_horaria']}"]);
         }
 
-        $this->addDetalhe([ 'Faltas globalizadas', is_numeric($registro['faltas_globalizadas']) ? 'Sim' : 'Não']);
+        $this->addDetalhe(['Faltas globalizadas', is_numeric($registro['faltas_globalizadas']) ? 'Sim' : 'Não']);
 
         if ($registro['dias_letivos']) {
-            $this->addDetalhe([ 'Dias Letivos', "{$registro['dias_letivos']}"]);
+            $this->addDetalhe(['Dias Letivos', "{$registro['dias_letivos']}"]);
         }
         if ($registro['frequencia']) {
-            $this->addDetalhe([ 'Frequência', "{$registro['frequencia']}"]);
+            $this->addDetalhe(['Frequência', "{$registro['frequencia']}"]);
         }
         if ($registro['extra_curricular']) {
-            $this->addDetalhe([ 'Extra-Curricular', 'Sim']);
+            $this->addDetalhe(['Extra-Curricular', 'Sim']);
         } else {
-            $this->addDetalhe([ 'Extra-Curricular', 'Não']);
+            $this->addDetalhe(['Extra-Curricular', 'Não']);
         }
 
         if ($registro['aceleracao']) {
-            $this->addDetalhe([ 'Aceleração', 'Sim']);
+            $this->addDetalhe(['Aceleração', 'Sim']);
         } else {
-            $this->addDetalhe([ 'Aceleração', 'Não']);
+            $this->addDetalhe(['Aceleração', 'Não']);
         }
         if ($registro['origem']) {
-            $this->addDetalhe([ 'Origem', 'Externo']);
+            $this->addDetalhe(['Origem', 'Externo']);
         } else {
-            $this->addDetalhe([ 'Origem', 'Interno']);
+            $this->addDetalhe(['Origem', 'Interno']);
         }
         if ($registro['observacao']) {
-            $this->addDetalhe([ 'Observação', "{$registro['observacao']}"]);
+            $this->addDetalhe(['Observação', "{$registro['observacao']}"]);
         }
         if ($registro['aprovado']) {
             if ($registro['aprovado'] == 1) {
@@ -145,24 +160,24 @@ return new class extends clsDetalhe {
                 $registro['aprovado'] = 'Reprovado por faltas';
             }
 
-            $this->addDetalhe([ 'Situação', "{$registro['aprovado']}"]);
+            $this->addDetalhe(['Situação', "{$registro['aprovado']}"]);
         }
 
         if ($registro['registro']) {
-            $this->addDetalhe([ 'Registro (arquivo)', "{$registro['registro']}"]);
+            $this->addDetalhe(['Registro (arquivo)', "{$registro['registro']}"]);
         }
 
         if ($registro['livro']) {
-            $this->addDetalhe([ 'Livro', "{$registro['livro']}"]);
+            $this->addDetalhe(['Livro', "{$registro['livro']}"]);
         }
 
         if ($registro['folha']) {
-            $this->addDetalhe([ 'Folha', "{$registro['folha']}"]);
+            $this->addDetalhe(['Folha', "{$registro['folha']}"]);
         }
 
         $obj = new clsPmieducarHistoricoDisciplinas();
         $obj->setOrderby('nm_disciplina ASC');
-        $lst = $obj->lista(null, $this->ref_cod_aluno, $this->sequencial);
+        $lst = $obj->lista(int_ref_ref_cod_aluno: $this->ref_cod_aluno, int_ref_sequencial: $this->sequencial);
 
         $qtd_disciplinas = $obj->_total;
         if ($lst) {
@@ -203,7 +218,7 @@ return new class extends clsDetalhe {
             $tabela .= '</table>';
         }
         if ($tabela) {
-            $this->addDetalhe([ 'Disciplina', "{$tabela}"]);
+            $this->addDetalhe(['Disciplina', "{$tabela}"]);
         }
 
         $this->obj_permissao = new clsPermissoes();
@@ -237,7 +252,7 @@ return new class extends clsDetalhe {
                                                           ORDER BY cod_matricula DESC
                                                              LIMIT 1");
 
-                $possuiVinculoComEscolaUltimaMatricula = in_array($escola_ultima_matricula, $idEscolasUsuario);
+                $possuiVinculoComEscolaUltimaMatricula = in_array(needle: $escola_ultima_matricula, haystack: $idEscolasUsuario);
 
                 if (($possuiVinculoComEscolaUltimaMatricula) || $this->nivel_usuario == 1 || $this->nivel_usuario == 2) {
                     if ($registro['origem']) {
@@ -270,11 +285,11 @@ return new class extends clsDetalhe {
                                                                                                                                                                                      INNER JOIN pmieducar.escola_usuario ON (escola_usuario.ref_cod_usuario = usuario.cod_usuario)
                                                                                                                                                                                  WHERE usuario.cod_usuario = $this->pessoa_logada)");
                 if ($escola_usuario_historico != '' || $this->nivel_usuario == 1 || $this->nivel_usuario == 2) {
-                    $this->addBotao('Copiar Histórico', "educar_historico_escolar_cad.php?ref_cod_aluno={$registro['ref_cod_aluno']}&sequencial={$registro['sequencial']}&copia=true");
+                    $this->addBotao(label: 'Copiar Histórico', url: "educar_historico_escolar_cad.php?ref_cod_aluno={$registro['ref_cod_aluno']}&sequencial={$registro['sequencial']}&copia=true");
                 }
             }
         } else {
-            $this->addBotao('Copiar Histórico', "educar_historico_escolar_cad.php?ref_cod_aluno={$registro['ref_cod_aluno']}&sequencial={$registro['sequencial']}&copia=true");
+            $this->addBotao(label: 'Copiar Histórico', url: "educar_historico_escolar_cad.php?ref_cod_aluno={$registro['ref_cod_aluno']}&sequencial={$registro['sequencial']}&copia=true");
             if ($registro['origem']) {
                 $this->url_editar = "educar_historico_escolar_cad.php?ref_cod_aluno={$registro['ref_cod_aluno']}&sequencial={$registro['sequencial']}";
             }
@@ -283,7 +298,7 @@ return new class extends clsDetalhe {
         $this->url_cancelar = "educar_historico_escolar_lst.php?ref_cod_aluno={$registro['ref_cod_aluno']}";
         $this->largura = '100%';
 
-        $this->breadcrumb('Atualização de históricos escolares', [
+        $this->breadcrumb(currentPage: 'Atualização de históricos escolares', breadcrumbs: [
             url('intranet/educar_index.php') => 'Escola',
         ]);
     }

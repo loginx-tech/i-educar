@@ -10,7 +10,6 @@ class EducacensoRepository
     /**
      * @param int $year
      * @param int $school
-     *
      * @return Builder
      */
     public function getBuilderForRecord20($year, $school)
@@ -22,7 +21,6 @@ class EducacensoRepository
 
     /**
      * @param int $school
-     *
      * @return Builder
      */
     public function getBuilderForRecord40($school)
@@ -34,7 +32,6 @@ class EducacensoRepository
     /**
      * @param int $year
      * @param int $school
-     *
      * @return Builder
      */
     public function getBuilderForRecord50($year, $school)
@@ -47,7 +44,6 @@ class EducacensoRepository
     /**
      * @param int $year
      * @param int $school
-     *
      * @return Builder
      */
     public function getBuilderForRecord60($year, $school)
@@ -58,20 +54,15 @@ class EducacensoRepository
     }
 
     /**
-     * @param       $sql
      * @param array $params
-     *
      * @return array
      */
     protected function fetchPreparedQuery($sql, $params = [])
     {
-        return DB::select(DB::raw($sql), $params);
+        return DB::select($sql, $params);
     }
 
     /**
-     * @param $school
-     * @param $year
-     *
      * @return array
      */
     public function getDataForRecord00($school, $year)
@@ -88,35 +79,31 @@ class EducacensoRepository
               FROM pmieducar.ano_letivo_modulo
               WHERE ano_letivo_modulo.ref_ano = :year AND ano_letivo_modulo.ref_ref_cod_escola = e.cod_escola) AS "fimAnoLetivo",
             j.fantasia AS nome,
-            ep.cep AS cep,
-            municipio.cod_ibge AS "codigoIbgeMunicipio",
+            a.postal_code AS cep,
+            a.city_ibge_code AS "codigoIbgeMunicipio",
             districts.ibge_code AS "codigoIbgeDistrito",
-            l.nome AS logradouro,
-            ep.numero AS numero,
-            ep.complemento AS complemento,
-            bairro.nome AS bairro,
-            (SELECT COALESCE(
-              (SELECT min(fone_pessoa.ddd)
-                    FROM cadastro.fone_pessoa
-                    WHERE j.idpes = fone_pessoa.idpes),
-              (SELECT min(ddd_telefone)
-                FROM pmieducar.escola_complemento
-                WHERE escola_complemento.ref_cod_escola = e.cod_escola))) AS ddd,
-            (SELECT COALESCE(
-              (SELECT min(fone_pessoa.fone)
-                    FROM cadastro.fone_pessoa
-                    WHERE j.idpes = fone_pessoa.idpes AND fone_pessoa.tipo = 1),
-              (SELECT min(telefone)
-                FROM pmieducar.escola_complemento
-                WHERE escola_complemento.ref_cod_escola = e.cod_escola))) AS telefone,
-            (SELECT COALESCE(
-              (SELECT min(fone_pessoa.fone)
-                    FROM cadastro.fone_pessoa
-                    WHERE j.idpes = fone_pessoa.idpes AND fone_pessoa.tipo = 2),
-              (SELECT min(fax)
-                FROM pmieducar.escola_complemento
-                WHERE escola_complemento.ref_cod_escola = e.cod_escola))) AS "telefoneOutro",
-            (SELECT COALESCE(p.email,(SELECT email FROM pmieducar.escola_complemento WHERE ref_cod_escola = e.cod_escola))) AS email,
+            a.address AS logradouro,
+            a.number AS numero,
+            a.complement AS complemento,
+            a.neighborhood AS bairro,
+            (
+                SELECT min(fone_pessoa.ddd)
+                FROM cadastro.fone_pessoa
+                WHERE j.idpes = fone_pessoa.idpes
+            ) AS ddd,
+            (
+                SELECT min(fone_pessoa.fone)
+                FROM cadastro.fone_pessoa
+                WHERE j.idpes = fone_pessoa.idpes
+                AND fone_pessoa.tipo = 1
+            ) AS telefone,
+            (
+                SELECT min(fone_pessoa.fone)
+                FROM cadastro.fone_pessoa
+                WHERE j.idpes = fone_pessoa.idpes
+                AND fone_pessoa.tipo = 2
+            ) AS "telefoneOutro",
+            p.email AS email,
             i.orgao_regional AS "orgaoRegional",
             e.zona_localizacao AS "zonaLocalizacao",
             e.localizacao_diferenciada AS "localizacaoDiferenciada",
@@ -133,7 +120,8 @@ class EducacensoRepository
             (ARRAY[6] <@ e.mantenedora_escola_privada)::INT AS "mantenedoraOscip",
             e.categoria_escola_privada AS "categoriaEscolaPrivada",
             e.poder_publico_parceria_convenio AS "poderPublicoConveniado",
-            e.formas_contratacao_adm_publica_e_outras_instituicoes AS "formasContratacaoPoderPublico",
+            e.formas_contratacao_parceria_escola_secretaria_municipal AS "formasContratacaoPoderPublicoMunicipal",
+            e.formas_contratacao_parceria_escola_secretaria_estadual AS "formasContratacaoPoderPublicoEstadual",
             e.qtd_matriculas_atividade_complementar AS "qtdMatAtividadesComplentar",
             e.qtd_atendimento_educacional_especializado AS "qtdMatAee",
             e.qtd_ensino_regular_creche_par AS "qtdMatCrecheParcial",
@@ -191,10 +179,10 @@ class EducacensoRepository
             e.orgao_vinculado_escola AS "orgaoVinculado",
             e.esfera_administrativa AS "esferaAdministrativa",
             e.cod_escola AS "idEscola",
-            municipio.idmun AS "idMunicipio",
+            a.city_id AS "idMunicipio",
             districts.id AS "idDistrito",
             i.cod_instituicao AS "idInstituicao",
-            uf.sigla_uf AS "siglaUf",
+            a.state_abbreviation AS "siglaUf",
             (SELECT EXTRACT(YEAR FROM min(ano_letivo_modulo.data_inicio))
               FROM pmieducar.ano_letivo_modulo
               WHERE ano_letivo_modulo.ref_ano = :year AND ano_letivo_modulo.ref_ref_cod_escola = e.cod_escola) AS "anoInicioAnoLetivo",
@@ -207,13 +195,11 @@ class EducacensoRepository
             INNER JOIN cadastro.pessoa p ON (e.ref_idpes = p.idpes)
             INNER JOIN cadastro.juridica j ON (j.idpes = p.idpes)
             LEFT JOIN modules.educacenso_cod_escola ece ON (e.cod_escola = ece.cod_escola)
-            LEFT JOIN cadastro.endereco_pessoa ep ON (ep.idpes = p.idpes)
-            LEFT JOIN public.bairro ON (bairro.idbai = ep.idbai)
-            LEFT JOIN public.municipio ON (municipio.idmun = bairro.idmun)
-            LEFT JOIN public.uf ON (uf.sigla_uf = municipio.sigla_uf)
+            LEFT JOIN person_has_place php ON true
+                AND php.person_id = e.ref_idpes
+                AND php.type = 1
+            LEFT JOIN addresses a ON a.id = php.place_id
             LEFT JOIN public.districts ON (districts.id = e.iddis)
-            LEFT JOIN public.places places ON (places.id = ep.idbai AND places.id = ep.idlog AND places.postal_code = ep.cep)
-	        LEFT JOIN public.logradouro l ON (l.idlog = places.id)
             WHERE e.cod_escola = :school
 SQL;
 
@@ -224,8 +210,6 @@ SQL;
     }
 
     /**
-     * @param $school
-     *
      * @return array
      */
     public function getDataForRecord10($school)
@@ -334,7 +318,8 @@ SQL;
                 pessoa.url AS "url",
                 escola.projeto_politico_pedagogico AS "projetoPoliticoPedagogico",
                 escola.qtd_vice_diretor AS "qtdViceDiretor",
-                escola.qtd_orientador_comunitario AS "qtdOrientadorComunitario"
+                escola.qtd_orientador_comunitario AS "qtdOrientadorComunitario",
+                escola.qtd_tradutor_interprete_libras_outro_ambiente AS "qtdTradutorInterpreteLibrasOutroAmbiente"
             FROM pmieducar.escola
             INNER JOIN cadastro.juridica ON juridica.idpes = escola.ref_idpes
             INNER JOIN cadastro.pessoa ON pessoa.idpes = escola.ref_idpes
@@ -344,13 +329,11 @@ SQL;
 SQL;
 
         return $this->fetchPreparedQuery($sql, [
-            'school' => $school
+            'school' => $school,
         ]);
     }
 
     /**
-     * @param $school
-     *
      * @return array
      */
     public function getDataForRecord40($school)
@@ -361,9 +344,6 @@ SQL;
     }
 
     /**
-     * @param $school
-     * @param $year
-     *
      * @return array
      */
     public function getDataForRecord20($school, $year)
@@ -374,9 +354,6 @@ SQL;
     }
 
     /**
-     * @param $classroomId
-     * @param $disciplineIds
-     *
      * @return array
      */
     public function getDisciplinesWithoutTeacher($classroomId, $disciplineIds)
@@ -421,7 +398,7 @@ SQL;
             return [];
         }
 
-        $stringPersonId = join(',', $arrayPersonId);
+        $stringPersonId = implode(',', $arrayPersonId);
         $sql = <<<SQL
             SELECT
                 '30' AS registro,
@@ -437,8 +414,8 @@ SQL;
                 CASE WHEN fisica.sexo = 'M' THEN 1 ELSE 2 END AS "sexo",
                 raca.raca_educacenso AS "raca",
                 fisica.nacionalidade AS "nacionalidade",
-                CASE WHEN fisica.nacionalidade = 3 THEN pais.cod_ibge ELSE 76 END AS "paisNacionalidade",
-                municipio_nascimento.cod_ibge AS "municipioNascimento",
+                CASE WHEN fisica.nacionalidade = 3 THEN countries.ibge_code ELSE 76 END AS "paisNacionalidade",
+                municipio_nascimento.ibge_code AS "municipioNascimento",
                 CASE WHEN
                     true = (
                         SELECT true
@@ -457,12 +434,13 @@ SQL;
                 5 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaSurdoCegueira",
                 6 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaFisica",
                 7 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaIntelectual",
+                8 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaVisaoMonocular",
                 CASE WHEN array_length(deficiencias.array_deficiencias, 1) > 1 THEN 1 ELSE 0 END "deficienciaMultipla",
                 13 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaAltasHabilidades",
                 25 = ANY (deficiencias.array_deficiencias)::INTEGER AS "deficienciaAutismo",
                 fisica.pais_residencia AS "paisResidencia",
-                endereco_pessoa.cep AS "cep",
-                municipio.cod_ibge AS "municipioResidencia",
+                addresses.postal_code AS "cep",
+                addresses.city_ibge_code AS "municipioResidencia",
                 fisica.zona_localizacao_censo AS "localizacaoResidencia",
                 fisica.localizacao_diferenciada AS "localizacaoDiferenciada",
                 dadosescola.nomeescola AS "nomeEscola",
@@ -478,11 +456,12 @@ SQL;
             ON fisica.idpes_mae = pessoa_mae.idpes
             LEFT JOIN cadastro.pessoa as pessoa_pai
             ON fisica.idpes_pai = pessoa_pai.idpes
-            LEFT JOIN public.municipio municipio_nascimento ON municipio_nascimento.idmun = fisica.idmun_nascimento
-            LEFT JOIN cadastro.endereco_pessoa ON endereco_pessoa.idpes = pessoa.idpes
-            LEFT JOIN public.logradouro ON logradouro.idlog = endereco_pessoa.idlog
-            LEFT JOIN public.municipio ON municipio.idmun = logradouro.idmun
-            LEFT JOIN public.pais ON pais.idpais = CASE WHEN fisica.nacionalidade = 3 THEN fisica.idpais_estrangeiro ELSE 76 END
+            LEFT JOIN public.cities municipio_nascimento ON municipio_nascimento.id = fisica.idmun_nascimento
+            LEFT JOIN person_has_place ON true
+                AND person_has_place.person_id = pessoa.idpes
+                AND person_has_place.type = 1
+            LEFT JOIN addresses ON addresses.id = person_has_place.place_id
+            LEFT JOIN public.countries ON countries.id = CASE WHEN fisica.nacionalidade = 3 THEN fisica.idpais_estrangeiro ELSE 76 END
             LEFT JOIN LATERAL (
                  SELECT educacenso_cod_escola.cod_escola_inep,
                         educacenso_cod_escola.cod_escola,
@@ -496,7 +475,7 @@ SQL;
                  FROM cadastro.fisica_deficiencia
                  JOIN cadastro.deficiencia ON deficiencia.cod_deficiencia = fisica_deficiencia.ref_cod_deficiencia
                  WHERE fisica_deficiencia.ref_idpes = fisica.idpes
-                   AND deficiencia.deficiencia_educacenso IN (1,2,3,4,5,6,7,25,13)
+                   AND deficiencia.deficiencia_educacenso IN (1,2,3,4,5,6,7,8,25,13)
                  GROUP BY 1
                  ) deficiencias ON true
 
@@ -513,7 +492,7 @@ SQL;
             return [];
         }
 
-        $stringPersonId = join(',', $arrayEmployeeId);
+        $stringPersonId = implode(',', $arrayEmployeeId);
         $sql = <<<SQL
             SELECT DISTINCT
                 servidor.ref_cod_instituicao AS "codigoInstituicao",
@@ -537,6 +516,8 @@ SQL;
                 (ARRAY[9] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoCampo",
                 (ARRAY[10] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoAmbiental",
                 (ARRAY[11] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoDireitosHumanos",
+                (ARRAY[18] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoBilingueSurdos",
+                (ARRAY[19] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoTecnologiaInformaçãoComunicacao",
                 (ARRAY[12] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaGeneroDiversidadeSexual",
                 (ARRAY[13] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaDireitosCriancaAdolescente",
                 (ARRAY[14] <@ servidor.curso_formacao_continuada)::INT "formacaoContinuadaEducacaoRelacoesEticoRaciais",
@@ -580,7 +561,7 @@ SQL;
             return [];
         }
 
-        $stringStudentId = join(',', $arrayStudentId);
+        $stringStudentId = implode(',', $arrayStudentId);
         $sql = <<<SQL
             SELECT DISTINCT
                 aluno.ref_idpes AS "codigoPessoa",

@@ -2,7 +2,9 @@
 
 namespace iEducar\Support\View;
 
+use App\Models\DeficiencyType;
 use App\Models\EmployeeGraduationDiscipline;
+use App\Models\LocalizationZone;
 use App\Models\ManagerAccessCriteria;
 use App\Models\ManagerLinkType;
 use App\Models\ManagerRole;
@@ -135,6 +137,16 @@ class SelectOptions
     }
 
     /**
+     * Retorna as opções disponíveis referentes ao tipo de deficiência
+     *
+     * @return array
+     */
+    public static function deficiencyTypes()
+    {
+        return self::getDefaultOption() + DeficiencyType::getDescriptiveValues();
+    }
+
+    /**
      * Retorna as opções disponíveis referentes aos locais de funcionamento da escola
      *
      * @return array
@@ -212,5 +224,25 @@ class SelectOptions
         unset($options[ActiveLooking::ACTIVE_LOOKING_IN_PROGRESS_RESULT]);
 
         return $options;
+    }
+
+    public static function zonasLocalizacao()
+    {
+        $zones = new LocalizationZone();
+
+        return self::getDefaultOption() + $zones->getDescriptiveValues();
+    }
+
+    public static function localizacaoDiferencia()
+    {
+        return self::getDefaultOption() + LocalizacaoDiferenciadaEscola::getDescriptiveValues();
+    }
+
+    public static function formats()
+    {
+        return [
+            'csv' => 'CSV',
+            'pdf' => 'PDF',
+        ];
     }
 }

@@ -37,22 +37,18 @@ class LegacyCourse extends LegacyModel
 
     /**
      * Builder dos filtros
-     *
-     * @var string
      */
     protected string $builder = LegacyCourseBuilder::class;
 
     /**
      * Atributos legados para serem usados nas queries
-     *
-     * @var array
      */
     public array $legacy = [
         'id' => 'cod_curso',
         'name' => 'nm_curso',
         'is_standard_calendar' => 'padrao_ano_escolar',
         'steps' => 'qtd_etapas',
-        'description' => 'descricao'
+        'description' => 'descricao',
     ];
 
     /**
@@ -73,7 +69,7 @@ class LegacyCourse extends LegacyModel
         'ativo',
         'modalidade_curso',
         'padrao_ano_escolar',
-        'multi_seriado'
+        'multi_seriado',
     ];
 
     /**
@@ -124,6 +120,18 @@ class LegacyCourse extends LegacyModel
         );
     }
 
+    protected function hourAbsence(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->hora_falta
+        );
+    }
+
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(LegacyInstitution::class, 'ref_cod_instituicao');
+    }
+
     /**
      * Relacionamento com as series
      *
@@ -136,22 +144,10 @@ class LegacyCourse extends LegacyModel
 
     /**
      * Relaciona com  as escolas
-     *
-     * @return BelongsToMany
      */
     public function schools(): BelongsToMany
     {
         return $this->belongsToMany(LegacySchool::class, 'escola_curso', 'ref_cod_curso', 'ref_cod_escola')->wherePivot('ativo', 1);
-    }
-
-    /**
-     * Relaciona com as habilitações
-     *
-     * @return BelongsToMany
-     */
-    public function qualifications(): BelongsToMany
-    {
-        return $this->belongsToMany(LegacyQualification::class, 'pmieducar.habilitacao_curso', 'ref_cod_curso', 'ref_cod_habilitacao');
     }
 
     public function educationType(): BelongsTo

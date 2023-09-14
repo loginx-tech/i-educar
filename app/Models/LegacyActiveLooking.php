@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Builders\LegacyActiveLookingBuilder;
+use iEducar\Modules\School\Model\ActiveLooking;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,6 +23,8 @@ class LegacyActiveLooking extends LegacyModel
      */
     protected $table = 'pmieducar.busca_ativa';
 
+    protected string $builder = LegacyActiveLookingBuilder::class;
+
     /**
      * @var array
      */
@@ -31,12 +36,9 @@ class LegacyActiveLooking extends LegacyModel
         'resultado_busca_ativa',
     ];
 
-    protected $dates = [
-        'data_inicio',
-        'data_fim',
-        'updated_at',
-        'created_at',
-        'deleted_at'
+    protected $casts = [
+        'data_inicio' => 'date',
+        'data_fim' => 'date',
     ];
 
     public array $legacy = [
@@ -65,5 +67,12 @@ class LegacyActiveLooking extends LegacyModel
     public function getEndDate()
     {
         return $this->data_fim ? $this->data_fim->format('Y-m-d') : null;
+    }
+
+    protected function shortSituation(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ActiveLooking::getShortDescriptiveValues()[$this->result] ?? null
+        );
     }
 }

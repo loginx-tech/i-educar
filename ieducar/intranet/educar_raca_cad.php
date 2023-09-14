@@ -2,7 +2,8 @@
 
 use App\Models\LegacyRace;
 
-return new class extends clsCadastro {
+return new class extends clsCadastro
+{
     /**
      * Referencia pega da session para o idpes do usuario atual
      *
@@ -11,22 +12,29 @@ return new class extends clsCadastro {
     public $pessoa_logada;
 
     public $cod_raca;
+
     public $idpes_exc;
+
     public $idpes_cad;
+
     public $nm_raca;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $raca_educacenso;
+
     public $ativo;
 
     public function Inicializar()
     {
         $retorno = 'Novo';
 
-        $this->cod_raca=$_GET['cod_raca'];
+        $this->cod_raca = $_GET['cod_raca'];
 
         $obj_permissao = new clsPermissoes();
-        $obj_permissao->permissao_cadastra(678, $this->pessoa_logada, 7, 'educar_raca_lst.php');
+        $obj_permissao->permissao_cadastra(int_processo_ap: 678, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7, str_pagina_redirecionar: 'educar_raca_lst.php');
 
         if (is_numeric($this->cod_raca)) {
             $races = LegacyRace::query()->find($this->cod_raca)?->toArray();
@@ -39,7 +47,7 @@ return new class extends clsCadastro {
                 $this->data_cadastro = dataFromPgToBr($this->data_cadastro);
                 $this->data_exclusao = dataFromPgToBr($this->data_exclusao);
 
-                $this->fexcluir = $obj_permissao->permissao_cadastra(678, $this->pessoa_logada, 7);
+                $this->fexcluir = $obj_permissao->permissao_cadastra(int_processo_ap: 678, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7);
 
                 $retorno = 'Editar';
             }
@@ -48,7 +56,7 @@ return new class extends clsCadastro {
 
         $nomeMenu = $retorno == 'Editar' ? $retorno : 'Cadastrar';
 
-        $this->breadcrumb($nomeMenu . ' raça', [
+        $this->breadcrumb(currentPage: $nomeMenu . ' raça', breadcrumbs: [
             url('intranet/educar_pessoas_index.php') => 'Pessoas',
         ]);
 
@@ -60,32 +68,31 @@ return new class extends clsCadastro {
     public function Gerar()
     {
         // primary keys
-        $this->campoOculto('cod_raca', $this->cod_raca);
+        $this->campoOculto(nome: 'cod_raca', valor: $this->cod_raca);
 
-        $this->campoTexto('nm_raca', 'Raça', $this->nm_raca, 30, 255, true);
+        $this->campoTexto(nome: 'nm_raca', campo: 'Raça', valor: $this->nm_raca, tamanhovisivel: 30, tamanhomaximo: 255, obrigatorio: true);
 
-        $resources = [  0 => 'Não declarada',
-                                1 => 'Branca',
-                                2 => 'Preta',
-                                3 => 'Parda',
-                                4 => 'Amarela',
-                                5 => 'Indígena'];
+        $resources = [0 => 'Não declarada',
+            1 => 'Branca',
+            2 => 'Preta',
+            3 => 'Parda',
+            4 => 'Amarela',
+            5 => 'Indígena'];
 
         $options = ['label' => 'Raça educacenso', 'resources' => $resources, 'value' => $this->raca_educacenso];
-        $this->inputsHelper()->select('raca_educacenso', $options);
+        $this->inputsHelper()->select(attrName: 'raca_educacenso', inputOptions: $options);
     }
 
     public function Novo()
     {
         $race = LegacyRace::query()
             ->create(
-                 [
-                     'idpes_cad' => $this->pessoa_logada,
-                     'nm_raca' => $this->nm_raca,
-                     'raca_educacenso' => $this->raca_educacenso
-                 ]
-             )
-         ;
+                [
+                    'idpes_cad' => $this->pessoa_logada,
+                    'nm_raca' => $this->nm_raca,
+                    'raca_educacenso' => $this->raca_educacenso,
+                ]
+            );
 
         if ($race) {
             $this->mensagem = 'Cadastro efetuado com sucesso.<br>';
@@ -105,7 +112,6 @@ return new class extends clsCadastro {
         $race->nm_raca = $this->nm_raca;
         $race->idpes_cad = $this->pessoa_logada;
         $race->raca_educacenso = $this->raca_educacenso;
-
 
         if ($race->save()) {
             $this->mensagem = 'Edição efetuada com sucesso.<br>';

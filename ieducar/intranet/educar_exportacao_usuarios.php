@@ -1,25 +1,27 @@
 <?php
 
-return new class extends clsCadastro {
+return new class extends clsCadastro
+{
     public $pessoa_logada;
 
     public $ano;
+
     public $ref_cod_instituicao;
 
     public function Inicializar()
     {
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra(
-            999869,
-            $this->pessoa_logada,
-            7,
-            'educar_index.php'
+            int_processo_ap: 999869,
+            int_idpes_usuario: $this->pessoa_logada,
+            int_soma_nivel_acesso: 7,
+            str_pagina_redirecionar: 'educar_index.php'
         );
         $this->ref_cod_instituicao = $obj_permissoes->getInstituicao($this->pessoa_logada);
 
-        $this->breadcrumb('Exportação de usuários', [
-        url('intranet/educar_configuracoes_index.php') => 'Configurações',
-    ]);
+        $this->breadcrumb(currentPage: 'Exportação de usuários', breadcrumbs: [
+            url('intranet/educar_configuracoes_index.php') => 'Configurações',
+        ]);
 
         return 'Nova exportação';
     }
@@ -27,19 +29,19 @@ return new class extends clsCadastro {
     public function Gerar()
     {
         $this->inputsHelper()->dynamic(['instituicao']);
-        $this->inputsHelper()->dynamic('escola', ['required' =>  false]);
+        $this->inputsHelper()->dynamic(helperNames: 'escola', inputOptions: ['required' => false]);
 
-        $resourcesStatus = [1  => 'Ativo',
-                       0  => 'Inativo'];
-        $optionsStatus   = ['label' => 'Status', 'resources' => $resourcesStatus, 'value' => 1];
-        $this->inputsHelper()->select('status', $optionsStatus);
+        $resourcesStatus = [1 => 'Ativo',
+            0 => 'Inativo'];
+        $optionsStatus = ['label' => 'Status', 'resources' => $resourcesStatus, 'value' => 1];
+        $this->inputsHelper()->select(attrName: 'status', inputOptions: $optionsStatus);
 
-        $opcoes = [ '' => 'Selecione' ];
+        $opcoes = ['' => 'Selecione'];
 
         $objTemp = new clsPmieducarTipoUsuario();
         $objTemp->setOrderby('nm_tipo ASC');
 
-        $lista = $objTemp->lista(null, null, null, null, null, null, null, null, 1);
+        $lista = $objTemp->lista(int_ativo: 1);
 
         if (is_array($lista) && count($lista)) {
             foreach ($lista as $registro) {
@@ -48,19 +50,19 @@ return new class extends clsCadastro {
             }
         }
 
-        $tamanho = sizeof($opcoes_);
+        $tamanho = count($opcoes_);
         echo "<script>\nvar cod_tipo_usuario = new Array({$tamanho});\n";
         foreach ($opcoes_ as $key => $valor) {
             echo "cod_tipo_usuario[{$key}] = {$valor};\n";
         }
         echo '</script>';
 
-        $this->campoLista('ref_cod_tipo_usuario', 'Tipo usuário', $opcoes, $this->ref_cod_tipo_usuario, '', null, null, null, null, false);
+        $this->campoLista(nome: 'ref_cod_tipo_usuario', campo: 'Tipo usuário', valor: $opcoes, default: $this->ref_cod_tipo_usuario, duplo: null, descricao: null, complemento: null, desabilitado: null, obrigatorio: false);
 
-        Portabilis_View_Helper_Application::loadJavascript($this, '/vendor/legacy/ExportarUsuarios/exportarUsuarios.js');
+        Portabilis_View_Helper_Application::loadJavascript(viewInstance: $this, files: '/vendor/legacy/ExportarUsuarios/exportarUsuarios.js');
 
         $this->nome_url_sucesso = 'Exportar';
-        $this->acao_enviar      = ' ';
+        $this->acao_enviar = ' ';
     }
 
     public function Formular()

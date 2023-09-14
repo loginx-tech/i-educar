@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Builders\EmployeeAllocationBuilder;
 use App\Traits\HasLegacyDates;
 use App\Traits\HasLegacyUserAction;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeAllocation extends LegacyModel
 {
@@ -13,6 +16,8 @@ class EmployeeAllocation extends LegacyModel
     protected $primaryKey = 'cod_servidor_alocacao';
 
     protected $table = 'pmieducar.servidor_alocacao';
+
+    public string $builder = EmployeeAllocationBuilder::class;
 
     protected $fillable = [
         'carga_horaria',
@@ -29,8 +34,22 @@ class EmployeeAllocation extends LegacyModel
         'ref_cod_funcionario_vinculo',
         'hora_atividade',
         'horas_excedentes',
-        'data_saida'
+        'data_saida',
     ];
+
+    protected function periodName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return $this->period->nome;
+            },
+        );
+    }
+
+    public function period(): BelongsTo
+    {
+        return $this->belongsTo(LegacyPeriod::class, 'periodo');
+    }
 
     public function school()
     {
@@ -41,6 +60,7 @@ class EmployeeAllocation extends LegacyModel
     {
         return $this->belongsTo(LegacyEmployeeRole::class, 'ref_cod_servidor_funcao', 'cod_servidor_funcao');
     }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'ref_cod_servidor', 'cod_servidor');

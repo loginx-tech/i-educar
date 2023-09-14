@@ -4,6 +4,7 @@ use App\Models\LegacyEvaluationRule;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyRegistration;
 use App\Models\LegacyRemedialRule;
+use App\Models\LegacySchoolAcademicYear;
 use App\Models\LegacySchoolClass;
 use App\Process;
 use App\Services\ReleasePeriodService;
@@ -18,7 +19,9 @@ use Illuminate\Support\Str;
 class DiarioApiController extends ApiCoreController
 {
     protected $_dataMapper = 'Avaliacao_Model_NotaComponenteDataMapper';
+
     protected $_processoAp = 642;
+
     protected $_currentMatriculaId;
 
     private RemoveHtmlTagsStringService $removeHtmlTagsService;
@@ -32,13 +35,12 @@ class DiarioApiController extends ApiCoreController
     protected function validatesCanChangeDiarioForAno()
     {
         $escola = App_Model_IedFinder::getEscola($this->getRequest()->escola_id);
+        $ano = LegacySchoolAcademicYear::query()->whereSchool($this->getRequest()->escola_id)->whereYearEq($this->getRequest()->ano)->first([
+            'ativo',
+            'andamento',
+        ]);
 
-        $ano = new clsPmieducarEscolaAnoLetivo();
-        $ano->ref_cod_escola = $this->getRequest()->escola_id;
-        $ano->ano = $this->getRequest()->ano;
-        $ano = $ano->detalhe();
-
-        $anoLetivoEncerrado = is_array($ano) && count($ano) > 0 &&
+        $anoLetivoEncerrado = $ano &&
             $ano['ativo'] == 1 && $ano['andamento'] == 2;
 
         if ($escola['bloquear_lancamento_diario_anos_letivos_encerrados'] == '1' && $anoLetivoEncerrado) {
@@ -233,7 +235,7 @@ class DiarioApiController extends ApiCoreController
 
             if (!empty($etapasComNota)) {
                 $msg = 'Nota somente pode ser removida, após remover as notas lançadas nas etapas posteriores: ' .
-                join(', ', $etapasComNota) . '.';
+                implode(', ', $etapasComNota) . '.';
                 $this->messenger->append($msg, 'error');
             }
         }
@@ -260,7 +262,7 @@ class DiarioApiController extends ApiCoreController
             }
 
             if (!empty($etapasComFalta)) {
-                $this->messenger->append('Falta somente pode ser removida, após remover as faltas lançadas nas etapas posteriores: ' . join(', ', $etapasComFalta) . '.', 'error');
+                $this->messenger->append('Falta somente pode ser removida, após remover as faltas lançadas nas etapas posteriores: ' . implode(', ', $etapasComFalta) . '.', 'error');
             }
         }
 
@@ -539,11 +541,11 @@ class DiarioApiController extends ApiCoreController
 
             $nota = new Avaliacao_Model_NotaComponente(
                 [
-                'componenteCurricular' => $this->getRequest()->componente_curricular_id,
-                'etapa' => $etapa,
-                'nota' => $notaNova,
-                'notaRecuperacaoParalela' => $notaRecuperacaoParalela,
-                'notaOriginal' => $notaOriginal]
+                    'componenteCurricular' => $this->getRequest()->componente_curricular_id,
+                    'etapa' => $etapa,
+                    'nota' => $notaNova,
+                    'notaRecuperacaoParalela' => $notaRecuperacaoParalela,
+                    'notaOriginal' => $notaOriginal]
             );
 
             $this->serviceBoletim()->addNota($nota);
@@ -842,12 +844,12 @@ class DiarioApiController extends ApiCoreController
                                         $query->with([
                                             'person' => function ($query) {
                                                 $query->withCount('considerableDeficiencies');
-                                            }
+                                            },
                                         ]);
-                                    }
+                                    },
                                 ]);
                                 $query->with('dependencies');
-                            }
+                            },
                         ]);
 
                         // Pega a última enturmação na turma
@@ -889,7 +891,8 @@ class DiarioApiController extends ApiCoreController
             // suas tabelas de arredondamento (numérica e conceitual), valores
             // de arredondamento para as duas tabelas e regras de recuperação.
 
-            $evaluationRule = $schoolClass->getEvaluationRule();
+            //no multisseriado deve-se escolher/obter a série filtrada na tela, pois a turma possui mais de uma regra de avaliação em cada série
+            $evaluationRule = $schoolClass->getEvaluationRule($this->getRequest()->ref_cod_serie);
 
             $evaluationRule->load('roundingTable.roundingValues');
             $evaluationRule->load('conceptualRoundingTable.roundingValues');
@@ -1016,7 +1019,6 @@ class DiarioApiController extends ApiCoreController
 
     /**
      * @param bool $reload
-     *
      * @return Avaliacao_Service_Boletim
      *
      * @throws CoreExt_Exception
@@ -1295,14 +1297,14 @@ class DiarioApiController extends ApiCoreController
     {
         $obj = new clsModulesNotaExame($matriculaId, $componenteCurricularId, $notaExame);
 
-        return ($obj->existe() ? $obj->edita() : $obj->cadastra());
+        return $obj->existe() ? $obj->edita() : $obj->cadastra();
     }
 
     protected function deleteNotaExame($matriculaId, $componenteCurricularId)
     {
         $obj = new clsModulesNotaExame($matriculaId, $componenteCurricularId);
 
-        return ($obj->excluir());
+        return $obj->excluir();
     }
 
     /**
@@ -1444,7 +1446,7 @@ class DiarioApiController extends ApiCoreController
             $etapas = $regraRecuperacao->getEtapas();
             $sumNota = 0;
             foreach ($etapas as $key => $_etapa) {
-                $sumNota += (int)$this->getNotaOriginal($_etapa, $componenteCurricularId);
+                $sumNota += $this->getNotaOriginal($_etapa, $componenteCurricularId);
             }
 
             // caso a média das notas da etapa seja menor que média definida na regra e a última nota tenha sido lançada
@@ -1516,6 +1518,11 @@ class DiarioApiController extends ApiCoreController
 
         $nota = urldecode($this->serviceBoletim()->getNotaComponente($componenteCurricularId, $etapa)->notaOriginal);
         $nota = str_replace(',', '.', $nota);
+
+        //validação para evitar a soma de valores da notaOriginal para string vazia
+        if ($nota === '') {
+            return null;
+        }
 
         return $nota;
     }
@@ -1651,7 +1658,6 @@ class DiarioApiController extends ApiCoreController
      * faltas e notas sobre a regra de avaliação.
      *
      * @param LegacyEvaluationRule $evaluationRule
-     *
      * @return array
      */
     protected function getEvaluationRule($evaluationRule)
@@ -1778,7 +1784,7 @@ class DiarioApiController extends ApiCoreController
 
     protected function usaAuditoriaNotas()
     {
-        return (config('legacy.app.auditoria.notas') == '1');
+        return config('legacy.app.auditoria.notas') == '1';
     }
 
     public function canChange()
@@ -1792,7 +1798,7 @@ class DiarioApiController extends ApiCoreController
 
     public function postSituacao()
     {
-        if (! $this->canPostSituacaoAndNota()) {
+        if (!$this->canPostSituacaoAndNota()) {
             $this->messenger->append('Usuário não possui permissão para alterar a situação da matrícula.', 'error');
         }
 
@@ -1802,6 +1808,7 @@ class DiarioApiController extends ApiCoreController
         $legacyRegistration = LegacyRegistration::query()->find($matriculaId);
         if ($legacyRegistration instanceof LegacyRegistration && $legacyRegistration->isLockedToChangeStatus() === true) {
             $this->messenger->append('Situação da matrícula ' . $matriculaId . ' não pode ser alterada pois esta bloqueada para mudança de situação');
+
             return;
         }
 
@@ -1812,8 +1819,9 @@ class DiarioApiController extends ApiCoreController
 
     public function changeRegistrationLockStatus()
     {
-        if (! $this->canPostSituacaoAndNota()) {
+        if (!$this->canPostSituacaoAndNota()) {
             $this->messenger->append('Usuário não possui permissão para alterar a situação do bloqueio de status da matrícula.', 'error');
+
             return;
         }
 

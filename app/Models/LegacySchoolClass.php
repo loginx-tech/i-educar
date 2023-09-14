@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Builders\LegacySchoolClassBuilder;
+use App\Models\Enums\DayOfWeek;
+use App\Models\View\Discipline;
 use App\Traits\LegacyAttribute;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,8 +56,6 @@ class LegacySchoolClass extends Model
 
     /**
      * Builder dos filtros
-     *
-     * @var string
      */
     protected string $builder = LegacySchoolClassBuilder::class;
 
@@ -64,10 +64,10 @@ class LegacySchoolClass extends Model
      *
      * @var string[]
      */
-    public $legacy = [
+    public array $legacy = [
         'id' => 'cod_turma',
         'name' => 'nm_turma',
-        'year' => 'ano'
+        'year' => 'ano',
     ];
 
     /**
@@ -135,6 +135,8 @@ class LegacySchoolClass extends Model
         'estrutura_curricular',
         'formas_organizacao_turma',
         'unidade_curricular',
+        'outras_unidades_curriculares_obrigatorias',
+        'classe_com_lingua_brasileira_sinais',
     ];
 
     protected function id(): Attribute
@@ -161,6 +163,13 @@ class LegacySchoolClass extends Model
     {
         return Attribute::make(
             get: fn () => $this->ano,
+        );
+    }
+
+    protected function startTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->hora_inicial ? Carbon::createFromFormat('H:i:s', $this->hora_inicial) : null
         );
     }
 
@@ -192,6 +201,26 @@ class LegacySchoolClass extends Model
         );
     }
 
+    protected function daysOfWeekName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $diasSemana = $this->dias_semana ?? [];
+                $diff = array_diff([2, 3, 4, 5, 6], $diasSemana);
+
+                if (count($diff) === 0) {
+                    return 'Seg à Sex';
+                }
+
+                $daysOfWeek = array_map(function ($day) {
+                    return DayOfWeek::tryFrom((int) $day)?->shortName();
+                }, $diasSemana);
+
+                return implode(', ', $daysOfWeek);
+            },
+        );
+    }
+
     protected function exemptedDisciplineId(): Attribute
     {
         return Attribute::make(
@@ -213,8 +242,6 @@ class LegacySchoolClass extends Model
     /**
      * Retorna o total de alunos enturmados desconsiderando matrículas de
      * dependência.
-     *
-     * @return int
      */
     public function getTotalEnrolled(): int
     {
@@ -232,6 +259,13 @@ class LegacySchoolClass extends Model
         );
     }
 
+    protected function multiseries(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->multiseriada === 1,
+        );
+    }
+
     protected function endAcademicYear(): Attribute
     {
         return Attribute::make(
@@ -241,8 +275,6 @@ class LegacySchoolClass extends Model
 
     /**
      * Séries
-     *
-     * @return BelongsToMany
      */
     public function grades(): BelongsToMany
     {
@@ -251,25 +283,17 @@ class LegacySchoolClass extends Model
 
     /**
      * Anos Letivos
-     *
-     * @return HasMany
      */
     public function academicYears(): HasMany
     {
         return $this->hasMany(LegacySchoolAcademicYear::class, 'ref_cod_escola', 'ref_ref_cod_escola')->whereColumn('escola_ano_letivo.ano', 'ano');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(LegacyCourse::class, 'ref_cod_curso');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function grade(): BelongsTo
     {
         return $this->belongsTo(LegacyGrade::class, 'ref_ref_cod_serie');
@@ -277,8 +301,6 @@ class LegacySchoolClass extends Model
 
     /**
      * Relacionamento com a escola.
-     *
-     * @return BelongsTo
      */
     public function school(): BelongsTo
     {
@@ -287,8 +309,6 @@ class LegacySchoolClass extends Model
 
     /**
      * Relacionamento com as enturmações.
-     *
-     * @return HasMany
      */
     public function enrollments(): HasMany
     {
@@ -296,21 +316,39 @@ class LegacySchoolClass extends Model
     }
 
     /**
-     * @return HasMany
+     * Relacionamento com professor.
      */
+    public function schoolClassTeachers(): HasMany
+    {
+        return $this->hasMany(LegacySchoolClassTeacher::class, 'turma_id');
+    }
+
     public function stages(): HasMany
     {
         if ($this->course?->is_standard_calendar) {
-            return $this->hasMany(LegacyAcademicYearStage::class, 'ref_ref_cod_escola', 'ref_ref_cod_escola')
-                ->where('ref_ano', $this->year);
+            return $this->academicYearStages();
         }
 
-        return $this->hasMany(LegacySchoolClassStage::class, 'ref_cod_turma', 'cod_turma');
+        return $this->schoolClassStages();
     }
 
-    /**
-     * @return HasMany
-     */
+    public function academicYearStages(): HasMany
+    {
+        return $this->hasMany(LegacyAcademicYearStage::class, 'ref_ref_cod_escola', 'ref_ref_cod_escola')
+            ->where('ref_ano', $this->year);
+    }
+
+    public function getStages(bool $standardCalendar): Collection
+    {
+        if ($standardCalendar) {
+            $stages = $this->academicYearStages;
+        } else {
+            $stages = $this->schoolClassStages;
+        }
+
+        return $stages ?? collect();
+    }
+
     public function schoolClassStages(): HasMany
     {
         return $this->hasMany(LegacySchoolClassStage::class, 'ref_cod_turma', 'cod_turma');
@@ -325,7 +363,6 @@ class LegacySchoolClass extends Model
      * Retorna os dias da semana em um array
      *
      * @param string $value
-     *
      * @return array|null
      */
     public function getDiasSemanaAttribute($value)
@@ -333,7 +370,7 @@ class LegacySchoolClass extends Model
         if (is_string($value)) {
             $value = explode(',', str_replace([
                 '{',
-                '}'
+                '}',
             ], '', $value));
         }
 
@@ -344,7 +381,6 @@ class LegacySchoolClass extends Model
      * Seta os dias da semana transformando um array em uma string
      *
      * @param array $values
-     *
      * @return void
      */
     public function setDiasSemanaAttribute($values)
@@ -368,19 +404,16 @@ class LegacySchoolClass extends Model
                     $query->whereIn('aprovado', [
                         1,
                         2,
-                        3
+                        3,
                     ]);
                     $query->with('student.person');
-                }
+                },
             ])
             ->where('ativo', 1)
             ->orderBy('sequencial_fechamento')
             ->get();
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function schoolGrade(): BelongsTo
     {
         return $this->belongsTo(LegacySchoolGrade::class, 'ref_ref_cod_escola', 'ref_cod_escola')
@@ -402,7 +435,7 @@ class LegacySchoolClass extends Model
             return true;
         }
 
-        return (bool)$schoolGrade->bloquear_enturmacao_sem_vagas;
+        return (bool) $schoolGrade->bloquear_enturmacao_sem_vagas;
     }
 
     /**
@@ -421,9 +454,6 @@ class LegacySchoolClass extends Model
         return $startTime->diff($endTime)->h;
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function disciplines(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -441,9 +471,11 @@ class LegacySchoolClass extends Model
         ]);
     }
 
-    /**
-     * @return BelongsToMany
-     */
+    public function viewDisciplines(): HasMany
+    {
+        return $this->hasMany(Discipline::class, 'cod_turma', 'cod_turma');
+    }
+
     public function gradeDisciplines(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -459,12 +491,9 @@ class LegacySchoolClass extends Model
         ]);
     }
 
-    /**
-     * @return Collection
-     */
     public function getDisciplines(): Collection
     {
-        if ((bool)$this->multiseriada) {
+        if ((bool) $this->multiseriada) {
             $multigrades = $this->multigrades->pluck('serie_id')->toArray();
 
             return LegacySchoolGradeDiscipline::query()
@@ -497,9 +526,12 @@ class LegacySchoolClass extends Model
      *
      * @return LegacyEvaluationRule
      */
-    public function getEvaluationRule()
+    public function getEvaluationRule($gradeId = null)
     {
-        $evaluationRuleGradeYear = $this->hasOne(LegacyEvaluationRuleGradeYear::class, 'serie_id', 'ref_ref_cod_serie')
+        //a turma pode ser multisseriada e prover de várias séries
+        //portando é necessária repassar em vez de pegar a série principal da turma
+        $evaluationRuleGradeYear = LegacyEvaluationRuleGradeYear::query()
+            ->where('serie_id', $gradeId ?? $this->ref_ref_cod_serie)
             ->where('ano_letivo', $this->ano)
             ->firstOrFail();
         if ($this->school->utiliza_regra_diferenciada && $evaluationRuleGradeYear->differentiatedEvaluationRule) {
@@ -511,8 +543,6 @@ class LegacySchoolClass extends Model
 
     /**
      * Retorna o turno da turma.
-     *
-     * @return BelongsTo
      */
     public function period(): BelongsTo
     {

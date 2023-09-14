@@ -2,45 +2,46 @@
 
 use iEducar\Modules\Reports\QueryFactory\MovimentoMensalQueryFactory;
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     public function Gerar()
     {
         $params = [];
 
-        $params['ano'] = $this->getQueryString('ano');
-        $params['instituicao'] = $this->getQueryString('ref_cod_instituicao');
-        $params['escola'] = $this->getQueryString('ref_cod_escola');
-        $params['curso'] = $this->getQueryString('ref_cod_curso');
-        $params['serie'] = $this->getQueryString('ref_cod_serie');
-        $params['turma'] = $this->getQueryString('ref_cod_turma');
-        $params['data_inicial'] = $this->getQueryString('data_inicial');
-        $params['data_final'] = $this->getQueryString('data_final');
-        $params['modalidade'] = $this->getQueryString('modalidade');
+        $params['ano'] = $this->getQueryString(name: 'ano');
+        $params['instituicao'] = $this->getQueryString(name: 'ref_cod_instituicao');
+        $params['escola'] = $this->getQueryString(name: 'ref_cod_escola');
+        $params['curso'] = $this->getQueryString(name: 'ref_cod_curso');
+        $params['serie'] = $this->getQueryString(name: 'ref_cod_serie');
+        $params['turma'] = $this->getQueryString(name: 'ref_cod_turma');
+        $params['data_inicial'] = $this->getQueryString(name: 'data_inicial');
+        $params['data_final'] = $this->getQueryString(name: 'data_final');
+        $params['modalidade'] = $this->getQueryString(name: 'modalidade');
 
-        $this->breadcrumb('Consulta de movimento mensal', ['educar_index.php' => 'Escola']);
+        $this->breadcrumb(currentPage: 'Consulta de movimento mensal', breadcrumbs: ['educar_index.php' => 'Escola']);
 
         $required = [
             'ano',
             'instituicao',
             'escola',
             'data_inicial',
-            'data_final'
+            'data_final',
         ];
 
         foreach ($required as $req) {
             if (empty($params[$req])) {
-                $this->simpleRedirect('/intranet/educar_index.php');
+                $this->simpleRedirect(url: '/intranet/educar_index.php');
             }
         }
 
-        $params['data_inicial'] = Portabilis_Date_Utils::brToPgSQL($params['data_inicial']);
-        $params['data_final'] = Portabilis_Date_Utils::brToPgSQL($params['data_final']);
+        $params['data_inicial'] = Portabilis_Date_Utils::brToPgSQL(date: $params['data_inicial']);
+        $params['data_final'] = Portabilis_Date_Utils::brToPgSQL(date: $params['data_final']);
 
         $startDate = [];
         $endDate = [];
 
-        foreach ($this->getQueryString('calendars') as $datas) {
-            $arrayDatas = explode(' ', $datas);
+        foreach ($this->getQueryString(name: 'calendars') as $datas) {
+            $arrayDatas = explode(separator: ' ', string: $datas);
             $startDate[] = $arrayDatas[0];
             $endDate[] = $arrayDatas[1];
         }
@@ -51,7 +52,7 @@ return new class extends clsListagem {
         $base = new clsBanco();
         $base->FraseConexao();
         $connectionString = 'pgsql:' . $base->getFraseConexao();
-        $data = (new MovimentoMensalQueryFactory(new \PDO($connectionString), $params))
+        $data = (new MovimentoMensalQueryFactory(connection: new \PDO(dsn: $connectionString), params: $params))
             ->getData();
 
         $this->titulo = 'Parâmetros';
@@ -64,7 +65,7 @@ return new class extends clsListagem {
         $turma = 'Todas';
 
         if (!empty($params['escola'])) {
-            $dados = (array)Portabilis_Utils_Database::fetchPreparedQuery("
+            $dados = (array) Portabilis_Utils_Database::fetchPreparedQuery(sql: "
                 select
                     juridica.fantasia
                 from
@@ -80,47 +81,47 @@ return new class extends clsListagem {
         }
 
         if (!empty($params['curso'])) {
-            $dados = (array)Portabilis_Utils_Database::fetchPreparedQuery(
-                "select nm_curso from pmieducar.curso where cod_curso = {$params['curso']};"
+            $dados = (array) Portabilis_Utils_Database::fetchPreparedQuery(
+                sql: "select nm_curso from pmieducar.curso where cod_curso = {$params['curso']};"
             );
 
             $curso = $dados[0]['nm_curso'];
         }
 
         if (!empty($params['serie'])) {
-            $dados = (array)Portabilis_Utils_Database::fetchPreparedQuery(
-                "select nm_serie from pmieducar.serie where cod_serie = {$params['serie']};"
+            $dados = (array) Portabilis_Utils_Database::fetchPreparedQuery(
+                sql: "select nm_serie from pmieducar.serie where cod_serie = {$params['serie']};"
             );
 
             $serie = $dados[0]['nm_serie'];
         }
 
         if (!empty($params['turma'])) {
-            $dados = (array)Portabilis_Utils_Database::fetchPreparedQuery(
-                "select nm_turma from pmieducar.turma where cod_turma = {$params['turma']};"
+            $dados = (array) Portabilis_Utils_Database::fetchPreparedQuery(
+                sql: "select nm_turma from pmieducar.turma where cod_turma = {$params['turma']};"
             );
 
             $turma = $dados[0]['nm_turma'];
         }
 
-        $this->addCabecalhos([
+        $this->addCabecalhos(coluna: [
             'Ano',
             'Escola',
             'Curso',
             'Série',
             'Turma',
             'Data inicial',
-            'Data final'
+            'Data final',
         ]);
 
-        $this->addLinhas([
-            filter_var($params['ano'], FILTER_SANITIZE_STRING),
+        $this->addLinhas(linha: [
+            filter_var(value: $params['ano'], filter: FILTER_SANITIZE_STRING),
             $escola,
             $curso,
             $serie,
             $turma,
-            filter_var($this->getQueryString('data_inicial'), FILTER_SANITIZE_STRING),
-            filter_var($this->getQueryString('data_final'), FILTER_SANITIZE_STRING)
+            filter_var(value: $this->getQueryString(name: 'data_inicial'), filter: FILTER_SANITIZE_STRING),
+            filter_var(value: $this->getQueryString(name: 'data_final'), filter: FILTER_SANITIZE_STRING),
         ]);
 
         $linkTemplate = '<a href="#" class="mostra-consulta" style="font-weight: bold;" data-api="ConsultaMovimentoMensal" data-params=\'%s\' data-tipo="%s">%d</a>';
@@ -141,13 +142,13 @@ return new class extends clsListagem {
                         $paramsCopy = $params;
                         $paramsCopy['serie'] = $value['cod_serie'];
                         $paramsCopy['turma'] = $value['cod_turma'];
-                        $paramsCopy = json_encode($paramsCopy);
+                        $paramsCopy = json_encode(value: $paramsCopy);
                         $data[$key][$k] = sprintf($linkTemplate, $paramsCopy, $k, $v);
                 }
             }
         }
 
-        $data = json_encode($data);
+        $data = json_encode(value: $data);
 
         $tableScript = <<<JS
 (function () {
@@ -256,8 +257,8 @@ return new class extends clsListagem {
 })();
 JS;
 
-        Portabilis_View_Helper_Application::embedJavascript($this, $tableScript, false);
-        Portabilis_View_Helper_Application::loadJavascript($this, ['/intranet/scripts/consulta_movimentos.js']);
+        Portabilis_View_Helper_Application::embedJavascript(viewInstance: $this, script: $tableScript, afterReady: false);
+        Portabilis_View_Helper_Application::loadJavascript(viewInstance: $this, files: ['/intranet/scripts/consulta_movimentos.js']);
     }
 
     public function Formular()

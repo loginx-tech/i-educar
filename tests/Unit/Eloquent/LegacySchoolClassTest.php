@@ -47,9 +47,6 @@ class LegacySchoolClassTest extends EloquentTestCase
         'inep' => SchoolClassInep::class,
     ];
 
-    /**
-     * @return string
-     */
     protected function getEloquentModelName(): string
     {
         return LegacySchoolClass::class;
@@ -60,7 +57,7 @@ class LegacySchoolClassTest extends EloquentTestCase
         return [
             'id' => 'cod_turma',
             'name' => 'nm_turma',
-            'year' => 'ano'
+            'year' => 'ano',
         ];
     }
 
@@ -128,9 +125,11 @@ class LegacySchoolClassTest extends EloquentTestCase
 
         $expected = $this->model->stages()->orderBy('sequencial')->value('data_inicio');
         $this->assertEquals($expected, $this->model->beginAcademicYearAttribute);
-
         $expected = $this->model->stages()->orderByDesc('sequencial')->value('data_fim');
         $this->assertEquals($expected, $this->model->endAcademicYearAttribute);
+        $this->assertEquals('Seg à Sex', $this->model->daysOfWeekName);
+        $this->model->dias_semana = [1, 3, 5];
+        $this->assertEquals('Dom, Ter, Qui', $this->model->daysOfWeekName);
     }
 
     /** @test */
@@ -140,12 +139,12 @@ class LegacySchoolClassTest extends EloquentTestCase
         $school = LegacySchoolFactory::new()->create();
         LegacySchoolGradeFactory::new()->create([
             'ref_cod_escola' => $school,
-            'ref_cod_serie' => $grade
+            'ref_cod_serie' => $grade,
         ]);
         LegacySchoolClassGradeFactory::new()->create([
             'escola_id' => $school,
             'serie_id' => $grade,
-            'turma_id' => $this->model
+            'turma_id' => $this->model,
         ]);
         $this->assertCount(1, $this->model->grades);
         $this->assertInstanceOf(LegacyGrade::class, $this->model->grades->first());
@@ -156,10 +155,10 @@ class LegacySchoolClassTest extends EloquentTestCase
     {
         LegacySchoolAcademicYearFactory::new()->create([
             'ref_cod_escola' => $this->model->ref_ref_cod_escola,
-            'ano' => $this->model->ano
+            'ano' => $this->model->ano,
         ]);
         LegacySchoolClassStageFactory::new()->create([
-            'ref_cod_turma' => $this->model
+            'ref_cod_turma' => $this->model,
         ]);
         $this->assertCount(1, $this->model->stages);
     }
@@ -170,7 +169,7 @@ class LegacySchoolClassTest extends EloquentTestCase
         $discipline = LegacyDisciplineFactory::new()->create();
         LegacyDisciplineSchoolClassFactory::new()->create([
             'componente_curricular_id' => $discipline,
-            'turma_id' => $this->model
+            'turma_id' => $this->model,
         ]);
         $this->assertCount(1, $this->model->disciplines);
     }

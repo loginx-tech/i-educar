@@ -5,6 +5,7 @@ namespace App\Models\Exporter\Builders;
 use App\Support\Database\JoinableBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 
 class StudentEloquentBuilder extends Builder
 {
@@ -16,7 +17,7 @@ class StudentEloquentBuilder extends Builder
             'mother.person' => [
                 'id' => 'm.idpes as ID da mãe',
                 'name' => 'm.nome as Nome da mãe',
-                'email' => 'm.email as E-mail da mãe'
+                'email' => 'm.email as E-mail da mãe',
             ],
             'mother.individual' => [
                 'social_name' => 'mf.nome_social as Nome social e/ou afetivo da mãe',
@@ -27,17 +28,17 @@ class StudentEloquentBuilder extends Builder
                 'occupation' => 'mf.ocupacao as Ocupação da mãe',
                 'organization' => 'mf.empresa as Empresa da mãe',
                 'monthly_income' => 'mf.renda_mensal as Renda Mensal da mãe',
-                'gender' => 'mf.sexo as Gênero da mãe'
+                'gender' => 'mf.sexo as Gênero da mãe',
             ],
             'mother.document' => [
                 'rg' => 'md.rg as RG da mãe',
                 'rg_issue_date' => 'md.data_exp_rg as RG (Data Emissão) da mãe',
-                'rg_state_abbreviation' => 'md.sigla_uf_exp_rg as RG (Estado) da mãe'
+                'rg_state_abbreviation' => 'md.sigla_uf_exp_rg as RG (Estado) da mãe',
             ],
             'father.person' => [
                 'id' => 'f.idpes as ID do pai',
                 'name' => 'f.nome as Nome do pai',
-                'email' => 'f.email as E-mail do pai'
+                'email' => 'f.email as E-mail do pai',
             ],
             'father.individual' => [
                 'social_name' => 'ff.nome_social as Nome social e/ou afetivo do pai',
@@ -48,17 +49,17 @@ class StudentEloquentBuilder extends Builder
                 'occupation' => 'ff.ocupacao as Ocupação do pai',
                 'organization' => 'ff.empresa as Empresa do pai',
                 'monthly_income' => 'ff.renda_mensal as Renda Mensal do pai',
-                'gender' => 'ff.sexo as Gênero do pai'
+                'gender' => 'ff.sexo as Gênero do pai',
             ],
             'father.document' => [
                 'rg' => 'fd.rg as RG do pai',
                 'rg_issue_date' => 'fd.data_exp_rg as RG (Data Emissão) do pai',
-                'rg_state_abbreviation' => 'fd.sigla_uf_exp_rg as RG (Estado) do pai'
+                'rg_state_abbreviation' => 'fd.sigla_uf_exp_rg as RG (Estado) do pai',
             ],
             'guardian.person' => [
                 'id' => 'g.idpes as ID do responsável',
                 'name' => 'g.nome as Nome do responsável',
-                'email' => 'g.email as E-mail do responsável'
+                'email' => 'g.email as E-mail do responsável',
             ],
             'guardian.individual' => [
                 'social_name' => 'gf.nome_social as Nome social e/ou afetivo do responsável',
@@ -69,12 +70,12 @@ class StudentEloquentBuilder extends Builder
                 'occupation' => 'gf.ocupacao as Ocupação do responsável',
                 'organization' => 'gf.empresa as Empresa do responsável',
                 'monthly_income' => 'gf.renda_mensal as Renda Mensal do responsável',
-                'gender' => 'gf.sexo as Gênero do responsável'
+                'gender' => 'gf.sexo as Gênero do responsável',
             ],
             'guardian.document' => [
                 'rg' => 'gd.rg as RG do responsável',
                 'rg_issue_date' => 'gd.data_exp_rg as RG (Data Emissão) do responsável',
-                'rg_state_abbreviation' => 'gd.sigla_uf_exp_rg as RG (Estado) do responsável'
+                'rg_state_abbreviation' => 'gd.sigla_uf_exp_rg as RG (Estado) do responsável',
             ],
             'place' => [
                 'address' => 'p.address as Logradouro',
@@ -87,8 +88,8 @@ class StudentEloquentBuilder extends Builder
                 'city' => 'c.name as Cidade',
                 'state_abbreviation' => 's.abbreviation as Sigla do Estado',
                 'state' => 's.name as Estado',
-                'country' => 'cn.name as País'
-            ]
+                'country' => 'cn.name as País',
+            ],
         ];
     }
 
@@ -226,6 +227,53 @@ class StudentEloquentBuilder extends Builder
 
         return $this->leftJoin('uniform_distributions', function (JoinClause $join) {
             $join->on('exporter_student_grouped_registration.id', '=', 'uniform_distributions.student_id');
+        });
+    }
+
+    public function transport($columns)
+    {
+        if (in_array('tipo_transporte', $columns)) {
+            unset($columns[array_search('tipo_transporte', $columns)]);
+
+            $this->addSelect(DB::raw('
+                CASE aluno.tipo_transporte
+                    WHEN 0 THEN \'Não utiliza\'::varchar
+                    WHEN 1 THEN \'Estadual\'::varchar
+                    WHEN 2 THEN \'Municipal\'::varchar
+                    ELSE \'Não utiliza\'::varchar
+                END AS tipo_transporte
+            '));
+        }
+
+        if (in_array('veiculo_transporte_escolar', $columns)) {
+            unset($columns[array_search('veiculo_transporte_escolar', $columns)]);
+            $this->addSelect(DB::raw('
+                COALESCE(
+                    (SELECT string_agg(CASE veiculo
+                            WHEN 1 THEN \'Rodoviário - Vans/Kombis\'::varchar
+                            WHEN 2 THEN \'Rodoviário - Microônibus\'::varchar
+                            WHEN 3 THEN \'Rodoviário - Ônibus\'::varchar
+                            WHEN 4 THEN \'Rodoviário - Bicicleta\'::varchar
+                            WHEN 5 THEN \'Rodoviário - Tração animal\'::varchar
+                            WHEN 6 THEN \'Rodoviário - Outro\'::varchar
+                            WHEN 7 THEN \'Aquaviário/Embarcação - Capacidade de até 5 alunos\'::varchar
+                            WHEN 8 THEN \'Aquaviário/Embarcação - Capacidade entre 5 a 15 alunos\'::varchar
+                            WHEN 9 THEN \'Aquaviário/Embarcação - Capacidade entre 15 a 35 alunos\'::varchar
+                            WHEN 10 THEN \'Aquaviário/Embarcação - Capacidade acima de 35 alunos\'::varchar
+                            WHEN 11 THEN \'Ferroviário - Trem/Metrô\'::varchar
+                            ELSE \'Não Informado\'::varchar
+                        END, \' | \') as veiculo_transporte_escolar
+                    FROM UNNEST(aluno.veiculo_transporte_escolar) as veiculo)
+                , \'Não informado\') AS veiculo_transporte_escolar
+            '));
+        }
+
+        $this->addSelect(
+            $this->joinColumns('aluno', $columns)
+        );
+
+        return $this->leftJoin('pmieducar.aluno as aluno', function (JoinClause $join) {
+            $join->on('exporter_student_grouped_registration.student_id', '=', 'aluno.cod_aluno');
         });
     }
 }

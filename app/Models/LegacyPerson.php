@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Builders\LegacyPersonBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 
 /**
  * @property string $name
  */
-class LegacyPerson extends Model
+class LegacyPerson extends LegacyModel
 {
     public const CREATED_AT = 'data_cad';
+
     public const UPDATED_AT = 'data_rev';
 
     /**
@@ -27,12 +29,7 @@ class LegacyPerson extends Model
      */
     protected $primaryKey = 'idpes';
 
-    /**
-     * @var array
-     */
-    protected $dates = [
-        'data_cad',
-    ];
+    protected string $builder = LegacyPersonBuilder::class;
 
     /**
      * @var array
@@ -44,11 +41,16 @@ class LegacyPerson extends Model
         'situacao',
         'origem_gravacao',
         'operacao',
-        'email'
+        'email',
+    ];
+
+    public array $legacy = [
+        'id' => 'idpes',
+        'name' => 'nome',
     ];
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     protected static function boot()
     {
@@ -77,37 +79,45 @@ class LegacyPerson extends Model
     protected function name(): Attribute
     {
         return Attribute::make(
-            get: fn () =>  $this->nome
+            get: fn () => $this->nome
         );
     }
 
-    /**
-     * @return HasOne
-     */
-    public function address(): HasOne
+    protected function socialName(): Attribute
     {
-        return $this->hasOne(LegacyPersonAddress::class, 'idpes', 'idpes');
+        return Attribute::make(
+            get: fn () => $this->individual->social_name ?? null
+        );
     }
 
-    /**
-     * @return HasMany
-     */
-    public function phone(): HasMany
+    protected function realName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (empty($this->individual->social_name)) {
+                    return $this->nome;
+                }
+
+                return $this->individual->social_name;
+            }
+        );
+    }
+
+    public function phones(): HasMany
     {
         return $this->hasMany(LegacyPhone::class, 'idpes', 'idpes');
     }
 
-    /**
-     * @return HasOne
-     */
+    public function phone(): HasOne
+    {
+        return $this->hasOne(LegacyPhone::class, 'idpes', 'idpes');
+    }
+
     public function individual(): HasOne
     {
         return $this->hasOne(LegacyIndividual::class, 'idpes', 'idpes');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function deficiencies(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -120,17 +130,23 @@ class LegacyPerson extends Model
         );
     }
 
-    /**
-     * @return HasOne
-     */
+    public function place(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Place::class,
+            PersonHasPlace::class,
+            'person_id',
+            'id',
+            'idpes',
+            'place_id'
+        )->orderBy('type');
+    }
+
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class, 'cod_servidor', 'idpes');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function considerableDeficiencies(): BelongsToMany
     {
         return $this->deficiencies()->where('desconsidera_regra_diferenciada', false);

@@ -2,7 +2,8 @@
 
 use App\Models\Religion;
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     /**
      * Referencia pega da session para o idpes do usuario atual
      *
@@ -32,11 +33,17 @@ return new class extends clsListagem {
     public $offset;
 
     public $cod_religiao;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $nm_religiao;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
 
     public function Gerar()
@@ -44,54 +51,54 @@ return new class extends clsListagem {
         $this->titulo = 'Religiao - Listagem';
 
         foreach ($_GET as $var => $val) { // passa todos os valores obtidos no GET para atributos do objeto
-            $this->$var = ($val === '') ? null: $val;
+            $this->$var = ($val === '') ? null : $val;
         }
 
-        $this->addCabecalhos([
-            'Nome Religião'
+        $this->addCabecalhos(coluna: [
+            'Nome Religião',
         ]);
 
         // Filtros de Foreign Keys
 
         // outros Filtros
-        $this->campoTexto('nm_religiao', 'Nome Religião', $this->nm_religiao, 30, 255, false);
+        $this->campoTexto(nome: 'nm_religiao', campo: 'Nome Religião', valor: $this->nm_religiao, tamanhovisivel: 30, tamanhomaximo: 255);
 
         // Paginador
         $this->limite = 20;
 
-        $query = Religion::query()->orderBy("name");
+        $query = Religion::query()->orderBy(column: 'name');
 
-        if (is_string($this->nm_religiao)) {
-            $query->where('name', 'ilike', '%' . $this->nm_religiao . '%');
+        if (is_string(value: $this->nm_religiao)) {
+            $query->where(column: 'name', operator: 'ilike', value: '%' . $this->nm_religiao . '%');
         }
 
-        $result = $query->paginate($this->limite, pageName: 'pagina_' . $this->nome);
+        $result = $query->paginate(perPage: $this->limite, pageName: 'pagina_' . $this->nome);
 
         $lista = $result->items();
         $total = $result->total();
 
         // monta a lista
-        if (is_array($lista) && count($lista)) {
+        if (is_array(value: $lista) && count(value: $lista)) {
             foreach ($lista as $registro) {
-                $this->addLinhas([
-                    "<a href=\"educar_religiao_det.php?cod_religiao={$registro['id']}\">{$registro['name']}</a>"
+                $this->addLinhas(linha: [
+                    "<a href=\"educar_religiao_det.php?cod_religiao={$registro['id']}\">{$registro['name']}</a>",
                 ]);
             }
         }
-        $this->addPaginador2('educar_religiao_lst.php', $total, $_GET, $this->nome, $this->limite);
+        $this->addPaginador2(strUrl: 'educar_religiao_lst.php', intTotalRegistros: $total, mixVariaveisMantidas: $_GET, nome: $this->nome, intResultadosPorPagina: $this->limite);
 
         //** Verificacao de permissao para cadastro
         $obj_permissao = new clsPermissoes();
 
-        if ($obj_permissao->permissao_cadastra(579, $this->pessoa_logada, 3)) {
+        if ($obj_permissao->permissao_cadastra(int_processo_ap: 579, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3)) {
             $this->acao = 'go("educar_religiao_cad.php")';
             $this->nome_acao = 'Novo';
         }
         //**
         $this->largura = '100%';
 
-        $this->breadcrumb('Listagem de religiões', [
-            url('intranet/educar_pessoas_index.php') => 'Pessoas',
+        $this->breadcrumb(currentPage: 'Listagem de religiões', breadcrumbs: [
+            url(path: 'intranet/educar_pessoas_index.php') => 'Pessoas',
         ]);
     }
 

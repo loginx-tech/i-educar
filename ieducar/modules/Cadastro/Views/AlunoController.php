@@ -1,12 +1,16 @@
 <?php
 
+use App\Models\LegacyInstitution;
 use App\Models\LegacyRace;
 use App\Services\UrlPresigner;
+use App\User;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
+use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use iEducar\Modules\Educacenso\Model\PaisResidencia;
 use iEducar\Modules\Educacenso\Model\RecursosRealizacaoProvas;
 use iEducar\Modules\Educacenso\Model\VeiculoTransporteEscolar;
 use iEducar\Support\View\SelectOptions;
+use Illuminate\Support\Facades\Auth;
 
 class AlunoController extends Portabilis_Controller_Page_EditController
 {
@@ -73,7 +77,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         ],
 
         'emancipado' => [
-            'label' => 'Emancipado'
+            'label' => 'Emancipado',
         ],
 
         'transporte' => [
@@ -97,7 +101,12 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         ],
 
         'deficiencias' => [
-            'label' => 'Deficiências / habilidades especiais',
+            'label' => 'Deficiências',
+            'help' => '',
+        ],
+
+        'transtornos' => [
+            'label' => 'Transtornos',
             'help' => '',
         ],
 
@@ -112,10 +121,6 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         ],
 
         'sus' => ['label' => 'Número da Carteira do SUS'],
-
-        'altura' => ['label' => 'Altura/Metro'],
-
-        'peso' => ['label' => 'Peso/Kg'],
 
         'grupo_sanguineo' => ['label' => 'Grupo sanguíneo'],
 
@@ -262,7 +267,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         'observacao_aluno' => [
             'label' => 'Observações do aluno',
             'help' => '',
-        ]
+        ],
     ];
 
     protected function _preConstruct()
@@ -334,10 +339,8 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             $this->campoArquivo('file', 'Foto', $this->arquivoFoto, 40, '<br/> <span style="font-style: italic; font-size= 10px;">* Recomenda-se imagens nos formatos jpeg, jpg, png e gif. Tamanho máximo: 2MB</span>');
         }
 
-
         $options = ['label' => _cl('aluno.detalhe.codigo_aluno'), 'disabled' => true, 'required' => false, 'size' => 25];
         $this->inputsHelper()->integer('id', $options);
-
 
         $options = ['label' => $this->_getLabel('aluno_inep_id'), 'required' => false, 'size' => 25, 'max_length' => 12];
 
@@ -347,7 +350,6 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             $this->inputsHelper()->integer('aluno_inep_id', $options);
         }
 
-
         $this->campoRA(
             'aluno_estado_id',
             'Código rede estadual do aluno (RA)',
@@ -355,33 +357,30 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             false
         );
 
-
         if (config('legacy.app.alunos.mostrar_codigo_sistema')) {
             $options = [
                 'label' => config('legacy.app.alunos.codigo_sistema'),
                 'required' => false,
                 'size' => 25,
-                'max_length' => 30
+                'max_length' => 30,
             ];
             $this->inputsHelper()->text('codigo_sistema', $options);
         }
 
-
         $options = ['label' => $this->_getLabel('pessoa'), 'size' => 68];
         $this->inputsHelper()->simpleSearchPessoa('nome', $options);
-
 
         $options = ['label' => 'Data de nascimento', 'disabled' => true, 'required' => false, 'size' => 25, 'placeholder' => ''];
         $this->inputsHelper()->date('data_nascimento', $options);
 
         $options = [
-            'required' => $required,
+            'required' => false,
             'label' => 'RG / Data emissão',
             'placeholder' => 'Documento identidade',
             'value' => $documentos['rg'],
             'max_length' => 25,
             'size' => 27,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('rg', $options);
@@ -389,16 +388,16 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $options = [
             'required' => false,
             'label' => '',
-            'placeholder' => 'Data emiss\u00e3o',
+            'placeholder' => 'Data emissão',
             'value' => $documentos['data_exp_rg'],
-            'size' => 19
+            'size' => 19,
         ];
 
         $this->inputsHelper()->date('data_emissao_rg', $options);
 
         $selectOptions = [null => 'Órgão emissor'];
-        $orgaos        = new clsOrgaoEmissorRg();
-        $orgaos        = $orgaos->lista();
+        $orgaos = new clsOrgaoEmissorRg();
+        $orgaos = $orgaos->lista();
 
         foreach ($orgaos as $orgao) {
             $selectOptions[$orgao['idorg_rg']] = $orgao['sigla'];
@@ -407,23 +406,23 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $selectOptions = Portabilis_Array_Utils::sortByValue($selectOptions);
 
         $options = [
-            'required'  => false,
-            'label'     => '',
-            'value'     => $documentos['idorg_exp_rg'],
+            'required' => false,
+            'label' => '',
+            'value' => $documentos['idorg_exp_rg'],
             'resources' => $selectOptions,
-            'inline'    => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->select('orgao_emissao_rg', $options);
 
         $options = [
             'required' => false,
-            'label'    => '',
-            'value'    => $documentos['sigla_uf_exp_rg']
+            'label' => '',
+            'value' => $documentos['sigla_uf_exp_rg'],
         ];
 
         $helperOptions = [
-            'attrName' => 'uf_emissao_rg'
+            'attrName' => 'uf_emissao_rg',
         ];
 
         $this->inputsHelper()->uf($options, $helperOptions);
@@ -437,6 +436,18 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             $nisPisPasep = int2Nis($fisica['nis_pis_pasep']);
         }
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->ref_cod_instituicao) {
+            $obrigarCpf = LegacyInstitution::query()
+                ->find($user->ref_cod_instituicao, ['obrigar_cpf'])?->obrigar_cpf;
+        } else {
+            $obrigarCpf = LegacyInstitution::query()
+                ->first(['obrigar_cpf'])?->obrigar_cpf;
+        }
+
+        $this->campoOculto('obrigarCPF', (int) $obrigarCpf);
         $this->campoCpf('id_federal', 'CPF', $valorCpf);
 
         $options = [
@@ -445,7 +456,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => '',
             'value' => $nisPisPasep,
             'max_length' => 11,
-            'size' => 20
+            'size' => 20,
         ];
 
         $this->inputsHelper()->integer('nis_pis_pasep', $options);
@@ -456,7 +467,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'certidao_nascimento_novo_formato' => 'Nascimento (novo formato)',
             91 => 'Nascimento (antigo formato)',
             'certidao_casamento_novo_formato' => 'Casamento (novo formato)',
-            92 => 'Casamento (antigo formato)'
+            92 => 'Casamento (antigo formato)',
         ];
 
         if (!empty($documentos['certidao_nascimento'])) {
@@ -472,7 +483,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => 'Tipo certidão civil',
             'value' => $tipoCertidaoCivil,
             'resources' => $selectOptions,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->select('tipo_certidao_civil', $options);
@@ -483,7 +494,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Termo',
             'value' => $documentos['num_termo'],
             'max_length' => 8,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->integer('termo_certidao_civil', $options);
@@ -495,11 +506,10 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'value' => $documentos['num_livro'],
             'max_length' => 8,
             'size' => 15,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('livro_certidao_civil', $options);
-
 
         $options = [
             'required' => false,
@@ -507,7 +517,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Folha',
             'value' => $documentos['num_folha'],
             'max_length' => 4,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->integer('folha_certidao_civil', $options);
@@ -520,7 +530,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'value' => $documentos['certidao_nascimento'],
             'max_length' => 32,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->integer('certidao_nascimento', $options);
@@ -541,11 +551,11 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'required' => false,
             'label' => 'Estado emissão / Data emissão',
             'value' => $documentos['sigla_uf_cert_civil'],
-            'inline' => true
+            'inline' => true,
         ];
 
         $helperOptions = [
-            'attrName' => 'uf_emissao_certidao_civil'
+            'attrName' => 'uf_emissao_certidao_civil',
         ];
 
         $this->inputsHelper()->uf($options, $helperOptions);
@@ -556,14 +566,14 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => $placeholderEmissao,
             'value' => $documentos['data_emissao_cert_civil'],
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->date('data_emissao_certidao_civil', $options);
 
         $options = [
             'label' => '',
-            'required' => false
+            'required' => false,
         ];
 
         $labelCartorio = 'Cartório emissão';
@@ -580,7 +590,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $resources = [
             null => 'Selecione',
             1 => 'O(a) aluno(a) não possui os documentos pessoais solicitados',
-            2 => 'A escola não dispõe ou não recebeu os documentos pessoais do(a) aluno(a)'
+            2 => 'A escola não dispõe ou não recebeu os documentos pessoais do(a) aluno(a)',
         ];
 
         $options = [
@@ -588,7 +598,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'resources' => $resources,
             'required' => false,
             'label_hint' => 'Pelo menos um dos documentos: CPF, NIS, Certidão de Nascimento (novo formato) deve ser informado para não precisar justificar a ausência de documentação',
-            'disabled' => true
+            'disabled' => true,
         ];
 
         $this->inputsHelper()->select('justificativa_falta_documentacao', $options);
@@ -599,7 +609,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => $labelPassaporte,
             'value' => $documentos['passaporte'],
             'cols' => 45,
-            'max_length' => 20
+            'max_length' => 20,
         ];
 
         $this->inputsHelper()->text('passaporte', $options);
@@ -611,7 +621,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Nome autorizado',
             'max_length' => 150,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('autorizado_um', $options);
@@ -621,7 +631,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => 'Parentesco',
             'max_length' => 150,
-            'size' => 15
+            'size' => 15,
         ];
 
         $this->inputsHelper()->text('parentesco_um', $options);
@@ -632,7 +642,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Nome autorizado',
             'max_length' => 150,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('autorizado_dois', $options);
@@ -642,7 +652,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => 'Parentesco',
             'max_length' => 150,
-            'size' => 15
+            'size' => 15,
         ];
 
         $this->inputsHelper()->text('parentesco_dois', $options);
@@ -653,7 +663,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Nome autorizado',
             'max_length' => 150,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('autorizado_tres', $options);
@@ -663,7 +673,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => 'Parentesco',
             'max_length' => 150,
-            'size' => 15
+            'size' => 15,
         ];
 
         $this->inputsHelper()->text('parentesco_tres', $options);
@@ -674,7 +684,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'placeholder' => 'Nome autorizado',
             'max_length' => 150,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('autorizado_quatro', $options);
@@ -684,7 +694,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => 'Parentesco',
             'max_length' => 150,
-            'size' => 15
+            'size' => 15,
         ];
 
         $this->inputsHelper()->text('parentesco_quatro', $options);
@@ -696,7 +706,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
 
             'max_length' => 150,
             'size' => 50,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->text('autorizado_cinco', $options);
@@ -706,7 +716,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => '',
             'placeholder' => 'Parentesco',
             'max_length' => 150,
-            'size' => 15
+            'size' => 15,
         ];
 
         $this->inputsHelper()->text('parentesco_cinco', $options);
@@ -715,16 +725,14 @@ class AlunoController extends Portabilis_Controller_Page_EditController
 
         $this->inputMae();
 
-
         $label = $this->_getLabel('responsavel');
-
 
         $tiposResponsavel = [null => 'Informe uma Pessoa primeiro'];
         $options = [
             'label' => 'Responsável',
             'resources' => $tiposResponsavel,
             'required' => true,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->select('tipo_responsavel', $options);
@@ -734,18 +742,17 @@ class AlunoController extends Portabilis_Controller_Page_EditController
 
         $this->inputsHelper()->simpleSearchPessoa('nome', $options, $helperOptions);
 
-
         $tiposTransporte = [
             null => 'Selecione',
             'nenhum' => 'Não utiliza',
             'municipal' => 'Municipal',
-            'estadual' => 'Estadual'
+            'estadual' => 'Estadual',
         ];
 
         $options = [
             'label' => $this->_getLabel('transporte'),
             'resources' => $tiposTransporte,
-            'required' => true
+            'required' => true,
         ];
 
         $this->inputsHelper()->select('tipo_transporte', $options);
@@ -756,8 +763,8 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => 'Veículo utilizado',
             'required' => true,
             'options' => [
-                'all_values' => $veiculos
-            ]
+                'all_values' => $veiculos,
+            ],
         ];
         $this->inputsHelper()->multipleSearchCustom('', $options, $helperOptions);
 
@@ -768,7 +775,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => 'Benefícios',
             'size' => 250,
             'required' => false,
-            'options' => ['value' => null]
+            'options' => ['value' => null],
         ];
 
         $this->inputsHelper()->multipleSearchBeneficios('', $options, $helperOptions);
@@ -778,10 +785,20 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'label' => $this->_getLabel('deficiencias'),
             'size' => 50,
             'required' => false,
-            'options' => ['value' => null]
+            'options' => ['value' => null],
         ];
 
         $this->inputsHelper()->multipleSearchDeficiencias('', $options, $helperOptions);
+
+        $helperOptions = ['objectName' => 'transtornos'];
+        $options = [
+            'label' => $this->_getLabel('transtornos'),
+            'size' => 50,
+            'required' => false,
+            'options' => ['value' => null],
+        ];
+
+        $this->inputsHelper()->multipleSearchTranstornos('', $options, $helperOptions);
 
         $options = ['label' => $this->_getLabel('alfabetizado'), 'value' => 'checked'];
         $this->inputsHelper()->checkbox('alfabetizado', $options);
@@ -819,15 +836,6 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->inputsHelper()->numeric('historico_peso');
 
         $this->campoTabelaFim();
-
-
-        $options = ['label' => $this->_getLabel('altura'), 'size' => 5, 'max_length' => 4, 'required' => false, 'placeholder' => ''];
-        $this->inputsHelper()->numeric('altura', $options);
-
-
-        $options = ['label' => $this->_getLabel('peso'), 'size' => 5, 'max_length' => 6, 'required' => false, 'placeholder' => ''];
-        $this->inputsHelper()->numeric('peso', $options);
-
 
         $options = ['label' => $this->_getLabel('grupo_sanguineo'), 'size' => 5, 'max_length' => 2, 'required' => false, 'placeholder' => ''];
         $this->inputsHelper()->text('grupo_sanguineo', $options);
@@ -961,14 +969,14 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             null => 'Selecione',
             'A' => 'Apartamento',
             'C' => 'Casa',
-            'O' => 'Outro'
+            'O' => 'Outro',
         ];
 
         $options = [
             'label' => $this->_getLabel('moradia'),
             'resources' => $moradias,
             'required' => false,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->select('moradia', $options);
@@ -976,14 +984,14 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $materiais_moradia = [
             'A' => 'Alvenaria',
             'M' => 'Madeira',
-            'I' => 'Mista'
+            'I' => 'Mista',
         ];
 
         $options = [
             'label' => null,
             'resources' => $materiais_moradia,
             'required' => false,
-            'inline' => true
+            'inline' => true,
         ];
 
         $this->inputsHelper()->select('material', $options);
@@ -997,13 +1005,13 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             '2' => 'Próprio',
             '3' => 'Cedido',
             '4' => 'Financiado',
-            '5' => 'Outros'
+            '5' => 'Outros',
         ];
 
         $options = [
             'label' => $this->_getLabel('moradia_situacao'),
             'resources' => $situacoes,
-            'required' => false
+            'required' => false,
         ];
 
         $this->inputsHelper()->select('moradia_situacao', $options);
@@ -1053,10 +1061,10 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $options = ['label' => $this->_getLabel('telefone'), 'required' => false, 'placeholder' => ''];
         $this->inputsHelper()->checkbox('telefone', $options);
 
-        $obrigarRecursosTecnologicos = (bool)config('legacy.app.alunos.obrigar_recursos_tecnologicos');
+        $obrigarRecursosTecnologicos = (bool) config('legacy.app.alunos.obrigar_recursos_tecnologicos');
         $this->CampoOculto('obrigar_recursos_tecnologicos', (int) $obrigarRecursosTecnologicos);
 
-        $helperOptions = ['objectName'  => 'recursos_tecnologicos'];
+        $helperOptions = ['objectName' => 'recursos_tecnologicos'];
         $recursosTecnologicos = [
             'Internet' => 'Acesso à internet (em casa)',
             'Computador' => 'Computador',
@@ -1072,7 +1080,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'options' => [
                 'values' => $this->recursos_tecnologicos,
                 'all_values' => $recursosTecnologicos,
-            ]
+            ],
         ];
         $this->inputsHelper()->multipleSearchCustom('_', $options, $helperOptions);
 
@@ -1101,7 +1109,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->inputsHelper()->checkbox('lixo', $options);
 
         $recursosProvaInep = RecursosRealizacaoProvas::getDescriptiveValues();
-        $helperOptions = ['objectName'  => 'recursos_prova_inep'];
+        $helperOptions = ['objectName' => 'recursos_prova_inep'];
         $options = [
             'label' => $this->_getLabel('recursos_prova_inep'),
             'label_hint' => '<a href="#" class="open-dialog-recursos-prova-inep">Regras do preenchimento dos recursos necessários para realização de provas</a>',
@@ -1109,8 +1117,8 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'required' => false,
             'options' => [
                 'values' => $this->recursos_prova_inep,
-                'all_values' => $recursosProvaInep
-            ]
+                'all_values' => $recursosProvaInep,
+            ],
         ];
         $this->inputsHelper()->multipleSearchCustom('_', $options, $helperOptions);
 
@@ -1123,11 +1131,10 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $options = [
             'required' => false,
             'label' => $this->_getLabel('recebe_escolarizacao_em_outro_espaco'),
-            'resources' => $selectOptions
+            'resources' => $selectOptions,
         ];
 
         $this->inputsHelper()->select('recebe_escolarizacao_em_outro_espaco', $options);
-
 
         $this->campoTabelaInicio('projetos', 'Projetos', ['Projeto', 'Data inclusão', 'Data desligamento', 'Turno']);
 
@@ -1158,7 +1165,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
             'value' => $this->zona_localizacao,
             'disabled' => $desativarCamposDefinidosViaCep,
             'resources' => $zonas,
-            'required' => $enderecamentoObrigatorio
+            'required' => $enderecamentoObrigatorio,
         ];
 
         $this->inputsHelper()->select('zona_localizacao', $options);
@@ -1199,27 +1206,26 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->CampoOculto('obrigar_documento_pessoa', (int) $obrigarDocumentoPessoa);
         $this->CampoOculto('obrigar_telefone_pessoa', (int) $obrigarTelefonePessoa);
 
-        $race =  LegacyRace::query()
+        $race = LegacyRace::query()
             ->where('ativo', true)
             ->orderBy('nm_raca')
             ->pluck('nm_raca', 'cod_raca')
-            ->prepend( 'Selecione','')
-            ->toArray()
-        ;
+            ->prepend('Selecione', '')
+            ->toArray();
 
         $this->campoLista('cor_raca', 'Raça', $race, $this->cod_raca, '', false, '', '', '', $obrigarCamposCenso);
 
         $zonas = [
             '' => 'Selecione',
-            1  => 'Urbana',
-            2  => 'Rural',
+            1 => 'Urbana',
+            2 => 'Rural',
         ];
 
         $options = [
-            'label'       => 'Zona Localização',
-            'value'       => $this->zona_localizacao_censo,
-            'resources'   => $zonas,
-            'required'    => $obrigarCamposCenso,
+            'label' => 'Zona Localização',
+            'value' => $this->zona_localizacao_censo,
+            'resources' => $zonas,
+            'required' => $obrigarCamposCenso,
         ];
 
         $this->inputsHelper()->select('zona_localizacao_censo', $options);
@@ -1233,36 +1239,37 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->inputsHelper()->select('localizacao_diferenciada', $options);
 
         $tiposNacionalidade = [
-            '1'  => 'Brasileiro',
-            '2'  => 'Naturalizado brasileiro',
-            '3'  => 'Estrangeiro'
+            '' => 'Selecione',
+            '1' => 'Brasileiro',
+            '2' => 'Naturalizado brasileiro',
+            '3' => 'Estrangeiro',
         ];
 
         $options = [
-            'label'       => 'Nacionalidade',
-            'resources'   => $tiposNacionalidade,
-            'required'    => $obrigarCamposCenso,
-            'inline'      => true,
-            'value'       => $this->tipo_nacionalidade
+            'label' => 'Nacionalidade',
+            'resources' => $tiposNacionalidade,
+            'required' => $obrigarCamposCenso,
+            'inline' => true,
+            'value' => $this->getRequest()->id == null ? Nacionalidade::BRASILEIRA : $this->tipo_nacionalidade, //Quando for novo registro, preenche com o valor default brasileiro
         ];
 
         $this->inputsHelper()->select('tipo_nacionalidade', $options);
 
         $options = [
-            'label'       => '',
+            'label' => '',
             'placeholder' => 'Informe o nome do pais',
-            'required'    => $obrigarCamposCenso
+            'required' => $obrigarCamposCenso,
         ];
 
         $hiddenInputOptions = [
             'options' => [
-                'value' => $this->pais_origem_id
-            ]
+                'value' => $this->pais_origem_id,
+            ],
         ];
 
         $helperOptions = [
-            'objectName'         => 'pais_origem',
-            'hiddenInputOptions' => $hiddenInputOptions
+            'objectName' => 'pais_origem',
+            'hiddenInputOptions' => $hiddenInputOptions,
         ];
         $this->inputsHelper()->simpleSearchPaisSemBrasil('nome', $options, $helperOptions);
     }
@@ -1291,7 +1298,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $options = [
             'label' => "Pessoa {$parentTypeLabel}",
             'size' => 69,
-            'required' => false
+            'required' => false,
         ];
 
         $this->inputsHelper()->simpleSearchPessoa('nome', $options, $helperOptions);

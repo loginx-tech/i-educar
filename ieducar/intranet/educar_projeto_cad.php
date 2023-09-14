@@ -3,7 +3,8 @@
 use App\Models\LegacyProject;
 use App\Models\LegacyStudentProject;
 
-return new class extends clsCadastro {
+return new class extends clsCadastro
+{
     /**
      * Referencia pega da session para o idpes do usuario atual
      *
@@ -12,17 +13,19 @@ return new class extends clsCadastro {
     public $pessoa_logada;
 
     public $cod_projeto;
+
     public $nome;
+
     public $observacao;
 
     public function Inicializar()
     {
         $retorno = 'Novo';
 
-        $this->cod_projeto=$_GET['cod_projeto'];
+        $this->cod_projeto = $_GET['cod_projeto'];
 
         $obj_permissoes = new clsPermissoes();
-        $obj_permissoes->permissao_cadastra(21250, $this->pessoa_logada, 3, 'educar_projeto_lst.php');
+        $obj_permissoes->permissao_cadastra(int_processo_ap: 21250, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3, str_pagina_redirecionar: 'educar_projeto_lst.php');
 
         if (is_numeric($this->cod_projeto)) {
             $registro = LegacyProject::find($this->cod_projeto)?->getAttributes();
@@ -32,7 +35,7 @@ return new class extends clsCadastro {
                 }
 
                 //** verificao de permissao para exclusao
-                $this->fexcluir = $obj_permissoes->permissao_excluir(21250, $this->pessoa_logada, 3);
+                $this->fexcluir = $obj_permissoes->permissao_excluir(int_processo_ap: 21250, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3);
                 //**
 
                 $retorno = 'Editar';
@@ -42,7 +45,7 @@ return new class extends clsCadastro {
 
         $nomeMenu = $retorno == 'Editar' ? $retorno : 'Cadastrar';
 
-        $this->breadcrumb($nomeMenu . ' projeto', [
+        $this->breadcrumb(currentPage: $nomeMenu . ' projeto', breadcrumbs: [
             url('intranet/educar_index.php') => 'Escola',
         ]);
 
@@ -54,10 +57,10 @@ return new class extends clsCadastro {
     public function Gerar()
     {
         // primary keys
-        $this->campoOculto('cod_projeto', $this->cod_projeto);
+        $this->campoOculto(nome: 'cod_projeto', valor: $this->cod_projeto);
 
-        $this->campoTexto('nome', 'Nome do projeto', $this->nome, 50, 50, true);
-        $this->campoMemo('observacao', 'Observação', $this->observacao, 52, 5, false);
+        $this->campoTexto(nome: 'nome', campo: 'Nome do projeto', valor: $this->nome, tamanhovisivel: 50, tamanhomaximo: 50, obrigatorio: true);
+        $this->campoMemo(nome: 'observacao', campo: 'Observação', valor: $this->observacao, colunas: 52, linhas: 5);
     }
 
     public function Novo()
@@ -71,6 +74,7 @@ return new class extends clsCadastro {
             $this->simpleRedirect('educar_projeto_lst.php');
         }
         $this->mensagem = 'Cadastro não realizado.<br>';
+
         return false;
     }
 
@@ -85,17 +89,19 @@ return new class extends clsCadastro {
             $this->simpleRedirect('educar_projeto_lst.php');
         }
         $this->mensagem = 'Edição não realizada.<br>';
+
         return false;
     }
 
     public function Excluir()
     {
         $count = LegacyStudentProject::query()
-            ->where('ref_cod_projeto', $this->cod_projeto)
+            ->where(column: 'ref_cod_projeto', operator: $this->cod_projeto)
             ->count();
 
         if ($count > 0) {
             $this->mensagem = 'Você não pode excluir esse projeto, pois ele possui alunos vinculados.<br>';
+
             return false;
         }
 
@@ -106,6 +112,7 @@ return new class extends clsCadastro {
             $this->simpleRedirect('educar_projeto_lst.php');
         }
         $this->mensagem = 'Exclusão não realizada.<br>';
+
         return false;
     }
 

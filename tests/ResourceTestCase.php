@@ -17,11 +17,16 @@ class ResourceTestCase extends TestCase
     use DatabaseTransactions;
 
     protected string $uri = '/';
+
     protected string $model;
+
     protected string $factory;
 
-    protected int $indexFactoryCount = 20;
-    protected int $indexJsonCount = 15;
+    protected int $indexFactoryCount = 2;
+
+    protected int $indexJsonCount = 1;
+
+    protected int $showFactoryCount = 1;
 
     protected function setUp(): void
     {
@@ -52,7 +57,11 @@ class ResourceTestCase extends TestCase
 
         $this->newFactory()->count($this->indexFactoryCount)->create();
 
-        $response = $this->get($this->getUri());
+        $response = $this->get($this->getUri(
+            query: [
+                'show' => $this->showFactoryCount,
+            ]
+        ));
 
         $response->assertOk();
         $response->assertJsonCount($this->indexJsonCount, 'data');

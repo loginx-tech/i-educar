@@ -2,20 +2,34 @@
 
 use App\Models\LegacyGrade;
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     public $limite;
+
     public $offset;
+
     public $ref_cod_serie;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $hora_inicial;
+
     public $hora_final;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
+
     public $hora_inicio_intervalo;
+
     public $hora_fim_intervalo;
+
     public $ref_cod_curso;
+
     public $ref_ref_cod_serie;
 
     public function Gerar()
@@ -53,7 +67,7 @@ return new class extends clsListagem {
 
         // Editar
         if ($this->ref_cod_curso) {
-            $series = LegacyGrade::where('ativo',1)->where('ref_cod_curso',$this->ref_cod_curso)->orderBy('nm_serie')->get(['nm_serie','cod_serie']);
+            $series = LegacyGrade::where('ativo', 1)->where('ref_cod_curso', $this->ref_cod_curso)->orderBy('nm_serie')->get(['nm_serie', 'cod_serie']);
 
             foreach ($series as $serie) {
                 $opcoes_serie[$serie['cod_serie']] = $serie['nm_serie'];
@@ -61,10 +75,10 @@ return new class extends clsListagem {
         }
 
         $this->campoLista(
-            'ref_cod_serie',
-            'Série',
-            $opcoes_serie,
-            $this->ref_cod_serie,
+            nome: 'ref_cod_serie',
+            campo: 'Série',
+            valor: $opcoes_serie,
+            default: $this->ref_cod_serie,
             obrigatorio: false
         );
 
@@ -76,32 +90,18 @@ return new class extends clsListagem {
 
         $obj_escola_serie = new clsPmieducarEscolaSerie();
         $obj_escola_serie->setOrderby('nm_serie ASC');
-        $obj_escola_serie->setLimite($this->limite, $this->offset);
+        $obj_escola_serie->setLimite(intLimiteQtd: $this->limite, intLimiteOffset: $this->offset);
 
         if (App_Model_IedFinder::usuarioNivelBibliotecaEscolar($this->pessoa_logada)) {
             $obj_escola_serie->codUsuario = $this->pessoa_logada;
         }
 
         $lista = $obj_escola_serie->lista(
-            $this->ref_cod_escola,
-            $this->ref_cod_serie,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            1,
-            null,
-            null,
-            null,
-            null,
-            $this->ref_cod_instituicao,
-            $this->ref_cod_curso
+            int_ref_cod_escola: $this->ref_cod_escola,
+            int_ref_cod_serie: $this->ref_cod_serie,
+            int_ativo: 1,
+            int_ref_cod_instituicao: $this->ref_cod_instituicao,
+            int_ref_cod_curso: $this->ref_cod_curso
         );
 
         $total = $obj_escola_serie->_total;
@@ -126,7 +126,7 @@ return new class extends clsListagem {
 
                 $lista_busca = [
                     "<a href=\"educar_escola_serie_det.php?ref_cod_escola={$registro['ref_cod_escola']}&ref_cod_serie={$registro['ref_cod_serie']}\">{$nm_serie}</a>",
-                    "<a href=\"educar_escola_serie_det.php?ref_cod_escola={$registro['ref_cod_escola']}&ref_cod_serie={$registro['ref_cod_serie']}\">{$registro['ref_cod_curso']}</a>"
+                    "<a href=\"educar_escola_serie_det.php?ref_cod_escola={$registro['ref_cod_escola']}&ref_cod_serie={$registro['ref_cod_serie']}\">{$registro['ref_cod_curso']}</a>",
                 ];
 
                 $lista_busca[] = "<a href=\"educar_escola_serie_det.php?ref_cod_escola={$registro['ref_cod_escola']}&ref_cod_serie={$registro['ref_cod_serie']}\">{$nm_escola}</a>";
@@ -138,26 +138,25 @@ return new class extends clsListagem {
         }
 
         $this->addPaginador2(
-            'educar_escola_serie_lst.php',
-            $total,
-            $_GET,
-            $this->nome,
-            $this->limite
+            strUrl: 'educar_escola_serie_lst.php',
+            intTotalRegistros: $total,
+            mixVariaveisMantidas: $_GET,
+            nome: $this->nome,
+            intResultadosPorPagina: $this->limite
         );
 
         $obj_permissao = new clsPermissoes();
-        if ($obj_permissao->permissao_cadastra(585, $this->pessoa_logada, 7)) {
+        if ($obj_permissao->permissao_cadastra(int_processo_ap: 585, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7)) {
             $this->acao = 'go("educar_escola_serie_cad.php")';
             $this->nome_acao = 'Novo';
         }
 
         $this->largura = '100%';
 
-        $this->breadcrumb('Séries da escola', [
+        $this->breadcrumb(currentPage: 'Séries da escola', breadcrumbs: [
             url('intranet/educar_index.php') => 'Escola',
         ]);
     }
-
 
     public function makeExtra()
     {

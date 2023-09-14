@@ -8,10 +8,6 @@ class LegacySchoolGradeDisciplineBuilder extends LegacyBuilder
 {
     /**
      * Retorna o recurso para os selects dos formulários
-     *
-     * @param array $filters
-     *
-     * @return Collection
      */
     public function getResource(array $filters = []): Collection
     {
@@ -22,8 +18,6 @@ class LegacySchoolGradeDisciplineBuilder extends LegacyBuilder
 
     /**
      * Filtra somente os distintos por id
-     *
-     * @return LegacySchoolGradeDisciplineBuilder
      */
     public function distinctDiscipline(): self
     {
@@ -32,10 +26,6 @@ class LegacySchoolGradeDisciplineBuilder extends LegacyBuilder
 
     /**
      * Filtra por escola
-     *
-     * @param int $grade
-     *
-     * @return LegacySchoolGradeDisciplineBuilder
      */
     public function whereGrade(int $grade): self
     {
@@ -44,13 +34,38 @@ class LegacySchoolGradeDisciplineBuilder extends LegacyBuilder
 
     /**
      * Filtra por escola
-     *
-     * @param int $school
-     *
-     * @return LegacySchoolGradeDisciplineBuilder
      */
     public function whereSchool(int $school): self
     {
         return $this->where('ref_ref_cod_escola', $school);
+    }
+
+    /**
+     * Filtra por Disciplina
+     */
+    public function whereDiscipline(int $discipline): self
+    {
+        return $this->where('ref_cod_disciplina', $discipline);
+    }
+
+    /**
+     * Filtra os ativos
+     *
+     * @return LegacySchoolGradeDisciplineBuilder
+     */
+    public function active()
+    {
+        return $this->where('ativo', 1);
+    }
+
+    /**
+     * Filtra por ano letivo
+     *
+     *
+     * @return LegacySchoolGradeDisciplineBuilder
+     */
+    public function whereYearEq(int $year)
+    {
+        return $this->whereRaw("anos_letivos @> ('{{$year}}')");
     }
 }

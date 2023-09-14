@@ -2,21 +2,36 @@
 
 use App\Models\Employee;
 
-return new class extends clsListagem {
+return new class extends clsListagem
+{
     public $limite;
+
     public $offset;
+
     public $cod_servidor;
+
     public $ref_idesco;
+
     public $ref_cod_funcao;
+
     public $carga_horaria;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
+
     public $nome;
+
     public $matricula_servidor;
+
     public $ref_cod_escola;
+
     public $ref_cod_instituicao;
+
     public $servidor_sem_alocacao;
+
     public $ano_letivo;
 
     public function Gerar()
@@ -27,21 +42,21 @@ return new class extends clsListagem {
             $this->$var = ($val === '') ? null : $val;
         }
 
-        $this->addCabecalhos([
+        $this->addCabecalhos(coluna: [
             'Nome do Servidor',
             'Matrícula',
             'CPF',
-            'Instituição'
+            'Instituição',
         ]);
 
-        $this->inputsHelper()->dynamic(['instituicao', 'escola', 'anoLetivo'], [],['options' => ['required' => false]]);
+        $this->inputsHelper()->dynamic(helperNames: ['instituicao', 'escola', 'anoLetivo'], helperOptions: ['options' => ['required' => false]]);
 
         $parametros = new clsParametrosPesquisas();
-        $parametros->setSubmit(0);
-        $this->campoTexto('nome', 'Nome do servidor', $this->nome, 50, 255, false);
-        $this->campoTexto('matricula_servidor', 'Matrícula', $this->matricula_servidor, 50, 255, false);
-        $this->inputsHelper()->dynamic('escolaridade', ['required' => false]);
-        $this->campoCheck('servidor_sem_alocacao', 'Incluir servidores sem alocação', isset($_GET['servidor_sem_alocacao']));
+        $parametros->setSubmit(submit: 0);
+        $this->campoTexto(nome: 'nome', campo: 'Nome do servidor', valor: $this->nome, tamanhovisivel: 50, tamanhomaximo: 255);
+        $this->campoTexto(nome: 'matricula_servidor', campo: 'Matrícula', valor: $this->matricula_servidor, tamanhovisivel: 50, tamanhomaximo: 255);
+        $this->inputsHelper()->dynamic(helperNames: 'escolaridade', inputOptions: ['required' => false]);
+        $this->campoCheck(nome: 'servidor_sem_alocacao', campo: 'Incluir servidores sem alocação', valor: isset($_GET['servidor_sem_alocacao']));
 
         // Paginador
         $this->limite = 20;
@@ -50,23 +65,22 @@ return new class extends clsListagem {
             $this->ref_idesco = $_GET['idesco'];
         }
 
-        $lista = Employee::join('pessoa', 'cod_servidor', 'idpes')->filter([
+        $lista = Employee::join(table: 'pessoa', first: 'cod_servidor', operator: 'idpes')->filter([
             'institution' => $this->ref_cod_instituicao,
             'name' => $this->nome,
             'role' => $this->matricula_servidor,
             'schooling_degree' => $this->ref_idesco,
-            'allocation' => [request()->has('servidor_sem_alocacao'),$this->ref_cod_escola,$this->ano_letivo],
+            'allocation' => [request()->has('servidor_sem_alocacao'), $this->ref_cod_escola, $this->ano_letivo],
             'employee' => $this->cod_servidor,
         ])->with([
             'institution:cod_instituicao,nm_instituicao',
             'individual:idpes,cpf',
-            'employeeRoles:ref_cod_servidor,matricula'
+            'employeeRoles:ref_cod_servidor,matricula',
         ])->active()->orderBy('pessoa.nome')->paginate($this->limite, [
             'pessoa.nome as name',
             'ref_cod_instituicao',
             'cod_servidor',
         ], 'pagina_');
-
 
         // UrlHelper
         $url = CoreExt_View_Helper_UrlHelper::getInstance();
@@ -79,30 +93,30 @@ return new class extends clsListagem {
                     'query' => [
                         'cod_servidor' => $registro->id,
                         'ref_cod_instituicao' => $registro->institution->id,
-                    ]
+                    ],
                 ];
 
-                $this->addLinhas([
-                    $url->l($registro->name, $path, $options),
-                    $url->l($registro->employeeRoles->unique('matricula')->implode('matricula',', '), $path, $options),
-                    $url->l($registro->individual->cpf, $path, $options),
-                    $url->l($registro->institution->name, $path, $options),
+                $this->addLinhas(linha: [
+                    $url->l(text: $registro->name, path: $path, options: $options),
+                    $url->l(text: $registro->employeeRoles->unique('matricula')->implode('matricula', ', '), path: $path, options: $options),
+                    $url->l(text: $registro->individual->cpf, path: $path, options: $options),
+                    $url->l(text: $registro->institution->name, path: $path, options: $options),
                 ]);
             }
         }
 
-        $this->addPaginador2('educar_servidor_lst.php', $lista->total(), $_GET, $this->nome, $this->limite);
+        $this->addPaginador2(strUrl: 'educar_servidor_lst.php', intTotalRegistros: $lista->total(), mixVariaveisMantidas: $_GET, nome: $this->nome, intResultadosPorPagina: $this->limite);
         $obj_permissoes = new clsPermissoes();
 
-        if ($obj_permissoes->permissao_cadastra(635, $this->pessoa_logada, 7)) {
+        if ($obj_permissoes->permissao_cadastra(int_processo_ap: 635, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7)) {
             $this->acao = 'go("educar_servidor_cad.php")';
             $this->nome_acao = 'Novo';
         }
 
         $this->largura = '100%';
 
-        $this->breadcrumb('Funções do servidor', [
-            url('intranet/educar_servidores_index.php') => 'Servidores',
+        $this->breadcrumb(currentPage: 'Funções do servidor', breadcrumbs: [
+            url(path: 'intranet/educar_servidores_index.php') => 'Servidores',
         ]);
     }
 

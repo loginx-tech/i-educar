@@ -5,18 +5,31 @@ use iEducar\Legacy\Model;
 class clsPmieducarServidor extends Model
 {
     public $cod_servidor;
+
     public $ref_idesco = false;
+
     public $carga_horaria;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
+
     public $ref_cod_instituicao;
+
     public $pos_graduacao;
+
     public $curso_formacao_continuada;
+
     public $complementacao_pedagogica;
+
     public $multi_seriado;
+
     public $tipo_ensino_medio_cursado;
+
     public $_campos_lista2;
+
     public $_todos_campos2;
 
     public function __construct(
@@ -268,7 +281,6 @@ class clsPmieducarServidor extends Model
      * @param int        $int_ref_cod_disciplina      Código da disciplina que o professor deve ser habilitado (subquery).
      *                                                Somente verifica quando o curso passado por $int_ref_cod_curso não
      *                                                possui sistema de falta globalizada
-     *
      * @return array|bool Array com os resultados da query SELECT ou FALSE caso
      *                    nenhum registro tenha sido encontrado
      */
@@ -534,7 +546,7 @@ class clsPmieducarServidor extends Model
           WHERE $where
           AND a.periodo = 1
           AND a.periodo = 1".
-        ($ano_alocacao ? " AND a.ano = {$ano_alocacao}" : '')
+        ($ano_alocacao ? " AND a.ano = {$ano_alocacao} " : ' ')
         ."AND (a.data_saida > now() or a.data_saida is null)
           AND (a.data_saida > now() or a.data_saida is null)
           AND a.carga_horaria >= COALESCE(
@@ -569,10 +581,10 @@ class clsPmieducarServidor extends Model
                         $filtros .= "
       {$whereAnd} (s.cod_servidor NOT IN (SELECT a.ref_cod_servidor
               FROM pmieducar.servidor_alocacao a
-              WHERE $where
-              AND a.ano = $ano_alocacao
-              AND (a.data_saida > now() or a.data_saida is null)
-              AND a.periodo = 1) OR s.multi_seriado )";
+              WHERE $where".
+            ($ano_alocacao ? " AND a.ano = {$ano_alocacao}" : '')
+            .' AND (a.data_saida > now() or a.data_saida is null)
+              AND a.periodo = 1) OR s.multi_seriado )';
                     }
                 }
                 if ($vespertino) {
@@ -582,9 +594,9 @@ class clsPmieducarServidor extends Model
               (SELECT a.ref_cod_servidor
                 FROM pmieducar.servidor_alocacao a
                 WHERE $where
-                AND a.periodo = 2
-                AND a.ano = $ano_alocacao
-                AND (a.data_saida > now() or a.data_saida is null)
+                AND a.periodo = 2".
+                ($ano_alocacao ? " AND a.ano = {$ano_alocacao}" : '')
+                ." AND (a.data_saida > now() or a.data_saida is null)
                 AND a.carga_horaria >= COALESCE(
                   (SELECT SUM( qhh.hora_final - qhh.hora_inicial )
                   FROM pmieducar.quadro_horario_horarios qhh
@@ -598,9 +610,9 @@ class clsPmieducarServidor extends Model
                   AND qhh.hora_inicial >= '12:00'
                   AND qhh.hora_inicial <= '18:00'
                   AND qhh.dia_semana <> '$int_dia_semana'
-                  AND qhh.ref_servidor = a.ref_cod_servidor
-                  AND quadro_horario.ano = $ano_alocacao
-                  AND qhh.sequencial = (
+                  AND qhh.ref_servidor = a.ref_cod_servidor".
+                 ($ano_alocacao ? " AND quadro_horario.ano = {$ano_alocacao}" : '')
+                 ." AND qhh.sequencial = (
                     SELECT s_qhh.sequencial
                     FROM pmieducar.quadro_horario_horarios s_qhh
                     WHERE s_qhh.dia_semana = qhh.dia_semana
@@ -621,18 +633,18 @@ class clsPmieducarServidor extends Model
                     AND qhha.ref_cod_escola = '$int_ref_cod_escola'
                     AND qhha.ref_servidor = a.ref_cod_servidor
                     AND qhha.hora_inicial >= '12:00'
-                    AND qhha.hora_inicial <= '18:00'
-                    AND quadro_horario.ano = $ano_alocacao
-                    AND identificador = '$int_identificador'
+                    AND qhha.hora_inicial <= '18:00'".
+                 ($ano_alocacao ? " AND quadro_horario.ano = {$ano_alocacao}" : '')
+                 ." AND identificador = '$int_identificador'
                     GROUP BY qhha.ref_servidor),'00:00') ) OR s.multi_seriado ) ";
                     } else {
                         $filtros .= "
       {$whereAnd} (s.cod_servidor NOT IN ( SELECT a.ref_cod_servidor
               FROM pmieducar.servidor_alocacao a
-              WHERE $where
-              AND a.ano = $ano_alocacao
-              AND (a.data_saida > now() or a.data_saida is null)
-              AND a.periodo = 2 ) OR s.multi_seriado) ";
+              WHERE $where ".
+                ($ano_alocacao ? " AND a.ano = {$ano_alocacao}" : '')
+                .' AND (a.data_saida > now() or a.data_saida is null)
+              AND a.periodo = 2 ) OR s.multi_seriado) ';
                     }
                 }
                 if ($noturno) {
@@ -677,10 +689,10 @@ class clsPmieducarServidor extends Model
       {$whereAnd} (s.cod_servidor NOT IN (
             SELECT a.ref_cod_servidor
               FROM pmieducar.servidor_alocacao a
-              WHERE $where
-              AND a.ano = $ano_alocacao
-              AND (a.data_saida > now() or a.data_saida is null)
-              AND a.periodo = 3 ) OR s.multi_seriado) ";
+              WHERE $where ".
+                ($ano_alocacao ? " AND a.ano = {$ano_alocacao}" : '')
+                .' AND (a.data_saida > now() or a.data_saida is null)
+              AND a.periodo = 3 ) OR s.multi_seriado) ';
                     }
                 }
                 if (!(is_string($str_horario) && $str_horario == 'S')) {
@@ -709,9 +721,8 @@ class clsPmieducarServidor extends Model
              * na query.
              */
             if (!$int_ref_cod_disciplina && !$int_ref_cod_curso) {
-                $servidorDisciplina = new clsPmieducarServidorDisciplina();
-                $disciplinas = $servidorDisciplina->lista(null, null, $str_not_in_servidor);
-                if (is_array($disciplinas)) {
+                $disciplinas = DB::table('pmieducar.servidor_disciplina')->when(is_numeric($str_not_in_servidor), static fn ($q) => $q->where('ref_cod_servidor', $str_not_in_servidor))->get()->toArray();
+                if (!empty($disciplinas)) {
                     $codDisciplinas = array_column($disciplinas, 'ref_cod_disciplina');
                     $codDisciplinas = implode(',', $codDisciplinas);
                     $servidorDisciplinas = "
@@ -871,7 +882,6 @@ class clsPmieducarServidor extends Model
      *               um papel de professor
      *
      * @since   Método disponível desde a versão 1.0.2
-     *
      */
     public function getServidorFuncoes()
     {
@@ -902,12 +912,10 @@ class clsPmieducarServidor extends Model
      *                            usa o código disponível no objeto atual
      * @param int $codInstituicao Código da instituição, caso não seja
      *                            informado, usa o código disponível no objeto atual
-     *
      * @return array|bool Array com códigos das disciplinas ordenados ou FALSE
      *                    caso o servidor não tenha disciplinas
      *
      * @since   Método disponível desde a versão 1.0.2
-     *
      */
     public function getServidorDisciplinasQuadroHorarioHorarios(
         $codServidor = null,
@@ -942,11 +950,9 @@ class clsPmieducarServidor extends Model
      *                            usa o código disponível no objeto atual
      * @param int $codInstituicao Código da instituição, caso não seja
      *                            informado, usa o código disponível no objeto atual
-     *
      * @return array|bool (codServidor => (int), codInstituicao => (int))
      *
      * @since   Método disponível desde a versão 1.2.0
-     *
      */
     public function _getCodServidorInstituicao($codServidor = null, $codInstituicao = null)
     {
@@ -960,7 +966,7 @@ class clsPmieducarServidor extends Model
 
         return [
             'codServidor' => $codServidor,
-            'codInstituicao' => $codInstituicao
+            'codInstituicao' => $codInstituicao,
         ];
     }
 
@@ -971,12 +977,10 @@ class clsPmieducarServidor extends Model
      *                            usa o código disponível no objeto atual
      * @param int $codInstituicao Código da instituição, caso não seja
      *                            informado, usa o código disponível no objeto atual
-     *
      * @return array|bool Array com códigos das disciplinas ordenados ou FALSE
      *                    caso o servidor não tenha disciplinas
      *
      * @since   Método disponível desde a versão 1.0.2
-     *
      */
     public function getServidorDisciplinas(
         $codServidor = null,
@@ -1017,13 +1021,11 @@ class clsPmieducarServidor extends Model
      *                            usa o código disponível no objeto atual
      * @param int $codInstituicao Código da instituição, caso não seja
      *                            informado, usa o código disponível no objeto atual
-     *
      * @return array|bool Array associativo com os índices nm_escola, nm_curso,
      *                    nm_serie, nm_turma, nome (componente curricular), dia_semana,
      *                    qhh.hora_inicial e hora_final.
      *
      * @since   Método disponível desde a versão 1.0.2
-     *
      */
     public function getHorariosServidor($codServidor = null, $codInstituicao = null)
     {
@@ -1088,7 +1090,6 @@ class clsPmieducarServidor extends Model
      * @return bool TRUE caso o servidor desempenhe a função de professor
      *
      * @since   Método disponível desde a versão 1.0.2
-     *
      */
     public function isProfessor()
     {
@@ -1100,35 +1101,5 @@ class clsPmieducarServidor extends Model
         }
 
         return false;
-    }
-
-    /**
-     * Retorna um array com os dados de um registro.
-     *
-     * @return array
-     */
-    public function qtdhoras(
-        $int_cod_servidor,
-        $int_cod_escola,
-        $int_ref_cod_instituicao,
-        $dia_semana
-    ) {
-        $db = new clsBanco();
-        $db->Consulta(
-            "
-      SELECT
-        EXTRACT(HOUR FROM (SUM(hora_final - hora_inicial))) AS hora,
-        EXTRACT(MINUTE FROM (SUM(hora_final - hora_inicial))) AS min
-      FROM
-        pmieducar.servidor_alocacao
-      WHERE
-        ref_cod_servidor = {$int_cod_servidor} AND
-        ref_cod_escola = {$int_cod_escola} AND
-        ref_ref_cod_instituicao = {$int_ref_cod_instituicao} AND
-        dia_semana = {$dia_semana}"
-        );
-        $db->ProximoRegistro();
-
-        return $db->Tupla();
     }
 }

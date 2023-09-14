@@ -5,48 +5,91 @@ use iEducar\Legacy\Model;
 class clsModulesFichaMedicaAluno extends Model
 {
     public $ref_cod_aluno;
+
     public $altura;
+
     public $peso;
+
     public $grupo_sanguineo;
+
     public $fator_rh;
+
     public $alergia_medicamento;
+
     public $desc_alergia_medicamento;
+
     public $alergia_alimento;
+
     public $desc_alergia_alimento;
+
     public $doenca_congenita;
+
     public $desc_doenca_congenita;
+
     public $fumante;
+
     public $doenca_caxumba;
+
     public $doenca_sarampo;
+
     public $doenca_rubeola;
+
     public $doenca_catapora;
+
     public $doenca_escarlatina;
+
     public $doenca_coqueluche;
+
     public $doenca_outras;
+
     public $epiletico;
+
     public $epiletico_tratamento;
+
     public $hemofilico;
+
     public $hipertenso;
+
     public $asmatico;
+
     public $diabetico;
+
     public $insulina;
+
     public $tratamento_medico;
+
     public $desc_tratamento_medico;
+
     public $medicacao_especifica;
+
     public $desc_medicacao_especifica;
+
     public $acomp_medico_psicologico;
+
     public $desc_acomp_medico_psicologico;
+
     public $restricao_atividade_fisica;
+
     public $desc_restricao_atividade_fisica;
+
     public $fratura_trauma;
+
     public $desc_fratura_trauma;
+
     public $plano_saude;
+
     public $desc_plano_saude;
+
     public $responsavel;
+
     public $responsavel_parentesco;
+
     public $responsavel_parentesco_telefone;
+
     public $responsavel_parentesco_celular;
+
     public $aceita_hospital_proximo;
+
     public $desc_aceita_hospital_proximo;
 
     /**
@@ -102,7 +145,7 @@ class clsModulesFichaMedicaAluno extends Model
         $this->_schema = 'modules.';
         $this->_tabela = "{$this->_schema}ficha_medica_aluno";
 
-        $this->_campos_lista = $this->_todos_campos = ' ref_cod_aluno, altura, peso, grupo_sanguineo,
+        $this->_campos_lista = $this->_todos_campos = ' ref_cod_aluno, grupo_sanguineo,
         fator_rh, alergia_medicamento, desc_alergia_medicamento,alergia_alimento, desc_alergia_alimento,
         doenca_congenita,desc_doenca_congenita, fumante, doenca_caxumba, doenca_sarampo,doenca_rubeola,
         doenca_catapora, doenca_escarlatina, doenca_coqueluche,doenca_outras,  epiletico,
@@ -114,14 +157,6 @@ class clsModulesFichaMedicaAluno extends Model
 
         if (is_numeric($ref_cod_aluno)) {
             $this->ref_cod_aluno = $ref_cod_aluno;
-        }
-
-        if (is_string($altura)) {
-            $this->altura = $altura;
-        }
-
-        if (is_string($peso)) {
-            $this->peso = $peso;
         }
 
         if (is_string($grupo_sanguineo)) {
@@ -307,14 +342,6 @@ class clsModulesFichaMedicaAluno extends Model
             $valores .= "{$gruda}{$this->ref_cod_aluno}";
             $gruda = ', ';
 
-            $campos .= "{$gruda}altura";
-            $valores .= "{$gruda}'{$this->altura}'";
-            $gruda = ', ';
-
-            $campos .= "{$gruda}peso";
-            $valores .= "{$gruda}'{$this->peso}'";
-            $gruda = ', ';
-
             $campos .= "{$gruda}grupo_sanguineo";
             $valores .= "{$gruda}'{$this->grupo_sanguineo}'";
             $gruda = ', ';
@@ -497,11 +524,7 @@ class clsModulesFichaMedicaAluno extends Model
             $db = new clsBanco();
             $set = '';
 
-            $set .= "altura = '{$this->altura}'";
-
-            $set .= ",peso = '{$this->peso}'";
-
-            $set .= ",grupo_sanguineo = '{$this->grupo_sanguineo}'";
+            $set .= "grupo_sanguineo = '{$this->grupo_sanguineo}'";
 
             $set .= ",fator_rh = '{$this->fator_rh}'";
 

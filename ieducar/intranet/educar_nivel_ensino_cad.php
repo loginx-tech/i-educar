@@ -3,7 +3,8 @@
 use App\Models\LegacyCourse;
 use App\Models\LegacyEducationLevel;
 
-return new class extends clsCadastro {
+return new class extends clsCadastro
+{
     /**
      * Referencia pega da session para o idpes do usuario atual
      *
@@ -12,23 +13,31 @@ return new class extends clsCadastro {
     public $pessoa_logada;
 
     public $cod_nivel_ensino;
+
     public $ref_usuario_exc;
+
     public $ref_usuario_cad;
+
     public $nm_nivel;
+
     public $descricao;
+
     public $data_cadastro;
+
     public $data_exclusao;
+
     public $ativo;
+
     public $ref_cod_instituicao;
 
     public function Inicializar()
     {
         $retorno = 'Novo';
 
-        $this->cod_nivel_ensino=$_GET['cod_nivel_ensino'];
+        $this->cod_nivel_ensino = $_GET['cod_nivel_ensino'];
 
         $obj_permissoes = new clsPermissoes();
-        $obj_permissoes->permissao_cadastra(571, $this->pessoa_logada, 3, 'educar_nivel_ensino_lst.php');
+        $obj_permissoes->permissao_cadastra(int_processo_ap: 571, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3, str_pagina_redirecionar: 'educar_nivel_ensino_lst.php');
 
         if (is_numeric($this->cod_nivel_ensino)) {
             $registro = LegacyEducationLevel::find($this->cod_nivel_ensino)?->getAttributes();
@@ -38,7 +47,7 @@ return new class extends clsCadastro {
                     $this->$campo = $val;
                 }
 
-                $this->fexcluir = $obj_permissoes->permissao_excluir(571, $this->pessoa_logada, 3);
+                $this->fexcluir = $obj_permissoes->permissao_excluir(int_processo_ap: 571, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 3);
                 $retorno = 'Editar';
             }
         }
@@ -46,7 +55,7 @@ return new class extends clsCadastro {
 
         $nomeMenu = $retorno == 'Editar' ? $retorno : 'Cadastrar';
 
-        $this->breadcrumb($nomeMenu . ' nível de ensino', [
+        $this->breadcrumb(currentPage: $nomeMenu . ' nível de ensino', breadcrumbs: [
             url('intranet/educar_index.php') => 'Escola',
         ]);
 
@@ -58,15 +67,15 @@ return new class extends clsCadastro {
     public function Gerar()
     {
         // primary keys
-        $this->campoOculto('cod_nivel_ensino', $this->cod_nivel_ensino);
+        $this->campoOculto(nome: 'cod_nivel_ensino', valor: $this->cod_nivel_ensino);
 
         // foreign keys
         $obrigatorio = true;
-        include('include/pmieducar/educar_campo_lista.php');
+        include 'include/pmieducar/educar_campo_lista.php';
 
         // text
-        $this->campoTexto('nm_nivel', 'Nível Ensino', $this->nm_nivel, 30, 255, true);
-        $this->campoMemo('descricao', 'Descrição', $this->descricao, 60, 5, false);
+        $this->campoTexto(nome: 'nm_nivel', campo: 'Nível Ensino', valor: $this->nm_nivel, tamanhovisivel: 30, tamanhomaximo: 255, obrigatorio: true);
+        $this->campoMemo(nome: 'descricao', campo: 'Descrição', valor: $this->descricao, colunas: 60, linhas: 5);
     }
 
     public function Novo()
@@ -83,6 +92,7 @@ return new class extends clsCadastro {
         }
 
         $this->mensagem = 'Cadastro não realizado.<br>';
+
         return false;
     }
 
@@ -101,17 +111,19 @@ return new class extends clsCadastro {
         }
 
         $this->mensagem = 'Edição não realizada.<br>';
+
         return false;
     }
 
     public function Excluir()
     {
         $count = LegacyCourse::query()
-            ->where('ref_cod_nivel_ensino', $this->cod_nivel_ensino)
+            ->where(column: 'ref_cod_nivel_ensino', operator: $this->cod_nivel_ensino)
             ->count();
 
         if ($count > 0) {
             $this->mensagem = 'Você não pode excluir esse Nível de Ensino, pois ele possui vínculo com Curso(s).<br>';
+
             return false;
         }
 
@@ -125,6 +137,7 @@ return new class extends clsCadastro {
         }
 
         $this->mensagem = 'Exclusão não realizada.<br>';
+
         return false;
     }
 

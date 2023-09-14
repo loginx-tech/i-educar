@@ -7,26 +7,22 @@ trait HasLegacyDates
     public function initializeHasLegacyDates(): void
     {
         $this->legacy = array_unique(array_merge($this->legacy, [
-            'created_at' => 'data_cadastro'
+            'created_at' => 'data_cadastro',
         ]));
     }
 
     /**
      * Get the name of the "created at" column.
-     *
-     * @return string|null
      */
-    public function getCreatedAtColumn(): string|null
+    public function getCreatedAtColumn(): ?string
     {
         return 'data_cadastro';
     }
 
     /**
      * Get the name of the "updated at" column.
-     *
-     * @return string|null
      */
-    public function getUpdatedAtColumn(): string|null
+    public function getUpdatedAtColumn(): ?string
     {
         return null;
     }
