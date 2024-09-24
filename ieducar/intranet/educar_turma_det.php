@@ -377,6 +377,19 @@ return new class() extends clsDetalhe
                 $this->array_botao_url_script[] = sprintf('go("copia_vinculos_servidores_cad.php?cod_turma=%d");', $registro['cod_turma']);
             }
 
+            if (config(key: 'sed.create_uniformes.display')) {
+                $link = config('sed.create_uniformes.route');
+
+                $link = str_replace(search: [
+                    '@turma',
+                ], replace: [
+                    $registro['cod_turma']
+                ], subject: $link);
+
+                array_push($this->array_botao, config(key: 'sed.create_uniformes.title'));
+                array_push($this->array_botao_url_script, $link);
+            }
+
             if (config(key: 'sed.create_turma.display')) {
                 $link = config('sed.create_turma.route');
 
